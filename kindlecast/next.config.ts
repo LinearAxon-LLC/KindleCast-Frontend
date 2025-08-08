@@ -1,16 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    optimizeCss: true,
-  },
+  // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
   },
+
+  // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Enable static optimization
+
+  // Performance optimizations
+  poweredByHeader: false,
+
+  // Static optimization
   output: 'standalone',
 };
 

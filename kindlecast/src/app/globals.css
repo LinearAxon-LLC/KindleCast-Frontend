@@ -14,6 +14,12 @@
   --color-brand-tertiary: #E9A5F1;   /* rgb(233, 165, 241) */
   --color-brand-accent: #FED2E2;     /* rgb(254, 210, 226) */
 
+  /* Make brand colors available as Tailwind utilities */
+  --brand-primary: 143 135 241;
+  --brand-secondary: 198 142 253;
+  --brand-tertiary: 233 165 241;
+  --brand-accent: 254 210 226;
+
   /* Apple System Colors */
   --color-apple-blue: #007AFF;
   --color-apple-indigo: #5856D6;
@@ -136,27 +142,7 @@
   --ring: #8F87F1;
 }
 
-.dark {
-  /* Dark mode - Apple inspired */
-  --background: #1C1C1E;
-  --foreground: #F2F2F7;
-  --card: #2C2C2E;
-  --card-foreground: #F2F2F7;
-  --popover: #2C2C2E;
-  --popover-foreground: #F2F2F7;
-  --primary: #007AFF;
-  --primary-foreground: #FFFFFF;
-  --secondary: #3A3A3C;
-  --secondary-foreground: #F2F2F7;
-  --muted: #3A3A3C;
-  --muted-foreground: #8E8E93;
-  --accent: #C68EFD;
-  --accent-foreground: #1C1C1E;
-  --destructive: #FF453A;
-  --border: #48484A;
-  --input: #3A3A3C;
-  --ring: #007AFF;
-}
+
 
 @layer base {
   * {
@@ -164,7 +150,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-white text-gray-900 font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -180,7 +166,7 @@
 
   /* Apple-style selection */
   ::selection {
-    @apply bg-primary/20 text-foreground;
+    @apply bg-brand-primary/20 text-gray-900;
   }
 }
 
@@ -248,4 +234,41 @@
 
 .animate-bounce-subtle {
   animation: bounceSubtle 0.6s ease-out;
+}
+
+/* Brand color utilities */
+.bg-brand-primary {
+  background-color: rgb(var(--brand-primary));
+}
+
+.bg-brand-secondary {
+  background-color: rgb(var(--brand-secondary));
+}
+
+.bg-brand-tertiary {
+  background-color: rgb(var(--brand-tertiary));
+}
+
+.bg-brand-accent {
+  background-color: rgb(var(--brand-accent));
+}
+
+.text-brand-primary {
+  color: rgb(var(--brand-primary));
+}
+
+.text-brand-secondary {
+  color: rgb(var(--brand-secondary));
+}
+
+.text-brand-tertiary {
+  color: rgb(var(--brand-tertiary));
+}
+
+.text-brand-accent {
+  color: rgb(var(--brand-accent));
+}
+
+.border-brand-primary {
+  border-color: rgb(var(--brand-primary));
 }

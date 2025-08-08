@@ -1,7 +1,13 @@
 {
-  "name": "kindlecast",
-  "version": "0.1.0",
+  "name": "screencast",
+  "version": "1.0.0",
   "private": true,
+  "description": "Convert any content into Kindle-ready PDFs",
+  "homepage": "https://screencast.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/screencast/screencast-app"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

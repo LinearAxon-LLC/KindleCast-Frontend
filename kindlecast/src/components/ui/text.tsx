@@ -11,9 +11,10 @@ interface TextProps extends React.HTMLAttributes<HTMLElement> {
 export const Text = forwardRef<HTMLElement, TextProps>(
   ({ variant, children, className, as = 'span', ...props }, ref) => {
     const Component = as
-    
+
     return (
       <Component
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref={ref as any}
         className={cn(typography[variant], className)}
         {...props}

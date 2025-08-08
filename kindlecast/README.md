@@ -1,20 +1,21 @@
-# KindleCast - Apple Design Blueprint Implementation
+# ScreenCast - Content to Kindle PDF Converter
 
 A Next.js application built following Apple's Human Interface Guidelines with Tailwind CSS, shadcn/ui, and Framer Motion for smooth, premium interactions.
 
 ## 🎯 Project Overview
 
-KindleCast is designed to transform digital books into high-quality audiobooks using advanced AI voice technology. This frontend implementation follows Apple's design principles to create an authentic macOS/iOS experience with premium feel and smooth interactions.
+ScreenCast is designed to transform any digital content (webpages, videos, audio transcripts, documents, articles) into perfectly formatted Kindle PDFs. This frontend implementation follows Apple's design principles to create an authentic macOS/iOS experience with premium feel and smooth interactions, focusing on eye strain relief and comfortable reading.
 
 ## ✨ Features
 
-- **Apple-Inspired Design System**: Following Apple's Human Interface Guidelines
-- **Dark/Light Mode**: Seamless theme switching with system preference detection
-- **Smooth Animations**: Framer Motion powered interactions with Apple-style easing
-- **Responsive Design**: Mobile-first approach with Apple's breakpoint system
-- **Premium Typography**: SF Pro Display/Text inspired font system
-- **Component Library**: Reusable UI components with consistent styling
-- **Performance Optimized**: Next.js 15 with Turbopack for fast development
+- **Content Conversion**: Transform webpages, videos, audio, documents into Kindle PDFs
+- **Eye Strain Relief**: Optimized for comfortable reading on Kindle devices
+- **Apple-Inspired Design**: Clean, minimal interface following Apple's design principles
+- **Instant Processing**: Convert content in seconds with AI-powered formatting
+- **SEO Optimized**: Complete SEO setup with structured data and meta tags
+- **Performance Optimized**: Resource-efficient build for low-spec VPS deployment
+- **Responsive Design**: Works perfectly on all devices and screen sizes
+- **PWA Ready**: Progressive Web App capabilities with offline support
 
 ## 🛠️ Tech Stack
 
@@ -49,7 +50,7 @@ KindleCast is designed to transform digital books into high-quality audiobooks u
 - Node.js 18+
 - npm, yarn, or pnpm
 
-### Installation
+### Local Development
 
 1. **Clone the repository**
    ```bash
@@ -60,23 +61,45 @@ KindleCast is designed to transform digital books into high-quality audiobooks u
 2. **Install dependencies**
    ```bash
    npm install
-   # or
-   yarn install
-   # or
-   pnpm install
    ```
 
 3. **Run the development server**
    ```bash
    npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
    ```
 
 4. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Production Deployment
+
+#### Quick Deployment to VPS
+```bash
+cd deployment
+./deploy.sh
+```
+
+#### Test VPS Connection First
+```bash
+cd deployment
+./test-connection.sh
+```
+
+#### Monitor Application
+```bash
+cd deployment
+./monitor.sh status    # Check status
+./monitor.sh logs      # View logs
+./monitor.sh monitor   # Live monitoring
+```
+
+**VPS Details:**
+- Host: 143.198.50.21
+- Automated setup with Node.js, PM2, and Nginx
+- Resource-optimized for low-spec VPS
+- Zero-downtime deployment with rollback capability
+
+See [deployment/README.md](deployment/README.md) for detailed deployment guide.
 
 ## 📁 Project Structure
 
