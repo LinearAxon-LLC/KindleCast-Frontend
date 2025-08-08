@@ -1,10 +1,10 @@
-# ScreenCast - Content to Kindle PDF Converter
+# KindleCast - Save Your Eyes. Read Anything on Kindle.
 
 A Next.js application built following Apple's Human Interface Guidelines with Tailwind CSS, shadcn/ui, and Framer Motion for smooth, premium interactions.
 
 ## 🎯 Project Overview
 
-ScreenCast is designed to transform any digital content (webpages, videos, audio transcripts, documents, articles) into perfectly formatted Kindle PDFs. This frontend implementation follows Apple's design principles to create an authentic macOS/iOS experience with premium feel and smooth interactions, focusing on eye strain relief and comfortable reading.
+KindleCast is designed to transform any digital content (webpages, videos, audio transcripts, documents, articles) into perfectly formatted Kindle PDFs. This frontend implementation follows Apple's design principles to create an authentic macOS/iOS experience with premium feel and smooth interactions, focusing on eye strain relief and comfortable reading.
 
 ## ✨ Features
 
