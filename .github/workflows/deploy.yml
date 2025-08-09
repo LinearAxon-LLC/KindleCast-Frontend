@@ -35,7 +35,11 @@ jobs:
         # Install sshpass
         sudo apt-get update
         sudo apt-get install -y sshpass
-        
+
+        # Add VPS to known hosts to avoid host key verification
+        mkdir -p ~/.ssh
+        ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
+
         # Copy source code to VPS (excluding node_modules and build files)
         cd kindlecast
         sshpass -p "$VPS_PASSWORD" rsync -avz --delete \
@@ -49,21 +53,21 @@ jobs:
           --exclude='out' \
           --exclude='build' \
           ./ "$VPS_USER@$VPS_HOST:$REMOTE_DIR/"
-        
+
         # Install dependencies and restart on VPS
         sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "
           cd $REMOTE_DIR
-          
+
           # Install dependencies
           npm install
-          
+
           # Stop existing processes
           pm2 delete kindlecast 2>/dev/null || true
-          
+
           # Kill any process using port 3000
           lsof -ti:3000 | xargs kill -9 2>/dev/null || true
           sleep 2
-          
+
           # Start dev server
           pm2 start 'npm run dev' --name kindlecast
           pm2 save
