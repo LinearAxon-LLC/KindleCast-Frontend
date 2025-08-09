@@ -4,15 +4,31 @@ import {useState} from "react"
 import {Button} from "@/components/ui/button"
 import {Cast, Check, Loader2} from "lucide-react"
 import {useLinkProcessor} from "@/hooks/useLinkProcessor"
+import {LoginModal} from "@/components/ui/login-modal"
+import {useAuth} from "@/contexts/AuthContext"
+import Image from "next/image"
 
 export default function Home() {
     const [selectedFormat, setSelectedFormat] = useState('Just PDF')
     const [url, setUrl] = useState('')
     const [customPrompt, setCustomPrompt] = useState('')
+    const [showLoginModal, setShowLoginModal] = useState(false)
+    const [pendingLinkData, setPendingLinkData] = useState<{url: string, format: string, customPrompt?: string} | null>(null)
+
     const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
+    const { isAuthenticated, user } = useAuth()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // If user is not authenticated, show login modal
+        if (!isAuthenticated) {
+            setPendingLinkData({ url, format: selectedFormat, customPrompt })
+            setShowLoginModal(true)
+            return
+        }
+
+        // If authenticated, proceed with submission
         await submitLink(url, selectedFormat, customPrompt)
     }
 
@@ -35,10 +51,25 @@ export default function Home() {
                            className="text-black/60 hover:text-black/85 font-medium cursor-pointer text-[13px] transition-colors duration-200">Pricing</a>
                         <a href="#faq"
                            className="text-black/60 hover:text-black/85 font-medium cursor-pointer text-[13px] transition-colors duration-200">FAQ</a>
-                        <button
-                            className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer">
-                            Get Started
-                        </button>
+
+                        {isAuthenticated ? (
+                            <div className="flex items-center space-x-4">
+                                <a href="/dashboard"
+                                   className="text-black/60 hover:text-black/85 font-medium cursor-pointer text-[13px] transition-colors duration-200">Dashboard</a>
+                                <Image
+                                    src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
+                                    alt="Profile"
+                                    width={32}
+                                    height={32}
+                                    className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
+                                />
+                            </div>
+                        ) : (
+                            <button
+                                className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer">
+                                Get Started
+                            </button>
+                        )}
                     </div>
                 </div>
             </nav>
@@ -428,6 +459,12 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
+            {/* Login Modal */}
+            <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                linkData={pendingLinkData || undefined}
+            />
         </div>
     )
 }

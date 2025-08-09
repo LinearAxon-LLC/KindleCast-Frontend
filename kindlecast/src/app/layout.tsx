@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./globals.css"
+import { AuthProvider } from "@/contexts/AuthContext"
+import { SessionProvider } from "@/components/providers/SessionProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -8,6 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://kindlecast.com'),
   title: {
     default: "KindleCast - Save Your Eyes. Read Anything on Kindle.",
     template: "%s | KindleCast"
@@ -100,8 +103,9 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#8F87F1" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
         <link rel="manifest" href="/manifest.json" />
         <script
           type="application/ld+json"
@@ -109,7 +113,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-white`}>
-        {children}
+        <SessionProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );
