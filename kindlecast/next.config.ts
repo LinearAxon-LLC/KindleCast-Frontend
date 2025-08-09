@@ -25,8 +25,11 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   poweredByHeader: false,
 
-  // Static optimization
-  output: 'standalone',
+  // Fix chunk loading issues in production
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
+
+  // Use standard build instead of standalone to avoid chunk issues
+  // output: 'standalone', // Commented out - causes chunk loading issues
 };
 
 export default nextConfig;
