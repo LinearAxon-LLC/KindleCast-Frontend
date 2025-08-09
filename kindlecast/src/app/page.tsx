@@ -2,10 +2,20 @@
 
 import {useState} from "react"
 import {Button} from "@/components/ui/button"
-import {Cast, Check} from "lucide-react"
+import {Cast, Check, Loader2} from "lucide-react"
+import {useLinkProcessor} from "@/hooks/useLinkProcessor"
 
 export default function Home() {
     const [selectedFormat, setSelectedFormat] = useState('Just PDF')
+    const [url, setUrl] = useState('')
+    const [customPrompt, setCustomPrompt] = useState('')
+    const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        await submitLink(url, selectedFormat, customPrompt)
+    }
+
     return (
         <div className="min-h-screen bg-white">
             {/* Floating Navigation */}
@@ -14,7 +24,7 @@ export default function Home() {
                 <div className="px-8 py-4 flex items-center justify-between min-w-[720px]">
                     <div className="flex items-center space-x-3">
                         <div
-                            className="w-8 h-8 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-[8px] flex items-center justify-center">
+                            className="w-8 h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
                             <Cast className="w-4 h-4 text-white"/>
                         </div>
                         <span className="text-[17px] font-medium text-black/85">KindleCast</span>
@@ -101,15 +111,19 @@ export default function Home() {
                     <div className="max-w-2xl mx-auto mb-8 mt-12">
                         <div
                             className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] p-8">
-                            <div className="space-y-6">
-                                {/* URL Input Section */}
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
-                                        className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 cursor-text"
-                                    />
-                                </div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="space-y-6">
+                                    {/* URL Input Section */}
+                                    <div>
+                                        <input
+                                            type="text"
+                                            value={url}
+                                            onChange={(e) => setUrl(e.target.value)}
+                                            placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
+                                            className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 cursor-text"
+                                            disabled={isLoading}
+                                        />
+                                    </div>
 
                                 {/* Format Selection */}
                                 <div>
@@ -121,12 +135,14 @@ export default function Home() {
                                         {['Just PDF', 'Summarize', 'Learning Ready', 'Custom'].map((format) => (
                                             <button
                                                 key={format}
+                                                type="button"
                                                 onClick={() => setSelectedFormat(format)}
                                                 className={`px-4 py-2 rounded-[6px] text-[13px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
                                                     selectedFormat === format
                                                         ? 'bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]'
                                                         : 'bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]'
                                                 }`}
+                                                disabled={isLoading}
                                             >
                                                 {format}
                                             </button>
@@ -142,20 +158,53 @@ export default function Home() {
                                             Describe how you want it:
                                         </label>
                                         <textarea
+                                            value={customPrompt}
+                                            onChange={(e) => setCustomPrompt(e.target.value)}
                                             placeholder="e.g., 'Make it a study guide with key points highlighted'"
                                             className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 resize-none cursor-text"
                                             rows={3}
+                                            disabled={isLoading}
                                         />
                                     </div>
                                 )}
 
                                 {/* Primary Action */}
                                 <button
-                                    className="w-full bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-3 px-6 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer flex items-center justify-center">
-                                    <Cast className="w-4 h-4 mr-2"/>
-                                    Send to My Kindle
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className={`w-full text-white text-[13px] font-medium py-3 px-6 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 flex items-center justify-center ${
+                                        isLoading
+                                            ? 'bg-brand-primary/70 cursor-not-allowed'
+                                            : isSuccess
+                                                ? 'bg-green-500 hover:bg-green-600'
+                                                : 'bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 active:scale-[0.98] cursor-pointer'
+                                    }`}>
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                                            Processing...
+                                        </>
+                                    ) : isSuccess ? (
+                                        <>
+                                            <Check className="w-4 h-4 mr-2"/>
+                                            Sent!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Cast className="w-4 h-4 mr-2"/>
+                                            Send to My Kindle
+                                        </>
+                                    )}
                                 </button>
-                            </div>
+
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="text-red-500 text-[13px] text-center mt-2">
+                                        {error}
+                                    </div>
+                                )}
+                                </div>
+                            </form>
                         </div>
 
                         {/* Footer Enhancement */}
@@ -209,7 +258,7 @@ export default function Home() {
 
                         {/* Pro Plan */}
                         <div
-                            className="bg-gradient-to-br from-brand-primary to-brand-secondary rounded-3xl p-8 text-white relative">
+                            className="bg-brand-primary rounded-3xl p-8 text-white relative">
                             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-brand-accent text-brand-primary px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
@@ -287,7 +336,7 @@ export default function Home() {
                         Frequently Asked Questions
                     </h2>
 
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white rounded-2xl p-8 border border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                 How does KindleCast work?
@@ -327,63 +376,53 @@ export default function Home() {
                                 the quality before deciding to upgrade.
                             </p>
                         </div>
-
-                        <div className="bg-white rounded-2xl p-8 border border-gray-200">
-                            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                How does this help with eye strain?
-                            </h3>
-                            <p className="text-gray-600">
-                                Kindle&apos;s e-ink display eliminates blue light emission and screen glare, which are
-                                the primary causes of digital eye strain.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="py-16 px-8 bg-black/[0.02] text-black/85">
+            <footer className="py-16 px-8 bg-black text-white">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         <div className="col-span-1 md:col-span-2">
                             <div className="flex items-center space-x-3 mb-4">
                                 <div
-                                    className="w-8 h-8 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
+                                    className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
                                     <Cast className="w-4 h-4 text-white"/>
                                 </div>
-                                <span className="font-bold text-black/85 text-lg">KindleCast</span>
+                                <span className="font-bold text-white text-lg">KindleCast</span>
                             </div>
-                            <p className="text-black/60 max-w-md">
+                            <p className="text-white/60 max-w-md">
                                 Transform any digital content into comfortable, eye-friendly Kindle reading experiences.
                             </p>
                         </div>
 
                         <div>
-                            <h4 className="font-semibold text-black/85 mb-4">Product</h4>
-                            <ul className="space-y-2 text-black/60">
-                                <li><a href="#pricing" className="hover:text-black/85 cursor-pointer">Pricing</a></li>
-                                <li><a href="#faq" className="hover:text-black/85 cursor-pointer">FAQ</a></li>
-                                <li><a href="#" className="hover:text-black/85 cursor-pointer">API</a></li>
+                            <h4 className="font-semibold text-white mb-4">Product</h4>
+                            <ul className="space-y-2 text-white/60">
+                                <li><a href="#pricing" className="hover:text-white cursor-pointer">Pricing</a></li>
+                                <li><a href="#faq" className="hover:text-white cursor-pointer">FAQ</a></li>
+                                <li><a href="#" className="hover:text-white cursor-pointer">API</a></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="font-semibold text-black/85 mb-4">Support</h4>
-                            <ul className="space-y-2 text-black/60">
-                                <li><a href="#" className="hover:text-black/85 cursor-pointer">Help Center</a></li>
-                                <li><a href="#" className="hover:text-black/85 cursor-pointer">Contact</a></li>
-                                <li><a href="#" className="hover:text-black/85 cursor-pointer">Privacy</a></li>
-                                <li><a href="#" className="hover:text-black/85 cursor-pointer">Terms</a></li>
+                            <h4 className="font-semibold text-white mb-4">Support</h4>
+                            <ul className="space-y-2 text-white/60">
+                                <li><a href="#" className="hover:text-white cursor-pointer">Help Center</a></li>
+                                <li><a href="#" className="hover:text-white cursor-pointer">Contact</a></li>
+                                <li><a href="#" className="hover:text-white cursor-pointer">Privacy</a></li>
+                                <li><a href="#" className="hover:text-white cursor-pointer">Terms</a></li>
                             </ul>
                         </div>
                     </div>
 
                     <div
-                        className="border-t border-black/[0.08] pt-8 flex flex-col md:flex-row justify-between items-center">
-                        <p className="text-black/40 text-sm">
-                            © 2024 KindleCast. All rights reserved.
+                        className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
+                        <p className="text-white/40 text-sm">
+                            © {new Date().getFullYear()} KindleCast. All rights reserved.
                         </p>
-                        <p className="text-black/40 text-sm mt-4 md:mt-0">
+                        <p className="text-white/40 text-sm mt-4 md:mt-0">
                             Made for readers who value their eyesight
                         </p>
                     </div>
