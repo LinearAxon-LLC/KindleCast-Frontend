@@ -19,6 +19,6 @@ jobs:
         ssh-keyscan -H 143.198.50.21 >> ~/.ssh/known_hosts
 
         cd kindlecast
-        sshpass -p "22222WaminZ" rsync -avz --delete --exclude='node_modules' --exclude='.next' --exclude='.git' ./ root@143.198.50.21:/var/www/kindlecast/
+        sshpass -p "22222WaminZ" rsync -avz --delete --exclude='node_modules' --exclude='.next' --exclude='.git' ./ root@143.198.50.21:/home/kindlecast/
 
-        sshpass -p "22222WaminZ" ssh root@143.198.50.21 "cd /var/www/kindlecast && npm install && pm2 delete kindlecast || true && pm2 start 'npm run dev' --name kindlecast && pm2 save"
+        sshpass -p "22222WaminZ" ssh root@143.198.50.21 "cd /home/kindlecast && pm2 restart kindlecast"
