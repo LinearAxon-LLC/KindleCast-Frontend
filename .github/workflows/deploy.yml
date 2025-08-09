@@ -58,18 +58,35 @@ jobs:
         sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "
           cd $REMOTE_DIR
 
-          # Install dependencies
-          npm install
+          # Set proper environment
+          export PATH=/usr/local/bin:/usr/bin:/bin:\$PATH
+          export NODE_ENV=development
+
+          # Clean install dependencies with timeout
+          rm -rf node_modules package-lock.json .next
+          npm install --verbose
+
+          # Verify installation
+          echo 'Checking Next.js installation...'
+          npx next --version || echo 'Next.js check failed'
 
           # Stop existing processes
           pm2 delete kindlecast 2>/dev/null || true
+          pkill -f 'next dev' 2>/dev/null || true
+          sleep 3
 
-          # Kill any process using port 3000
-          lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-          sleep 2
+          # Create a startup script for better control
+          cat > start-dev.sh << 'EOF'
+#!/bin/bash
+export PATH=/usr/local/bin:/usr/bin:/bin:\$PATH
+export NODE_ENV=development
+cd $REMOTE_DIR
+exec npx next dev --turbopack --port 3000 --hostname 0.0.0.0
+EOF
+          chmod +x start-dev.sh
 
-          # Start dev server
-          pm2 start 'npm run dev' --name kindlecast
+          # Start with the script
+          pm2 start ./start-dev.sh --name kindlecast --log-date-format 'YYYY-MM-DD HH:mm:ss'
           pm2 save
         "
         
@@ -79,11 +96,35 @@ jobs:
         VPS_USER: root
         VPS_PASSWORD: 22222WaminZ
       run: |
-        sleep 5
-        if sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "curl -f http://localhost:3000 > /dev/null 2>&1"; then
-          echo "✅ Deployment successful! KindleCast is running."
-        else
-          echo "❌ Health check failed. Showing logs..."
-          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "pm2 logs kindlecast --lines 20"
-          exit 1
-        fi
+        echo "Waiting for application to start..."
+        sleep 15
+
+        echo "Checking PM2 status..."
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "pm2 status"
+
+        echo "Checking if port 3000 is listening..."
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "netstat -tlnp | grep :3000 || echo 'Port 3000 not listening'"
+
+        echo "Testing local connection..."
+        for i in {1..3}; do
+          if sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "curl -f -m 10 http://localhost:3000 > /dev/null 2>&1"; then
+            echo "✅ Deployment successful! KindleCast is running on port 3000."
+            exit 0
+          else
+            echo "Attempt $i failed, retrying..."
+            sleep 5
+          fi
+        done
+
+        echo "❌ Health check failed after 3 attempts. Showing diagnostics..."
+        sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "
+          echo '=== PM2 Status ==='
+          pm2 status
+          echo '=== PM2 Logs ==='
+          pm2 logs kindlecast --lines 50
+          echo '=== Port Check ==='
+          netstat -tlnp | grep :3000
+          echo '=== Process Check ==='
+          ps aux | grep next
+        "
+        exit 1
