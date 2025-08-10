@@ -17,9 +17,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: async ({ session, token }) => {
+    session: async ({ session, token, user }) => {
       if (session?.user) {
         session.user.id = token.sub!
+        // Add any additional user data from MongoDB if needed
+        if (user) {
+          session.user.id = user.id
+        }
       }
       return session
     },

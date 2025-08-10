@@ -1,16 +1,26 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { HomePage } from '@/components/dashboard/pages/HomePage'
 import { HistoryPage } from '@/components/dashboard/pages/HistoryPage'
 import { SettingsPage } from '@/components/dashboard/pages/SettingsPage'
 import { redirect } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth()
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('home')
+
+  // Handle URL parameters for tab switching
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && ['home', 'history', 'settings'].includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   // Cache all tab components to prevent re-rendering and flickering
   const cachedComponents = useMemo(() => ({
@@ -19,10 +29,10 @@ export default function DashboardPage() {
     settings: <SettingsPage />
   }), [])
 
-  // Allow anonymous access for now
-  // if (!isLoading && !isAuthenticated) {
-  //   redirect('/')
-  // }
+  // Protect dashboard - redirect to home if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    redirect('/')
+  }
 
   // Show loading state
   if (isLoading) {

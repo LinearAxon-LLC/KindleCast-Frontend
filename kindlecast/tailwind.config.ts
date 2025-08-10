@@ -60,10 +60,10 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-sans)",
+          "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
-          "SF Pro Display",
-          "SF Pro Text",
           "system-ui",
           "sans-serif",
         ],

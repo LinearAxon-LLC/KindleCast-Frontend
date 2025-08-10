@@ -88,7 +88,7 @@ export function MacOSDialog({
             className={`flex-1 py-3 px-4 text-[13px] font-medium transition-colors duration-100 ${
               primaryButton.variant === 'destructive'
                 ? 'text-white bg-[#ff3b30] hover:bg-[#ff2d20] active:bg-[#ff1f10]'
-                : 'text-white bg-[#007aff] hover:bg-[#0056cc] active:bg-[#004499]'
+                : 'text-white bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80'
             }`}
           >
             {primaryButton.label}
