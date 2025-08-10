@@ -60,6 +60,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "Rubik",
           "var(--font-sans)",
           "Inter",
           "-apple-system",
@@ -68,6 +69,12 @@ const config: Config = {
           "sans-serif",
         ],
         mono: ["SF Mono", "Consolas", "Monaco", "monospace"],
+        rubik: [
+          "Rubik",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif"
+        ],
       },
       fontSize: {
         xs: ["11px", { lineHeight: "16px", letterSpacing: "0.066em" }],

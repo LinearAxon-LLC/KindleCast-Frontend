@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Rubik } from "next/font/google";
 import "./globals.css"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { SessionProvider } from "@/components/providers/SessionProvider";
 
-const inter = Inter({
+const rubik = Rubik({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -112,7 +112,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-white`}>
+      <body className={`${rubik.variable} font-sans antialiased bg-white`}>
         <SessionProvider>
           <AuthProvider>
             {children}

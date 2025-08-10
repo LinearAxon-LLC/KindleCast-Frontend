@@ -6,11 +6,14 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { HomePage } from '@/components/dashboard/pages/HomePage'
 import { HistoryPage } from '@/components/dashboard/pages/HistoryPage'
 import { SettingsPage } from '@/components/dashboard/pages/SettingsPage'
+import { TrialStatusBanner } from '@/components/ui/trial-status-banner'
+import { useUserProfile } from '@/hooks/useUserProfile'
 import { redirect } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth()
+  const { userProfile } = useUserProfile()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('home')
 
@@ -44,7 +47,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EFEEEA] font-sf-pro">
+    <div className="min-h-screen bg-[#EFEEEA] font-rubik">
       <div className="flex h-screen">
         <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1 overflow-hidden bg-[#EFEEEA] relative">
@@ -56,7 +59,18 @@ export default function DashboardPage() {
                 activeTab === tabKey ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
             >
-              {component}
+              {/* Trial Status Banner - Inside each page */}
+              <div className="h-full flex flex-col">
+                {userProfile && (
+                  <TrialStatusBanner
+                    userSubscribed={userProfile.user_subscribed}
+                    trialDaysRemaining={userProfile.trialDaysRemaining}
+                  />
+                )}
+                <div className="flex-1 overflow-hidden">
+                  {component}
+                </div>
+              </div>
             </div>
           ))}
         </main>

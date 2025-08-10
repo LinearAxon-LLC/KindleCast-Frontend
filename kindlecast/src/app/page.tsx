@@ -7,6 +7,7 @@ import {useLinkProcessor} from "@/hooks/useLinkProcessor"
 import {LoginModal} from "@/components/ui/login-modal"
 import {useAuth} from "@/contexts/AuthContext"
 import {UserDropdown} from "@/components/ui/user-dropdown"
+import {useUserProfile} from "@/hooks/useUserProfile"
 import Image from "next/image"
 
 export default function Home() {
@@ -19,6 +20,29 @@ export default function Home() {
 
     const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
     const { isAuthenticated, user } = useAuth()
+    const { userProfile } = useUserProfile()
+
+    const getPricingButtonConfig = () => {
+        if (!isAuthenticated) {
+            return {
+                text: 'Get Started',
+                action: () => setShowLoginModal(true)
+            }
+        }
+
+        if (userProfile?.user_subscribed) {
+            return {
+                text: 'Go to Dashboard',
+                action: () => window.location.href = '/dashboard'
+            }
+        }
+
+        // User is logged in but not subscribed (free trial)
+        return {
+            text: 'Upgrade to Pro',
+            action: () => window.location.href = 'https://www.creem.io/test/payment/prod_oGpAgPwct4S52vtAbFHOX'
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -58,22 +82,24 @@ export default function Home() {
                             FAQ
                         </a>
 
-                        {isAuthenticated ? (
-                            <div className="flex items-center space-x-4">
-                                <a href="/dashboard"
-                                   className="text-black/60 hover:text-black/85 font-medium cursor-pointer text-[13px] transition-colors duration-200">
-                                    Go to Dashboard
-                                </a>
-                                <UserDropdown />
-                            </div>
-                        ) : (
-                            <button
-                                className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                                onClick={() => setShowLoginModal(true)}
-                            >
-                                Get Started
-                            </button>
-                        )}
+                        <div className="flex items-center space-x-4">
+                            {isAuthenticated ? (
+                                <>
+                                    <a href="/dashboard"
+                                       className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer">
+                                        Go to Dashboard
+                                    </a>
+                                    <UserDropdown />
+                                </>
+                            ) : (
+                                <button
+                                    className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
+                                    onClick={() => setShowLoginModal(true)}
+                                >
+                                    Get Started
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -100,26 +126,26 @@ export default function Home() {
                                 FAQ
                             </a>
 
-                            {isAuthenticated ? (
-                                <div className="space-y-4 pt-4 border-t border-black/[0.08]">
-                                    <a href="/dashboard"
-                                       className="block text-black/60 hover:text-black/85 font-medium cursor-pointer text-[15px] transition-colors duration-200"
-                                       onClick={() => setMobileMenuOpen(false)}>
-                                        Go to Dashboard
-                                    </a>
-                                    <div className="flex items-center space-x-3">
-                                        <Image
-                                            src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
-                                            alt="Profile"
-                                            width={32}
-                                            height={32}
-                                            className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
-                                        />
-                                        <span className="text-[15px] font-medium text-black/85">{user?.name || 'User'}</span>
+                            <div className="pt-4 border-t border-black/[0.08]">
+                                {isAuthenticated ? (
+                                    <div className="space-y-4">
+                                        <a href="/dashboard"
+                                           className="block w-full bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[15px] font-medium py-3 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer text-center"
+                                           onClick={() => setMobileMenuOpen(false)}>
+                                            Go to Dashboard
+                                        </a>
+                                        <div className="flex items-center space-x-3 px-2">
+                                            <Image
+                                                src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
+                                                alt="Profile"
+                                                width={32}
+                                                height={32}
+                                                className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
+                                            />
+                                            <span className="text-[15px] font-medium text-black/85">{user?.name || 'User'}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="pt-4 border-t border-black/[0.08]">
+                                ) : (
                                     <button
                                         className="w-full bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[15px] font-medium py-3 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
                                         onClick={() => {
@@ -128,8 +154,8 @@ export default function Home() {
                                         }}>
                                         Get Started
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -362,7 +388,10 @@ export default function Home() {
                             <div className="text-center">
                                 <h3 className="text-xl sm:text-2xl font-bold mb-2">Paid</h3>
                                 <div className="mb-6">
-                                    <span className="text-3xl sm:text-4xl font-bold">$9</span>
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-2xl sm:text-3xl font-bold text-white/60 line-through">$14.99</span>
+                                        <span className="text-3xl sm:text-4xl font-bold">$9.99</span>
+                                    </div>
                                     <span className="text-white/80 text-sm sm:text-base">/month</span>
                                 </div>
                                 <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-left">
@@ -385,9 +414,9 @@ export default function Home() {
                                 </ul>
                                 <Button
                                     className="w-full bg-white text-brand-primary hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
-                                    onClick={() => setShowLoginModal(true)}
+                                    onClick={getPricingButtonConfig().action}
                                 >
-                                    Start Paid Plan
+                                    {getPricingButtonConfig().text}
                                 </Button>
                             </div>
                         </div>

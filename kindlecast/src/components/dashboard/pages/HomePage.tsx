@@ -1,8 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { Plus, FileText, Upload } from 'lucide-react'
 import { useLinkProcessor } from '@/hooks/useLinkProcessor'
+import { useUserProfile } from '@/hooks/useUserProfile'
+import { getTimeBasedGreeting } from '@/lib/time-utils'
+import { DeviceSetup } from '@/components/dashboard/DeviceSetup'
+import { text } from '@/lib/typography'
 
 interface HomePageProps {
   onSwitchTab: (tab: string) => void
@@ -13,25 +17,36 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [selectedFormat, setSelectedFormat] = useState('Just PDF')
   const [customPrompt, setCustomPrompt] = useState('')
   const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
+  const { userProfile, isLoading: profileLoading, refetch } = useUserProfile()
+
+  const { greeting, emoji } = getTimeBasedGreeting()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await submitLink(url, selectedFormat, customPrompt)
   }
 
-  const recentJobs = [
-    { id: 1, title: 'Wikipedia: Machine Learning', status: 'completed', format: 'PDF', time: '2 hours ago' },
-    { id: 2, title: 'YouTube: React Tutorial', status: 'processing', format: 'Summary', time: '5 minutes ago' },
-    { id: 3, title: 'Reddit: Programming Tips', status: 'failed', format: 'Learning', time: '1 day ago' },
-  ]
+  const handleDeviceSetupComplete = () => {
+    refetch() // Refresh user profile
+  }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'processing': return <Clock className="w-4 h-4 text-blue-500" />
-      case 'failed': return <AlertCircle className="w-4 h-4 text-red-500" />
-      default: return <FileText className="w-4 h-4 text-gray-500" />
-    }
+  if (profileLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-[15px] text-[#273F4F]/70">Loading...</div>
+      </div>
+    )
+  }
+
+  // Show device setup if user hasn't set up their device
+  if (userProfile && !userProfile.set_up_device) {
+    return (
+      <div className="h-full overflow-y-auto">
+        <div className="p-8">
+          <DeviceSetup onComplete={handleDeviceSetupComplete} />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -39,140 +54,115 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-[28px] font-bold text-[#273F4F] mb-2">Welcome back!</h1>
-          <p className="text-[15px] text-[#273F4F]/70">Convert your content to Kindle-ready formats</p>
+          <h1 className={`${text.sectionTitle} mb-2 flex items-center space-x-2`}>
+            <span>{greeting}, {userProfile?.name?.split(' ')[0] || 'there'}</span>
+            <span className="text-xl">{emoji}</span>
+          </h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Convert Card */}
-            <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-brand-primary/10 rounded-[8px] flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-brand-primary" />
-                </div>
-                <div>
-                  <h2 className="text-[17px] font-semibold text-[#273F4F]">Quick Convert</h2>
-                  <p className="text-[13px] text-[#273F4F]/60">Convert any link to Kindle format</p>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+          {/* Left Column - Convert & Send */}
+          <div className="space-y-6">
+            {/* Quick Convert & Send */}
+            <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
+              <h2 className={`${text.componentTitle} mb-6`}>Quick Send</h2>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {/* URL Input */}
                 <div>
+                  <label className={`block ${text.label} mb-3`}>
+                    Enter an URL
+                  </label>
                   <input
-                    type="text"
+                    type="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="Paste your link here..."
-                    className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200"
-                    disabled={isLoading}
+                    placeholder="https://www.nature.com/..."
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-[8px] ${text.body} focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary`}
+                    required
                   />
+                  <p className={`${text.caption} mt-2`}>
+                    Try an example: <span className={text.link}>How to Grow Your Startup on a $0 Marketing Budget</span>
+                  </p>
                 </div>
-
-                {/* Format Selection */}
-                <div>
-                  <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Format</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['Just PDF', 'Summarize', 'Learning Ready', 'Custom'].map((format) => (
-                      <button
-                        key={format}
-                        type="button"
-                        onClick={() => setSelectedFormat(format)}
-                        className={`px-4 py-2 rounded-[6px] text-[13px] font-medium transition-all duration-150 ${
-                          selectedFormat === format
-                            ? 'bg-brand-primary text-white'
-                            : 'bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]'
-                        }`}
-                        disabled={isLoading}
-                      >
-                        {format}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Custom Prompt */}
-                {selectedFormat === 'Custom' && (
-                  <div>
-                    <textarea
-                      value={customPrompt}
-                      onChange={(e) => setCustomPrompt(e.target.value)}
-                      placeholder="Describe how you want the content formatted..."
-                      className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 resize-none"
-                      rows={3}
-                      disabled={isLoading}
-                    />
-                  </div>
-                )}
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className={`w-full text-white text-[15px] font-medium py-3 px-6 rounded-[8px] transition-all duration-150 flex items-center justify-center ${
-                    isLoading 
-                      ? 'bg-brand-primary/70 cursor-not-allowed' 
-                      : isSuccess 
-                        ? 'bg-green-500 hover:bg-green-600' 
-                        : 'bg-brand-primary hover:bg-brand-primary/90 active:scale-[0.98]'
-                  }`}
+                  disabled={isLoading || !url.trim()}
+                  className={`w-full px-6 py-3 bg-brand-primary text-white ${text.button} rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2`}
                 >
-                  {isLoading ? 'Processing...' : isSuccess ? 'Sent!' : 'Convert Now'}
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Converting...</span>
+                    </>
+                  ) : (
+                    <span>Preview</span>
+                  )}
                 </button>
 
-                {/* Error Message */}
+                {/* Status Messages */}
+                {isSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-[8px]">
+                    <p className={text.success}>✓ Successfully sent to your Kindle!</p>
+                  </div>
+                )}
+
                 {error && (
-                  <div className="text-red-500 text-[13px] text-center">
-                    {error}
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-[8px]">
+                    <p className={text.error}>{error}</p>
                   </div>
                 )}
               </form>
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Jobs */}
-            <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[17px] font-semibold text-[#273F4F]">Recent Jobs</h3>
-                <button
-                  onClick={() => onSwitchTab('history')}
-                  className="text-[13px] text-brand-primary hover:text-brand-primary/80 font-medium"
-                >
-                  View All
-                </button>
-              </div>
-              
-              <div className="space-y-3">
-                {recentJobs.map((job) => (
-                  <div key={job.id} className="flex items-start gap-3 p-3 bg-black/[0.02] rounded-[8px]">
-                    {getStatusIcon(job.status)}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-medium text-[#273F4F] truncate">
-                        {job.title}
-                      </div>
-                      <div className="text-[11px] text-[#273F4F]/60">
-                        {job.format} • {job.time}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* OR Divider */}
+            <div className="flex items-center justify-center">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className={`px-4 ${text.caption} bg-[#EFEEEA]`}>OR</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            {/* Usage Stats */}
-            <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
-              <h3 className="text-[17px] font-semibold text-[#273F4F] mb-4">Usage This Month</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-[13px] text-[#273F4F]/70">Conversions</span>
-                  <span className="text-[15px] font-semibold text-[#273F4F]">12 / 100</span>
+            {/* Quick Send File Upload */}
+            <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
+              <div className="border-2 border-dashed border-gray-300 rounded-[12px] p-8 text-center hover:border-brand-primary/50 transition-colors duration-150 cursor-pointer">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Upload className="w-6 h-6 text-gray-500" />
                 </div>
-                <div className="w-full bg-black/[0.06] rounded-full h-2">
-                  <div className="bg-brand-primary h-2 rounded-full" style={{ width: '12%' }}></div>
+                <p className={`${text.body} mb-2`}>Click to upload or drag and drop</p>
+                <p className={text.caption}>MD, DOCX, EPUB, PDF* (max 20MB)</p>
+                <p className={`${text.footnote} mt-2`}>* Only available for legacy paying customers</p>
+                <p className={text.footnote}>* For best quality, use a non-scanned, text-based PDF document</p>
+              </div>
+
+              <button className={`w-full mt-4 px-6 py-3 bg-[#273F4F] text-white ${text.button} rounded-[8px] hover:bg-[#273F4F]/90 transition-colors duration-150`}>
+                Send to Kindle
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column - Kindle Preview */}
+          <div className="flex items-center justify-center p-4">
+            <div className="relative w-full max-w-md">
+              {/* Kindle Device Mockup */}
+              <div className="w-full h-[500px] bg-black rounded-[20px] p-4 shadow-2xl">
+                <div className="w-full h-full bg-white rounded-[12px] p-4 flex flex-col">
+                  {/* Kindle Screen Content */}
+                  <div className="flex-1 bg-gray-100 rounded-[8px] p-4 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-gray-500" />
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">Your converted content</p>
+                      <p className="text-xs text-gray-500">will appear here</p>
+                    </div>
+                  </div>
+
+                  {/* Kindle Logo */}
+                  <div className="text-center mt-4">
+                    <span className="text-lg font-light text-gray-600">kindle</span>
+                  </div>
                 </div>
               </div>
             </div>

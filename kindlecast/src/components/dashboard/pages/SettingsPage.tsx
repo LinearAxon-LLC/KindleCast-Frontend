@@ -1,11 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { User, Bell, Shield, CreditCard, Trash2 } from 'lucide-react'
+import { User, Bell, Shield, CreditCard, Trash2, Smartphone } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useUserProfile } from '@/hooks/useUserProfile'
+import { text } from '@/lib/typography'
 
 export function SettingsPage() {
   const { user } = useAuth()
+  const { userProfile } = useUserProfile()
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -17,20 +20,20 @@ export function SettingsPage() {
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-[28px] font-bold text-[#273F4F] mb-2">Settings</h1>
-          <p className="text-[15px] text-[#273F4F]/70">Manage your account and preferences</p>
+          <h1 className={`${text.sectionTitle} mb-2`}>Settings</h1>
+          <p className={text.bodySecondary}>Manage your account and preferences</p>
         </div>
 
         <div className="max-w-4xl space-y-8">
           {/* Profile Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-500/10 rounded-[8px] flex items-center justify-center">
                 <User className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <h2 className="text-[17px] font-semibold text-[#273F4F]">Profile</h2>
-                <p className="text-[13px] text-[#273F4F]/60">Update your personal information</p>
+                <h2 className={text.componentTitle}>Profile</h2>
+                <p className={text.caption}>Update your personal information</p>
               </div>
             </div>
 
@@ -60,8 +63,52 @@ export function SettingsPage() {
             </div>
           </div>
 
+          {/* Device Settings Section */}
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-brand-primary/10 rounded-[8px] flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-brand-primary" />
+              </div>
+              <div>
+                <h2 className="text-[17px] font-semibold text-[#273F4F]">Device Settings</h2>
+                <p className="text-[13px] text-[#273F4F]/60">Manage your Kindle device connection</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-black/[0.02] rounded-[8px]">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[15px] font-medium text-[#273F4F]">Kindle Email</div>
+                    <div className="text-[13px] text-[#273F4F]/60">
+                      {userProfile?.kindle_email || 'Not configured'}
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded-full text-[11px] font-medium ${
+                    userProfile?.set_up_device
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    {userProfile?.set_up_device ? 'Connected' : 'Not Setup'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-black/[0.02] rounded-[8px]">
+                <div className="text-[15px] font-medium text-[#273F4F]">KTool Email</div>
+                <div className="text-[13px] text-[#273F4F]/60 font-mono">
+                  {userProfile?.ktool_email || 'Not generated'}
+                </div>
+              </div>
+
+              <button className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">
+                Reconfigure Device
+              </button>
+            </div>
+          </div>
+
           {/* Notifications Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
                 <Bell className="w-5 h-5 text-yellow-500" />
@@ -98,7 +145,7 @@ export function SettingsPage() {
           </div>
 
           {/* Security Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-green-500/10 rounded-[8px] flex items-center justify-center">
                 <Shield className="w-5 h-5 text-green-500" />
@@ -122,7 +169,7 @@ export function SettingsPage() {
           </div>
 
           {/* Billing Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-brand-primary/10 rounded-[8px] flex items-center justify-center">
                 <CreditCard className="w-5 h-5 text-brand-primary" />
@@ -157,7 +204,7 @@ export function SettingsPage() {
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-white/80 backdrop-blur-xl border border-red-200 rounded-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] p-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-red-200 rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-red-500/10 rounded-[8px] flex items-center justify-center">
                 <Trash2 className="w-5 h-5 text-red-500" />

@@ -33,6 +33,17 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
+    signIn: async ({ user, account, profile }) => {
+      // Always allow sign in - the user profile creation/checking is handled in the API
+      return true
+    },
+    redirect: async ({ url, baseUrl }) => {
+      // Always redirect to dashboard after successful login
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
+      return `${baseUrl}/dashboard`
+    },
   },
   pages: {
     signIn: '/',
