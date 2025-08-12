@@ -7,12 +7,11 @@ import { HomePage } from '@/components/dashboard/pages/HomePage'
 import { HistoryPage } from '@/components/dashboard/pages/HistoryPage'
 import { SettingsPage } from '@/components/dashboard/pages/SettingsPage'
 import { TrialStatusBanner } from '@/components/ui/trial-status-banner'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { useUserProfile } from '@/hooks/useUserProfile'
-import { redirect } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 
 function DashboardContent() {
-  const { isAuthenticated, isLoading } = useAuth()
   const { userProfile } = useUserProfile()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('home')
@@ -31,11 +30,6 @@ function DashboardContent() {
     history: <HistoryPage />,
     settings: <SettingsPage />
   }), [])
-
-  // Protect dashboard - redirect to home if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    redirect('/')
-  }
 
   // Show loading state
   if (isLoading) {
@@ -81,8 +75,10 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <DashboardContent />
+      </Suspense>
+    </ProtectedRoute>
   )
 }

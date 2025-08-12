@@ -4,7 +4,7 @@ import {useState, useRef, useEffect} from "react"
 import {Button} from "@/components/ui/button"
 import {Cast, Check, Loader2, Menu, X} from "lucide-react"
 import {useLinkProcessor} from "@/hooks/useLinkProcessor"
-import {LoginModal} from "@/components/ui/login-modal"
+import {AuthDialog} from "@/components/ui/auth-dialog"
 import {useAuth} from "@/contexts/AuthContext"
 import {UserDropdown} from "@/components/ui/user-dropdown"
 import {useUserProfile} from "@/hooks/useUserProfile"
@@ -135,10 +135,10 @@ function GraphicStep4() {
     )
 }
 
-// Simple 16:10 Image Placeholders with solid colors only
+// Image Placeholders with taller aspect ratio for screenshots
 function FeatureImage({ color, className = "" }: { color: string, className?: string }) {
     return (
-        <div className={`w-full aspect-[16/10] rounded-2xl ${color} ${className}`}></div>
+        <div className={`w-full aspect-[4/5] rounded-2xl ${color} ${className}`}></div>
     )
 }
 
@@ -146,7 +146,7 @@ export default function Home() {
     const [selectedFormat, setSelectedFormat] = useState('Just PDF')
     const [url, setUrl] = useState('')
     const [customPrompt, setCustomPrompt] = useState('')
-    const [showLoginModal, setShowLoginModal] = useState(false)
+    const [showAuthDialog, setShowAuthDialog] = useState(false)
     const [pendingLinkData, setPendingLinkData] = useState<{url: string, format: string, customPrompt?: string} | null>(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -158,7 +158,7 @@ export default function Home() {
         if (!isAuthenticated) {
             return {
                 text: 'Get Started',
-                action: () => setShowLoginModal(true)
+                action: () => setShowAuthDialog(true)
             }
         }
 
@@ -179,16 +179,18 @@ export default function Home() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // If user is not authenticated, show login modal
+        // If user is not authenticated, show auth dialog
         if (!isAuthenticated) {
             setPendingLinkData({ url, format: selectedFormat, customPrompt })
-            setShowLoginModal(true)
+            setShowAuthDialog(true)
             return
         }
 
         // If authenticated, proceed with submission
         await submitLink(url, selectedFormat, customPrompt)
     }
+
+
 
     return (
         <div className="min-h-screen bg-[#EFEEEA]">
@@ -247,7 +249,7 @@ export default function Home() {
                             ) : (
                                 <button
                                     className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                                    onClick={() => setShowLoginModal(true)}
+                                    onClick={() => setShowAuthDialog(true)}
                                 >
                                     Get Started
                                 </button>
@@ -391,7 +393,11 @@ export default function Home() {
                                             value={url}
                                             onChange={(e) => setUrl(e.target.value)}
                                             placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
-                                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 cursor-text"
+                                            className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 cursor-text ${
+                                                error && !url.trim()
+                                                    ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                                                    : 'border-black/[0.08] focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20'
+                                            }`}
                                             disabled={isLoading}
                                         />
                                     </div>
@@ -432,7 +438,11 @@ export default function Home() {
                                             value={customPrompt}
                                             onChange={(e) => setCustomPrompt(e.target.value)}
                                             placeholder="e.g., 'Make it a study guide with key points highlighted'"
-                                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200 resize-none cursor-text"
+                                            className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 resize-none cursor-text ${
+                                                error && selectedFormat === 'Custom' && !customPrompt.trim()
+                                                    ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                                                    : 'border-black/[0.08] focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20'
+                                            }`}
                                             rows={3}
                                             disabled={isLoading}
                                         />
@@ -468,12 +478,7 @@ export default function Home() {
                                     )}
                                 </button>
 
-                                {/* Error Message */}
-                                {error && (
-                                    <div className="text-red-500 text-[12px] sm:text-[13px] text-center mt-2">
-                                        {error}
-                                    </div>
-                                )}
+
                                 </div>
                             </form>
                         </div>
@@ -910,10 +915,10 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
-            {/* Login Modal */}
-            <LoginModal
-                isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)}
+            {/* Auth Dialog */}
+            <AuthDialog
+                isOpen={showAuthDialog}
+                onClose={() => setShowAuthDialog(false)}
                 linkData={pendingLinkData || undefined}
             />
         </div>

@@ -47,14 +47,27 @@ export function useUserProfile() {
 
     try {
       setIsLoading(true)
-      const response = await fetch('/api/user/profile')
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch user profile')
+      // TODO: Implement actual user profile API call
+      // For now, create mock profile based on authenticated user
+      const mockProfile: UserProfile = {
+        userId: 'mock-user-id',
+        email: 'user@example.com',
+        name: 'Mock User',
+        avatar: '',
+        signed_up: true,
+        when_signed_up: new Date().toISOString(),
+        user_subscribed: false,
+        set_up_device: false,
+        basic_conversions: 0,
+        ai_conversions: 0,
+        trialDaysRemaining: 7,
+        config: {
+          free_trial_days: 7,
+          basic_conversions_limit: 5,
+          ai_conversions_limit: 3
+        }
       }
-      
-      const data = await response.json()
-      setUserProfile(data)
+      setUserProfile(mockProfile)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')

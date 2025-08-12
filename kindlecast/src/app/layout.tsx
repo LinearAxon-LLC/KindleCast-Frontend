@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css"
 import { AuthProvider } from "@/contexts/AuthContext"
-import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ToastProvider } from "@/components/ui/toast"
+import { ErrorBoundary } from "@/components/auth/ErrorBoundary"
+
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -123,11 +125,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${rubik.variable} font-sans antialiased bg-[#EFEEEA]`}>
-        <SessionProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </SessionProvider>
+        <ErrorBoundary>
+          <ToastProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

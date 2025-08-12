@@ -40,26 +40,21 @@ export function validateLinkRequest(url: string, format: string, customPrompt?: 
  * Processes a link by sending it to the KindleCast API
  */
 export async function processLink(request: LinkProcessRequest): Promise<LinkProcessResponse> {
-  const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PROCESS_LINK}`;
-  
+  const { AuthenticatedAPI } = await import('./auth');
+
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
+    const response = await AuthenticatedAPI.makeRequest<LinkProcessResponse>(
+      API_CONFIG.ENDPOINTS.PROCESS_LINK,
+      {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: LinkProcessResponse = await response.json();
-    return data;
+    return response;
   } catch (error) {
     console.error('API request failed:', error);
-    
+
     // Return a user-friendly error response
     return {
       status: false,
