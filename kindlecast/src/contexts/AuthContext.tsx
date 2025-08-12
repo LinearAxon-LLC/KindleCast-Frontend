@@ -33,22 +33,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
 
-      // Check for OAuth callback first
-      try {
-        const tokens = OAuthManager.handleOAuthCallback()
-        if (tokens) {
-          // OAuth callback successful, fetch user data
-          await fetchCurrentUser()
-          toast.success('Successfully signed in!')
+      // Skip OAuth callback handling if we're on the auth success page
+      // The auth success page will handle token extraction and storage
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+
+      if (currentPath !== '/auth/success') {
+        // Check for OAuth callback first
+        try {
+          const tokens = OAuthManager.handleOAuthCallback()
+          if (tokens) {
+            // OAuth callback successful, fetch user data
+            await fetchCurrentUser()
+            toast.success('Successfully signed in!')
+            return
+          }
+        } catch (error) {
+          // OAuth callback failed
+          console.error('OAuth callback failed:', error)
+          toast.error('Sign In Failed', getErrorMessage(error))
+          TokenManager.clearTokens()
+          setUser(null)
           return
         }
-      } catch (error) {
-        // OAuth callback failed
-        console.error('OAuth callback failed:', error)
-        toast.error('Sign In Failed', getErrorMessage(error))
-        TokenManager.clearTokens()
-        setUser(null)
-        return
       }
 
       // Check existing session

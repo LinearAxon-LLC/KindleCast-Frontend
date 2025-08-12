@@ -26,8 +26,8 @@ def get_oauth_redirect_url(provider: str, success: bool, error_message: Optional
     frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
     
     if success:
-        # Redirect to dashboard on success
-        return f"{frontend_url}/dashboard?auth=success&provider={provider}"
+        # Redirect to auth success page for token handling
+        return f"{frontend_url}/auth/success?provider={provider}"
     else:
         # Redirect to home page with error parameters
         error_param = error_message or "Authentication failed"

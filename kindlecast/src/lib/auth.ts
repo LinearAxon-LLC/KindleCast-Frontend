@@ -207,6 +207,13 @@ export class OAuthManager {
     if (typeof window === 'undefined') return null;
 
     const urlParams = new URLSearchParams(window.location.search);
+    const currentPath = window.location.pathname;
+
+    // Skip OAuth handling if we're on the auth success page
+    // The auth success page will handle token extraction and storage
+    if (currentPath === '/auth/success') {
+      return null;
+    }
 
     // Check for OAuth errors first
     const error = urlParams.get('error');
@@ -224,7 +231,7 @@ export class OAuthManager {
       );
     }
 
-    // Check for successful OAuth tokens
+    // Check for successful OAuth tokens (legacy handling for direct redirects)
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
     const expiresIn = urlParams.get('expires_in');
