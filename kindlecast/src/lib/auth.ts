@@ -1,6 +1,9 @@
 // Authentication service for KindleCast
 import { API_CONFIG, AuthTokens, User, AuthResponse, RefreshTokenRequest, RefreshTokenResponse, APIException } from '@/types/api';
 
+// Re-export types and utilities for other modules
+export { APIException } from '@/types/api';
+
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'kindlecast_access_token';
 const REFRESH_TOKEN_KEY = 'kindlecast_refresh_token';

@@ -24,15 +24,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false)
   const toast = useToastHelpers()
 
-  // Check for OAuth callback and existing session on mount
-  useEffect(() => {
-    initializeAuth()
-  }, [])
+  const fetchCurrentUser = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (isLoading) {
+      console.log('User fetch already in progress, skipping...')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const userData = await resilientApiCall(
+        () => AuthenticatedAPI.getCurrentUser(),
+        {
+          maxAttempts: 2,
+          onRetry: (attempt) => {
+            console.log(`Retrying user fetch, attempt ${attempt}`)
+          }
+        }
+      )
+      setUser(userData)
+    } catch (error) {
+      console.error('Failed to fetch user:', error)
+      TokenManager.clearTokens()
+      setUser(null)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isLoading])
 
   const initializeAuth = async () => {
     try {
-      setIsLoading(true)
-
       // Skip OAuth callback handling if we're on the auth success page
       // The auth success page will handle token extraction and storage
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -66,30 +88,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       TokenManager.clearTokens()
       setUser(null)
     } finally {
-      setIsLoading(false)
       setIsInitialized(true)
     }
   }
 
-  const fetchCurrentUser = useCallback(async () => {
-    try {
-      const userData = await resilientApiCall(
-        () => AuthenticatedAPI.getCurrentUser(),
-        {
-          maxAttempts: 2,
-          onRetry: (attempt) => {
-            console.log(`Retrying user fetch, attempt ${attempt}`)
-          }
-        }
-      )
-      setUser(userData)
-    } catch (error) {
-      console.error('Failed to fetch user:', error)
-      TokenManager.clearTokens()
-      setUser(null)
-      throw error
-    }
+  // Check for OAuth callback and existing session on mount
+  useEffect(() => {
+    initializeAuth()
   }, [])
+
+  // Watch for token changes (e.g., from auth success page)
+  useEffect(() => {
+    if (isInitialized && !user && TokenManager.hasTokens()) {
+      console.log('Tokens detected after initialization, fetching user...')
+      fetchCurrentUser()
+    }
+  }, [isInitialized, user, fetchCurrentUser])
 
   const login = useCallback((provider: 'google' | 'amazon') => {
     try {

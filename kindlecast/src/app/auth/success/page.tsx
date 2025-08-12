@@ -4,12 +4,11 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TokenManager } from '@/lib/auth'
 import { AuthTokens } from '@/types/api'
-import { useAuth } from '@/contexts/AuthContext'
+
 
 export default function AuthSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { refreshUser } = useAuth()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
@@ -60,9 +59,6 @@ export default function AuthSuccessPage() {
         // Store tokens
         TokenManager.setTokens(tokens)
 
-        // Refresh user data to update auth context
-        await refreshUser()
-
         setStatus('success')
 
         // Redirect to dashboard after a brief delay
@@ -83,7 +79,7 @@ export default function AuthSuccessPage() {
     }
 
     handleAuthSuccess()
-  }, [searchParams, router, refreshUser])
+  }, [searchParams, router])
 
   return (
     <div className="min-h-screen bg-[#EFEEEA] flex items-center justify-center font-rubik">

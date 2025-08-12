@@ -12,6 +12,7 @@ import { useUserProfile } from '@/hooks/useUserProfile'
 import { useSearchParams } from 'next/navigation'
 
 function DashboardContent() {
+  const { isLoading } = useAuth()
   const { userProfile } = useUserProfile()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('home')
