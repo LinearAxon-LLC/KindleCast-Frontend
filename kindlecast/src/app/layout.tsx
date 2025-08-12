@@ -12,8 +12,18 @@ const rubik = Rubik({
 export const metadata: Metadata = {
   metadataBase: new URL('https://kindlecast.com'),
   title: {
-    default: "KindleCast - Save Your Eyes. Read Anything on Kindle.",
-    template: "%s | KindleCast"
+    default: "Kinddy - Save Your Eyes. Read Anything on Kindle.",
+    template: "%s | Kinddy"
+  },
+  icons: {
+    icon: [
+      {
+        url: '/logo.png',
+        type: 'image/png',
+      }
+    ],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
   description: "Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain. Join 2,847+ readers who upgraded their reading experience.",
   keywords: [
@@ -68,7 +78,7 @@ export const metadata: Metadata = {
     creator: "@kindlecast_app",
   },
   alternates: {
-    canonical: "https://kindlecast.app",
+    canonical: "https://kindlecast.com",
   },
   category: "Technology",
 };
@@ -83,7 +93,7 @@ export default function RootLayout({
     '@type': 'WebApplication',
     name: 'KindleCast',
     description: 'Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain.',
-    url: 'https://kindlecast.app',
+    url: 'https://kindlecast.com',
     applicationCategory: 'ProductivityApplication',
     operatingSystem: 'Web Browser',
     offers: {
@@ -112,7 +122,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${rubik.variable} font-sans antialiased bg-white`}>
+      <body className={`${rubik.variable} font-sans antialiased bg-[#EFEEEA]`}>
         <SessionProvider>
           <AuthProvider>
             {children}

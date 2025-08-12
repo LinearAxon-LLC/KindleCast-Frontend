@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, Suspense } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { HomePage } from '@/components/dashboard/pages/HomePage'
@@ -11,7 +11,7 @@ import { useUserProfile } from '@/hooks/useUserProfile'
 import { redirect } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { isAuthenticated, isLoading } = useAuth()
   const { userProfile } = useUserProfile()
   const searchParams = useSearchParams()
@@ -76,5 +76,13 @@ export default function DashboardPage() {
         </main>
       </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   )
 }

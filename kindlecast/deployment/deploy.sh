@@ -16,7 +16,11 @@ npm run build -- --no-lint
 
 # Step 2: Create minimal deployment package
 echo "📦 Creating deployment package..."
-tar -czf deploy.tar.gz .next package.json public --exclude=".next/cache"
+if [ -d ".next/cache" ]; then
+    tar -czf deploy.tar.gz .next package.json public --exclude=".next/cache"
+else
+    tar -czf deploy.tar.gz .next package.json public
+fi
 echo "📏 Package size: $(du -h deploy.tar.gz | cut -f1)"
 
 # Step 3: Clean server and upload

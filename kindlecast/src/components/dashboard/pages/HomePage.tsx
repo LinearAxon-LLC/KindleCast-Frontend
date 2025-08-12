@@ -90,7 +90,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                 <button
                   type="submit"
                   disabled={isLoading || !url.trim()}
-                  className={`w-full px-6 py-3 bg-brand-primary text-white ${text.button} rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2`}
+                  className="w-full px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>
@@ -136,7 +136,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                 <p className={text.footnote}>* For best quality, use a non-scanned, text-based PDF document</p>
               </div>
 
-              <button className={`w-full mt-4 px-6 py-3 bg-[#273F4F] text-white ${text.button} rounded-[8px] hover:bg-[#273F4F]/90 transition-colors duration-150`}>
+              <button className="w-full mt-4 px-6 py-3 bg-[#273F4F] text-white text-base font-medium rounded-[8px] hover:bg-[#273F4F]/90 transition-colors duration-150">
                 Send to Kindle
               </button>
             </div>

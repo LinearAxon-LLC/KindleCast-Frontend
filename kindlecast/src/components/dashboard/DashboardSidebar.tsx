@@ -33,7 +33,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
               <path d="M12 8L18 8M12 12L16 12M12 16L14 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </div>
-          <span className={text.componentTitle}>KindleCast</span>
+          <span className={text.componentTitle}>Kinddy</span>
         </a>
       </div>
 

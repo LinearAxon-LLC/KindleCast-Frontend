@@ -1,7 +1,7 @@
 // Clean layout system for KindleCast
 export const layout = {
   // Page containers
-  page: 'min-h-screen bg-white',
+  page: 'min-h-screen bg-[#EFEEEA]',
   container: 'max-w-7xl mx-auto px-6 py-8',
   section: 'py-12 sm:py-16',
 
