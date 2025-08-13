@@ -72,12 +72,10 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
       {/* User Profile Section */}
       <div className="p-4 border-t border-[#273F4F]/20">
         <div className="flex items-center gap-3 mb-3">
-          <Image
+          <img
             src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
             alt="User Avatar"
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full"
+            className="w-10 h-10 rounded-full object-cover"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -96,7 +94,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
           </div>
         </div>
 
-        {/* Usage Stats */}
+        {/* Usage Stats - Now with singleton API calls */}
         {userProfile && usage && (
           <div className="mt-4 p-3 bg-white/60 backdrop-blur-xl border border-black/[0.08] rounded-[12px]">
             <h4 className={`${text.caption} font-semibold mb-3`}>Usage This Month</h4>

@@ -33,6 +33,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   }
 
   const handleInfoUpdateComplete = () => {
+    console.log('🔍 HomePage: handleInfoUpdateComplete called, setting showInfoUpdate to false');
     setShowInfoUpdate(false)
     refetch() // Refresh user profile
   }
@@ -41,12 +42,28 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     setShowInfoUpdate(false)
   }
 
-  // Check if we should show the info update box
-  const shouldShowInfoUpdate = userProfile && showInfoUpdate && (
-    !userProfile.kindle_email ||
-    !userProfile.acknowledged_mail_whitelisting ||
-    userProfile.acknowledged_mail_whitelisting.toLowerCase() !== 'yes'
+  // Check if user has completed Kindle setup
+  // Based on your API response: kindle_email exists AND acknowledged_mail_whitelisting is 'yes'
+  const hasKindleSetup = Boolean(
+    userProfile?.kindle_email &&
+    userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === 'yes'
   )
+
+  // Only show onboarding if user doesn't have a complete setup
+  const shouldShowInfoUpdate = userProfile && showInfoUpdate && !hasKindleSetup
+
+  // Debug what we're getting from API
+  // React.useEffect(() => {
+  //   if (userProfile) {
+  //     console.log('🔍 HomePage Debug:', {
+  //       kindle_email: userProfile.kindle_email,
+  //       acknowledged_mail_whitelisting: userProfile.acknowledged_mail_whitelisting,
+  //       hasKindleSetup,
+  //       shouldShowInfoUpdate,
+  //       showInfoUpdate
+  //     })
+  //   }
+  // }, [userProfile, hasKindleSetup, shouldShowInfoUpdate])
 
   if (profileLoading) {
     return (
@@ -56,8 +73,20 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     )
   }
 
+  // If no user profile (API failed), show error
+  if (!userProfile) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-[15px] text-red-600 mb-2">Failed to load profile</div>
+          <div className="text-[13px] text-[#273F4F]/70">Please check your connection and try again</div>
+        </div>
+      </div>
+    )
+  }
+
   // Show device setup if user hasn't set up their device
-  if (userProfile && !userProfile.set_up_device) {
+  if (!hasKindleSetup) {
     return (
       <div className="h-full overflow-y-auto">
         <div className="p-8">
@@ -86,7 +115,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+        <div data-testid="conversion-screen" className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Left Column - Convert & Send */}
           <div className="space-y-6">
             {/* Quick Convert & Send */}

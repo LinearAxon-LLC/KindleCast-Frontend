@@ -3,6 +3,13 @@ import { SubscriptionPlan, API_CONFIG } from '@/types/api';
 import { AuthenticatedAPI } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Global singleton to prevent multiple API calls
+let globalPlans: SubscriptionPlan[] = []
+let globalIsLoading = false
+let globalError: string | null = null
+let isCurrentlyFetching = false
+let fetchPromise: Promise<void> | null = null
+
 interface UsePricingPlansReturn {
   plans: SubscriptionPlan[];
   isLoading: boolean;
@@ -13,47 +20,75 @@ interface UsePricingPlansReturn {
 }
 
 export function usePricingPlans(): UsePricingPlansReturn {
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(globalPlans);
+  const [isLoading, setIsLoading] = useState(globalIsLoading);
+  const [error, setError] = useState<string | null>(globalError);
   const { user } = useAuth();
 
-  const fetchPricingPlans = useCallback(async (): Promise<SubscriptionPlan[]> => {
-    // Make API call without authentication requirement
-    const response = await AuthenticatedAPI.makeRequest<SubscriptionPlan[]>(
-      API_CONFIG.ENDPOINTS.SUBSCRIPTION_PLANS,
-      {},
-      false // Don't require auth for pricing plans
-    );
-    
-    return response;
+  const fetchPricingPlans = useCallback(async (): Promise<void> => {
+    // If already fetching, wait for the existing promise
+    if (fetchPromise) {
+      await fetchPromise
+      setPlans(globalPlans)
+      setIsLoading(globalIsLoading)
+      setError(globalError)
+      return
+    }
+
+    // If we already have data, use it
+    if (globalPlans.length > 0) {
+      setPlans(globalPlans)
+      setIsLoading(false)
+      setError(globalError)
+      return
+    }
+
+    // Create single fetch promise
+    fetchPromise = (async () => {
+      try {
+        globalIsLoading = true
+        isCurrentlyFetching = true
+
+        console.log('🔍 usePricingPlans: Making SINGLE API call to /subscription/plans')
+
+        const response = await AuthenticatedAPI.makeRequest<SubscriptionPlan[]>(
+          API_CONFIG.ENDPOINTS.SUBSCRIPTION_PLANS,
+          {},
+          false // Don't require auth for pricing plans
+        );
+
+        globalPlans = response
+        globalError = null
+        globalIsLoading = false
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load pricing plans'
+        globalError = errorMsg
+        globalPlans = []
+        globalIsLoading = false
+      } finally {
+        isCurrentlyFetching = false
+        fetchPromise = null
+      }
+    })()
+
+    await fetchPromise
+
+    // Update local state
+    setPlans(globalPlans)
+    setIsLoading(globalIsLoading)
+    setError(globalError)
   }, []);
 
   const loadPricingPlans = useCallback(async (forceRefresh = false) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Simple fetch without caching for now
-      const plansData = await fetchPricingPlans();
-
-      if (plansData && plansData.length > 0) {
-        // Data is already sorted by price in ascending order from backend
-        setPlans(plansData);
-      } else {
-        // Fallback to default plans if no data available
-        setPlans(getDefaultPlans());
-        setError('Using default pricing. Please check your connection.');
-      }
-    } catch (err) {
-      console.error('Failed to load pricing plans:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load pricing plans');
-
-      // Use default plans as final fallback
-      setPlans(getDefaultPlans());
-    } finally {
-      setIsLoading(false);
+    if (forceRefresh) {
+      // Reset global state for force refresh
+      globalPlans = []
+      globalIsLoading = false
+      globalError = null
+      fetchPromise = null
     }
+
+    await fetchPricingPlans()
   }, [fetchPricingPlans]);
 
   const refresh = useCallback(async () => {
@@ -87,39 +122,4 @@ export function usePricingPlans(): UsePricingPlansReturn {
   };
 }
 
-/**
- * Default pricing plans as fallback when API is unavailable
- */
-function getDefaultPlans(): SubscriptionPlan[] {
-  return [
-    {
-      name: 'free-default',
-      display_name: 'Free',
-      is_most_popular: true,
-      subscription_type: 'free',
-      original_price: 0,
-      discounted_price: 0,
-      billing_cycle: 'monthly',
-      features: [
-        '5 Basic Epub conversion per month',
-        '3 AI Formatting per month',
-        '20 days data retention'
-      ]
-    },
-    {
-      name: 'premium-default',
-      display_name: 'Premium',
-      is_most_popular: false,
-      subscription_type: 'premium',
-      original_price: 14.99,
-      discounted_price: 9.99,
-      billing_cycle: 'monthly',
-      features: [
-        'Unlimited Basic Epub conversion per month',
-        '100 AI (improved) Formatting per month',
-        '120 days data retention',
-        'Personal mail for auto newsletter forwarding'
-      ]
-    }
-  ];
-}
+// No more mock data - all data comes from real API

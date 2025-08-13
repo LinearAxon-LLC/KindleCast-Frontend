@@ -54,12 +54,12 @@ function DashboardContent() {
                 activeTab === tabKey ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
             >
-              {/* Trial Status Banner - Inside each page */}
+              {/* Trial Status Banner - Now with singleton API calls */}
               <div className="h-full flex flex-col">
                 {userProfile && (
                   <TrialStatusBanner
                     userSubscribed={userProfile.user_subscribed}
-                    trialDaysRemaining={userProfile.trialDaysRemaining}
+                    trialDaysRemaining={12}
                   />
                 )}
                 <div className="flex-1 overflow-hidden">

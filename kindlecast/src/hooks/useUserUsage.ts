@@ -3,6 +3,13 @@ import { UserUsageResponse, API_CONFIG } from '@/types/api';
 import { AuthenticatedAPI } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Global singleton to prevent multiple API calls
+let globalUsage: UserUsageResponse | null = null
+let globalIsLoading = false
+let globalError: string | null = null
+let isCurrentlyFetching = false
+let fetchPromise: Promise<void> | null = null
+
 interface UseUserUsageReturn {
   usage: UserUsageResponse | null;
   isLoading: boolean;
@@ -14,9 +21,9 @@ interface UseUserUsageReturn {
 }
 
 export function useUserUsage(): UseUserUsageReturn {
-  const [usage, setUsage] = useState<UserUsageResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UserUsageResponse | null>(globalUsage);
+  const [isLoading, setIsLoading] = useState(globalIsLoading);
+  const [error, setError] = useState<string | null>(globalError);
   const { isAuthenticated } = useAuth();
 
   const fetchUsage = useCallback(async (): Promise<void> => {

@@ -9,46 +9,8 @@ export function HistoryPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  const jobs = [
-    {
-      id: 1,
-      title: 'The Complete Guide to Machine Learning',
-      url: 'https://en.wikipedia.org/wiki/Machine_learning',
-      status: 'completed',
-      format: 'PDF',
-      createdAt: '2024-01-15T10:30:00Z',
-      completedAt: '2024-01-15T10:32:00Z',
-      fileSize: '2.4 MB'
-    },
-    {
-      id: 2,
-      title: 'React Hooks Tutorial - Complete Guide',
-      url: 'https://www.youtube.com/watch?v=example',
-      status: 'processing',
-      format: 'Summary',
-      createdAt: '2024-01-15T09:15:00Z',
-      progress: 65
-    },
-    {
-      id: 3,
-      title: 'Best Programming Practices Discussion',
-      url: 'https://www.reddit.com/r/programming/comments/example',
-      status: 'failed',
-      format: 'Learning Ready',
-      createdAt: '2024-01-14T16:45:00Z',
-      error: 'Content not accessible'
-    },
-    {
-      id: 4,
-      title: 'JavaScript ES2024 Features',
-      url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-      status: 'completed',
-      format: 'Custom',
-      createdAt: '2024-01-14T14:20:00Z',
-      completedAt: '2024-01-14T14:23:00Z',
-      fileSize: '1.8 MB'
-    }
-  ]
+  // TODO: Replace with real API call to get user's conversion history
+  const jobs: any[] = [] // No mock data - show empty state until API is implemented
 
   const getStatusIcon = (status: string) => {
     switch (status) {

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Mail, CheckCircle, AlertCircle, X } from 'lucide-react';
-import { useInfoUpdate } from '@/hooks/useInfoUpdate';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { text } from '@/lib/typography';
 
@@ -15,9 +14,10 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
   const [kindleEmail, setKindleEmail] = useState('');
   const [acknowledgment, setAcknowledgment] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  
-  const { isLoading, error, updateUserInfo } = useInfoUpdate();
-  const { refetch } = useUserProfile();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { setupDevice, refetch } = useUserProfile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,20 +26,33 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
       return;
     }
 
-    const result = await updateUserInfo({
-      kindle_email: kindleEmail.trim(),
-      mail_whitelisting_acknowledged: acknowledgment.trim()
-    });
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    if (result?.status) {
-      setShowSuccess(true);
-      // Refresh user profile to get updated data
-      await refetch();
+      // Call setupDevice with the full kindle email and acknowledgment
+      const fullKindleEmail = `${kindleEmail.trim()}@kindle.com`;
+      const result = await setupDevice(fullKindleEmail, acknowledgment.trim());
 
-      // Auto-complete after 2 seconds
-      setTimeout(() => {
-        onComplete?.();
-      }, 2000);
+      if (result.success) {
+        setShowSuccess(true);
+
+        console.log('🔍 InfoUpdateBox: API call successful, refreshing profile...');
+        // Refresh user profile to get updated data
+        await refetch();
+        console.log('🔍 InfoUpdateBox: Profile refreshed, calling onComplete...');
+
+        // Auto-complete after 2 seconds to go to main screen
+        setTimeout(() => {
+          onComplete?.();
+        }, 2000);
+      } else {
+        setError(result.error || 'Failed to connect your Kindle');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,8 +65,8 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <h3 className={`${text.body} font-semibold text-green-800`}>Setup Complete!</h3>
-              <p className={`${text.caption} text-green-700`}>Your information has been updated successfully</p>
+              <h3 className={`${text.body} font-semibold text-green-800`}>Kindle Connected!</h3>
+              <p className={`${text.caption} text-green-700`}>Your Kindle has been successfully connected</p>
             </div>
           </div>
         </div>
@@ -71,14 +84,14 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
   }
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-orange-200 rounded-[16px] p-6 mb-6">
+    <div data-testid="info-update-box" className="bg-white/80 backdrop-blur-xl border border-orange-200 rounded-[16px] p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-orange-100 rounded-[8px] flex items-center justify-center">
             <Mail className="w-5 h-5 text-orange-600" />
           </div>
           <div>
-            <h3 className={`${text.body} font-semibold text-orange-800`}>Complete Your Setup</h3>
+            <h3 className={`${text.body} font-semibold text-orange-800`}>Connect Your Kindle</h3>
             <p className={`${text.caption} text-orange-700`}>We need a few details to get you started</p>
           </div>
         </div>
@@ -172,9 +185,10 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
               <span>Updating...</span>
             </>
           ) : (
-            <span>Complete Setup</span>
+            <span>Connect Kindle</span>
           )}
         </button>
+
       </form>
     </div>
   );

@@ -4,7 +4,7 @@ import React from 'react'
 import { Crown, Clock } from 'lucide-react'
 import { text } from '@/lib/typography'
 import { usePayment } from '@/hooks/usePayment'
-import { usePricingPlans } from '@/hooks/usePricingPlans'
+// Removed usePricingPlans - will use hardcoded premium plan name
 
 interface TrialStatusBannerProps {
   userSubscribed: boolean
@@ -18,21 +18,18 @@ export function TrialStatusBanner({
   className = ''
 }: TrialStatusBannerProps) {
   const { redirectToPayment, isLoading } = usePayment()
-  const { plans } = usePricingPlans()
 
   // Don't show banner for subscribed users
   if (userSubscribed) {
     return null
   }
 
-  // Get the premium plan for upgrade
-  const premiumPlan = plans.find(plan => plan.subscription_type === 'premium')
-
   const handleUpgradeClick = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (premiumPlan && !isLoading) {
+    if (!isLoading) {
       try {
-        await redirectToPayment(premiumPlan.name)
+        // Use hardcoded premium plan name to avoid API call
+        await redirectToPayment('premium-monthly')
       } catch (error) {
         console.error('Failed to initiate payment:', error)
       }
@@ -51,7 +48,7 @@ export function TrialStatusBanner({
             </span>
             <button
               onClick={handleUpgradeClick}
-              disabled={isLoading || !premiumPlan}
+              disabled={isLoading}
               className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}
@@ -73,7 +70,7 @@ export function TrialStatusBanner({
           </span>
           <button
             onClick={handleUpgradeClick}
-            disabled={isLoading || !premiumPlan}
+            disabled={isLoading}
             className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}

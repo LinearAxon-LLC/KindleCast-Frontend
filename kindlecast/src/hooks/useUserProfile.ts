@@ -3,61 +3,85 @@ import { useAuth } from '@/contexts/AuthContext'
 import { UserProfile, API_CONFIG } from '@/types/api'
 import { AuthenticatedAPI } from '@/lib/auth'
 
+// Global singleton to prevent multiple API calls across all components
+let globalUserProfile: UserProfile | null = null
+let globalIsLoading = false
+let globalError: string | null = null
+let isCurrentlyFetching = false
+let fetchPromise: Promise<void> | null = null
+
 export function useUserProfile() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(globalUserProfile)
+  const [isLoading, setIsLoading] = useState(globalIsLoading)
+  const [error, setError] = useState<string | null>(globalError)
 
   const fetchUserProfile = async () => {
     if (!isAuthenticated) {
+      globalUserProfile = null
+      globalIsLoading = false
+      globalError = null
       setUserProfile(null)
       setIsLoading(false)
+      setError(null)
       return
     }
 
-    try {
-      setIsLoading(true)
-      // Use the actual /me API endpoint
-      const profile = await AuthenticatedAPI.makeRequest<UserProfile>(
-        API_CONFIG.ENDPOINTS.AUTH_ME
-      )
-      setUserProfile(profile)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-      setUserProfile(null)
-    } finally {
+    // If already fetching, wait for the existing promise
+    if (fetchPromise) {
+      await fetchPromise
+      // Update local state with global state
+      setUserProfile(globalUserProfile)
+      setIsLoading(globalIsLoading)
+      setError(globalError)
+      return
+    }
+
+    // If we already have data, use it
+    if (globalUserProfile) {
+      setUserProfile(globalUserProfile)
       setIsLoading(false)
+      setError(globalError)
+      return
     }
-  }
 
-  const updateUserProfile = async (updates: Partial<UserProfile>) => {
-    try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to update user profile')
+    // Create single fetch promise
+    fetchPromise = (async () => {
+      try {
+        globalIsLoading = true
+        isCurrentlyFetching = true
+
+        console.log('🔍 useUserProfile: Making SINGLE API call to /auth/me')
+
+        // Single API call to /me endpoint
+        const profile = await AuthenticatedAPI.makeRequest<UserProfile>(
+          API_CONFIG.ENDPOINTS.AUTH_ME
+        )
+
+        globalUserProfile = profile
+        globalError = null
+        globalIsLoading = false
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Failed to load profile'
+        globalError = errorMsg
+        globalUserProfile = null
+        globalIsLoading = false
+      } finally {
+        isCurrentlyFetching = false
+        fetchPromise = null
       }
-      
-      // Refresh the profile data
-      await fetchUserProfile()
-      return true
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-      return false
-    }
+    })()
+
+    await fetchPromise
+
+    // Update local state
+    setUserProfile(globalUserProfile)
+    setIsLoading(globalIsLoading)
+    setError(globalError)
   }
 
-  const setupDevice = async (kindleEmail: string, acknowledgment: string = 'yes') => {
+  const connectKindle = async (kindleEmail: string, acknowledgment: string = 'yes') => {
     try {
-      // Use the correct API endpoint for info update
       const response = await AuthenticatedAPI.makeRequest(
         API_CONFIG.ENDPOINTS.USER_INFO_UPDATE,
         {
@@ -68,13 +92,13 @@ export function useUserProfile() {
           }),
         }
       )
-
+      
       // Refresh the profile data
       await fetchUserProfile()
-
+      
       return {
         success: true,
-        kindlecastEmail: 'no-reply@kindlecast.com' // Return the sender email
+        data: response
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -85,6 +109,7 @@ export function useUserProfile() {
     }
   }
 
+  // Only fetch once when authentication changes
   useEffect(() => {
     if (!authLoading) {
       fetchUserProfile()
@@ -96,7 +121,6 @@ export function useUserProfile() {
     isLoading: isLoading || authLoading,
     error,
     refetch: fetchUserProfile,
-    updateUserProfile,
-    setupDevice
+    setupDevice: connectKindle
   }
 }

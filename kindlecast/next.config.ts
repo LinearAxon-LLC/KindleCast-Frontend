@@ -1,32 +1,30 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Disable React Strict Mode to prevent double API calls in development
+  reactStrictMode: false,
+
   // Development configuration
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
 
-  // Image optimization
+  // Image optimization - Allow any URL
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: '**',
         port: '',
         pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
+        protocol: 'http',
+        hostname: '**',
         port: '',
         pathname: '/**',
       },
     ],
+    unoptimized: true, // Disable optimization for external images
   },
 
   // Compiler optimizations
