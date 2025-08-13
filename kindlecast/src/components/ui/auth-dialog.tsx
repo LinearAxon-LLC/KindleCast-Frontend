@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, User, Loader2 } from 'lucide-react'
+import { X, User, Loader2, Mail } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface AuthDialogProps {
@@ -20,7 +20,10 @@ export function AuthDialog({
   linkData
 }: AuthDialogProps) {
   const { login, isLoading } = useAuth()
-  const [loadingProvider, setLoadingProvider] = useState<'google' | 'amazon' | null>(null)
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'twitter' | 'apple' | 'email' | null>(null)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   if (!isOpen) return null
 
@@ -29,9 +32,21 @@ export function AuthDialog({
     login('google')
   }
 
-  const handleAmazonLogin = () => {
-    setLoadingProvider('amazon')
-    login('amazon')
+  const handleTwitterLogin = () => {
+    setLoadingProvider('twitter')
+    login('twitter')
+  }
+
+  const handleAppleLogin = () => {
+    setLoadingProvider('apple')
+    login('apple')
+  }
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoadingProvider('email')
+    // TODO: Implement email login
+    login('email')
   }
 
   return (
@@ -117,24 +132,98 @@ export function AuthDialog({
               </span>
             </button>
 
-            {/* Amazon Login */}
+            {/* X (Twitter) Login */}
             <button
-              onClick={handleAmazonLogin}
+              onClick={handleTwitterLogin}
               disabled={isLoading || loadingProvider !== null}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#FF9900] hover:bg-[#FF9900]/90 active:bg-[#FF9900]/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#FF9900] disabled:active:scale-100"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-black hover:bg-black/90 active:bg-black/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:active:scale-100"
             >
-              {loadingProvider === 'amazon' ? (
+              {loadingProvider === 'twitter' ? (
                 <Loader2 className="w-5 h-5 animate-spin text-white" />
               ) : (
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.12c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726-1.548.41-3.156.615-4.83.615-3.045 0-5.91-.645-8.596-1.936-.628-.3-1.234-.653-1.815-1.053-.226-.16-.345-.29-.345-.39 0-.06.03-.12.09-.18l.009-.345z"/>
-                  <path d="M18.792 16.025c-.367-.226-.61-.422-.61-.648 0-.12.06-.226.18-.316.226-.18.526-.316.9-.406 1.244-.3 2.353-.18 3.33.36.226.12.346.27.346.45 0 .18-.09.36-.27.54-.18.18-.42.33-.72.45-.6.24-1.29.36-2.07.36-.69 0-1.29-.12-1.8-.36-.18-.09-.286-.226-.286-.43z"/>
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               )}
               <span className="text-[15px] font-medium">
-                {loadingProvider === 'amazon' ? 'Connecting...' : 'Continue with Amazon'}
+                {loadingProvider === 'twitter' ? 'Connecting...' : 'Continue with X'}
               </span>
             </button>
+
+            {/* Apple Login */}
+            <button
+              onClick={handleAppleLogin}
+              disabled={isLoading || loadingProvider !== null}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-black hover:bg-black/90 active:bg-black/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:active:scale-100"
+            >
+              {loadingProvider === 'apple' ? (
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.017 0C8.396 0 8.025.044 8.025.044c0 .467.01 1.05.044 1.713.034.662.134 1.325.3 1.988.166.662.4 1.29.7 1.883.3.594.667 1.155 1.1 1.683.433.528.933 1.022 1.5 1.483.567.461 1.2.883 1.9 1.267.7.383 1.467.733 2.3 1.05.833.317 1.733.6 2.7.85 1.967.5 4.233.95 6.8 1.35-.033-.617-.083-1.2-.15-1.75-.067-.55-.167-1.067-.3-1.55-.133-.483-.3-.933-.5-1.35-.2-.417-.433-.8-.7-1.15-.267-.35-.567-.667-.9-.95-.333-.283-.7-.533-1.1-.75-.4-.217-.833-.4-1.3-.55-.467-.15-.967-.267-1.5-.35-.533-.083-1.1-.133-1.7-.15-.6-.017-1.233-.017-1.9 0zm-.017 2.15c.567-.017 1.083.017 1.55.1.467.083.883.2 1.25.35.367.15.683.333.95.55.267.217.483.467.65.75.167.283.283.6.35.95.067.35.1.733.1 1.15 0 .417-.033.8-.1 1.15-.067.35-.183.667-.35.95-.167.283-.383.533-.65.75-.267.217-.583.4-.95.55-.367.15-.783.267-1.25.35-.467.083-.983.117-1.55.1-.567.017-1.083-.017-1.55-.1-.467-.083-.883-.2-1.25-.35-.367-.15-.683-.333-.95-.55-.267-.217-.483-.467-.65-.75-.167-.283-.283-.6-.35-.95-.067-.35-.1-.733-.1-1.15 0-.417.033-.8.1-1.15.067-.35.183-.667.35-.95.167-.283.383-.533.65-.75.267-.217.583-.4.95-.55.367-.15.783-.267 1.25-.35.467-.083.983-.117 1.55-.1z"/>
+                </svg>
+              )}
+              <span className="text-[15px] font-medium">
+                {loadingProvider === 'apple' ? 'Connecting...' : 'Continue with Apple'}
+              </span>
+            </button>
+
+            {/* Email Login Toggle */}
+            {!showEmailForm ? (
+              <button
+                onClick={() => setShowEmailForm(true)}
+                disabled={isLoading || loadingProvider !== null}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] hover:bg-black/[0.02] active:bg-black/[0.05] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:active:scale-100"
+              >
+                <Mail className="w-5 h-5 text-gray-600" />
+                <span className="text-[15px] font-medium text-black/85">
+                  Continue with Email
+                </span>
+              </button>
+            ) : (
+              /* Email Form */
+              <form onSubmit={handleEmailLogin} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] text-[15px] placeholder:text-black/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30"
+                />
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] text-[15px] placeholder:text-black/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isLoading || loadingProvider !== null}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingProvider === 'email' ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Mail className="w-5 h-5" />
+                    )}
+                    <span className="text-[15px] font-medium">
+                      {loadingProvider === 'email' ? 'Signing in...' : 'Sign In'}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEmailForm(false)}
+                    className="px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] hover:bg-black/[0.02] active:bg-black/[0.05] transition-all duration-150 active:scale-[0.98]"
+                  >
+                    <X className="w-5 h-5 text-black/60" />
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Footer */}

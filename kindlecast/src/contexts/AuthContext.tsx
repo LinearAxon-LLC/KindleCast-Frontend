@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null
   isLoading: boolean
   isInitialized: boolean
-  login: (provider: 'google' | 'amazon') => void
+  login: (provider: 'google' | 'twitter' | 'apple' | 'email') => void
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
@@ -105,12 +105,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isInitialized, user, fetchCurrentUser])
 
-  const login = useCallback((provider: 'google' | 'amazon') => {
+  const login = useCallback((provider: 'google' | 'twitter' | 'apple' | 'email') => {
     try {
       if (provider === 'google') {
         OAuthManager.initiateGoogleLogin()
-      } else {
-        OAuthManager.initiateAmazonLogin()
+      } else if (provider === 'twitter') {
+        OAuthManager.initiateTwitterLogin()
+      } else if (provider === 'apple') {
+        OAuthManager.initiateAppleLogin()
+      } else if (provider === 'email') {
+        OAuthManager.initiateEmailLogin()
       }
     } catch (error) {
       console.error('Login initiation failed:', error)

@@ -1,19 +1,38 @@
 'use client'
 
 import React, { useState } from 'react'
-import { User, Bell, Shield, CreditCard, Trash2, Smartphone } from 'lucide-react'
+import { User, Bell, Shield, CreditCard, Trash2, Smartphone, Crown, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
+import { usePricingPlans } from '@/hooks/usePricingPlans'
+import { usePayment } from '@/hooks/usePayment'
 import { text } from '@/lib/typography'
 
 export function SettingsPage() {
   const { user } = useAuth()
   const { userProfile } = useUserProfile()
+  const { plans, getUserCurrentPlan } = usePricingPlans()
+  const { redirectToPayment, isLoading: paymentLoading } = usePayment()
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
     marketing: false
   })
+
+  // Get user's current plan and premium plan for upgrade
+  const currentPlan = getUserCurrentPlan(user?.subscription_name)
+  const premiumPlan = plans.find(plan => plan.subscription_type === 'premium')
+  const isFreePlan = !userProfile?.user_subscribed || currentPlan?.subscription_type === 'free'
+
+  const handleUpgrade = async () => {
+    if (premiumPlan && !paymentLoading) {
+      try {
+        await redirectToPayment(premiumPlan.name)
+      } catch (error) {
+        console.error('Failed to initiate payment:', error)
+      }
+    }
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -180,18 +199,66 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-gradient-to-r from-brand-primary/10 to-green-500/10 rounded-[8px] border border-brand-primary/20">
+            {/* Current Plan Display */}
+            <div className={`p-4 rounded-[8px] border ${
+              isFreePlan
+                ? 'bg-gray-50 border-gray-200'
+                : 'bg-gradient-to-r from-brand-primary/10 to-green-500/10 border-brand-primary/20'
+            }`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[15px] font-semibold text-[#273F4F]">Pro Plan</div>
-                  <div className="text-[13px] text-[#273F4F]/60">100 conversions per month</div>
+                  <div className="text-[15px] font-semibold text-[#273F4F]">
+                    {currentPlan?.display_name || 'Free Plan'}
+                  </div>
+                  <div className="text-[13px] text-[#273F4F]/60">
+                    {isFreePlan
+                      ? `${userProfile?.config?.basic_conversions_limit || 5} conversions per month`
+                      : 'Unlimited conversions per month'
+                    }
+                  </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[17px] font-bold text-brand-primary">$9.99/mo</div>
-                  <div className="text-[11px] text-[#273F4F]/60">Next billing: Jan 15</div>
+                  <div className={`text-[17px] font-bold ${isFreePlan ? 'text-gray-600' : 'text-brand-primary'}`}>
+                    ${currentPlan?.discounted_price?.toFixed(2) || '0.00'}/{currentPlan?.billing_cycle || 'month'}
+                  </div>
+                  {!isFreePlan && (
+                    <div className="text-[11px] text-[#273F4F]/60">Active subscription</div>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Upgrade Button for Free Users */}
+            {isFreePlan && premiumPlan && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-brand-primary/5 to-purple-500/5 rounded-[8px] border border-brand-primary/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Crown className="w-5 h-5 text-brand-primary" />
+                    <div>
+                      <div className="text-[15px] font-semibold text-[#273F4F]">Upgrade to {premiumPlan.display_name}</div>
+                      <div className="text-[13px] text-[#273F4F]/60">Get unlimited conversions and premium features</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleUpgrade}
+                    disabled={paymentLoading}
+                    className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {paymentLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="w-4 h-4" />
+                        Upgrade Now
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 mt-4">
               <button className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150">

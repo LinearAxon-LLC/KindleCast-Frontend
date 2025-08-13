@@ -3,6 +3,8 @@
 import React from 'react'
 import { Crown, Clock } from 'lucide-react'
 import { text } from '@/lib/typography'
+import { usePayment } from '@/hooks/usePayment'
+import { usePricingPlans } from '@/hooks/usePricingPlans'
 
 interface TrialStatusBannerProps {
   userSubscribed: boolean
@@ -15,9 +17,26 @@ export function TrialStatusBanner({
   trialDaysRemaining,
   className = ''
 }: TrialStatusBannerProps) {
+  const { redirectToPayment, isLoading } = usePayment()
+  const { plans } = usePricingPlans()
+
   // Don't show banner for subscribed users
   if (userSubscribed) {
     return null
+  }
+
+  // Get the premium plan for upgrade
+  const premiumPlan = plans.find(plan => plan.subscription_type === 'premium')
+
+  const handleUpgradeClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (premiumPlan && !isLoading) {
+      try {
+        await redirectToPayment(premiumPlan.name)
+      } catch (error) {
+        console.error('Failed to initiate payment:', error)
+      }
+    }
   }
 
   // Trial expired
@@ -30,12 +49,13 @@ export function TrialStatusBanner({
             <span className={`${text.caption} text-white`}>
               Your trial has expired.
             </span>
-            <a
-              href="https://www.creem.io/test/payment/prod_oGpAgPwct4S52vtAbFHOX"
-              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
+            <button
+              onClick={handleUpgradeClick}
+              disabled={isLoading || !premiumPlan}
+              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              Upgrade Now, Save your Eyes!
-            </a>
+              {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}
+            </button>
           </div>
         </div>
       </div>
@@ -51,12 +71,13 @@ export function TrialStatusBanner({
           <span className={`${text.caption} text-white`}>
             {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} left in trial.
           </span>
-          <a
-            href="https://www.creem.io/test/payment/prod_oGpAgPwct4S52vtAbFHOX"
-            className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
+          <button
+            onClick={handleUpgradeClick}
+            disabled={isLoading || !premiumPlan}
+            className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            Upgrade Now, Save your Eyes!
-          </a>
+            {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}
+          </button>
         </div>
       </div>
     </div>

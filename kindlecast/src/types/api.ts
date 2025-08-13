@@ -28,11 +28,17 @@ export const API_CONFIG = {
     PROCESS_LINK: '/api/v1/link/process',
     // Auth endpoints - matching your FastAPI routes
     AUTH_GOOGLE: '/api/v1/auth/google',
-    AUTH_AMAZON: '/api/v1/auth/amazon',
+    AUTH_TWITTER: '/api/v1/auth/twitter',
+    AUTH_APPLE: '/api/v1/auth/apple',
+    AUTH_EMAIL: '/api/v1/auth/email',
     AUTH_REFRESH: '/api/v1/auth/refresh',
     AUTH_ME: '/api/v1/auth/me',
     AUTH_STATUS: '/api/v1/auth/status',
-    AUTH_LOGOUT: '/api/v1/auth/logout'
+    AUTH_LOGOUT: '/api/v1/auth/logout',
+    // Subscription endpoints
+    SUBSCRIPTION_PLANS: '/api/v1/subscription/plans',
+    SUBSCRIPTION_PAYMENT: '/api/v1/subscription/payment',
+    SUBSCRIPTION_USAGE: '/api/v1/subscription/me'
   }
 } as const;
 
@@ -48,9 +54,10 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  provider: 'google' | 'amazon';
+  provider: 'google' | 'twitter' | 'apple' | 'email';
   avatar?: string;
   created_at: string;
+  subscription_name?: string;
 }
 
 export interface AuthResponse {
@@ -85,4 +92,37 @@ export class APIException extends Error {
     this.statusCode = statusCode;
     this.errorType = errorType;
   }
+}
+
+// Subscription Plan types
+export interface SubscriptionPlan {
+  name: string;
+  display_name: string;
+  is_most_popular: boolean;
+  subscription_type: 'free' | 'premium';
+  original_price: number;
+  discounted_price: number;
+  billing_cycle: 'monthly' | 'yearly';
+  features: string[];
+}
+
+export interface SubscriptionPlansResponse {
+  plans: SubscriptionPlan[];
+}
+
+// Payment types
+export interface PaymentRequest {
+  subscription_name: string;
+}
+
+export interface PaymentResponse {
+  checkout_url: string;
+}
+
+// User usage types
+export interface UserUsageResponse {
+  basic_monthly_limit: number;
+  ai_monthly_limit: number;
+  used_basic_monthly: number;
+  used_ai_monthly: number;
 }

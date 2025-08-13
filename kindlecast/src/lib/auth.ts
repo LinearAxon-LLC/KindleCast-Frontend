@@ -201,8 +201,18 @@ export class OAuthManager {
     window.location.href = authUrl;
   }
 
-  static initiateAmazonLogin(): void {
-    const authUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_AMAZON}`;
+  static initiateTwitterLogin(): void {
+    const authUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_TWITTER}`;
+    window.location.href = authUrl;
+  }
+
+  static initiateAppleLogin(): void {
+    const authUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_APPLE}`;
+    window.location.href = authUrl;
+  }
+
+  static initiateEmailLogin(): void {
+    const authUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_EMAIL}`;
     window.location.href = authUrl;
   }
 

@@ -4,6 +4,7 @@ import { LayoutDashboard, FileText, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
+import { useUsageDisplay } from '@/hooks/useUserUsage'
 import { text } from '@/lib/typography'
 import Image from 'next/image'
 
@@ -21,6 +22,7 @@ const sidebarItems = [
 export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarProps) {
   const { user } = useAuth()
   const { userProfile } = useUserProfile()
+  const { usage, formatUsageText, isUnlimited } = useUsageDisplay()
 
   return (
     <aside className="w-64 h-full bg-[#EFEEEA]/95 backdrop-blur-xl border-r border-[#273F4F]/20 flex flex-col">
@@ -71,7 +73,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
       <div className="p-4 border-t border-[#273F4F]/20">
         <div className="flex items-center gap-3 mb-3">
           <Image
-            src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format"}
+            src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
             alt="User Avatar"
             width={40}
             height={40}
@@ -95,7 +97,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
         </div>
 
         {/* Usage Stats */}
-        {userProfile && (
+        {userProfile && usage && (
           <div className="mt-4 p-3 bg-white/60 backdrop-blur-xl border border-black/[0.08] rounded-[12px]">
             <h4 className={`${text.caption} font-semibold mb-3`}>Usage This Month</h4>
             <div className="space-y-3">
@@ -103,36 +105,38 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
                 <div className="flex justify-between items-center mb-1">
                   <span className={text.footnote}>Quick Send</span>
                   <span className={`${text.footnote} font-medium`}>
-                    {userProfile.basic_conversions || 0}/{userProfile.user_subscribed ? '∞' : (userProfile.config?.basic_conversions_limit || 5)}
+                    {formatUsageText('basic')}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-brand-primary h-1.5 rounded-full"
-                    style={{
-                      width: userProfile.user_subscribed
-                        ? '0%'
-                        : `${Math.min(100, ((userProfile.basic_conversions || 0) / (userProfile.config?.basic_conversions_limit || 5)) * 100)}%`
-                    }}
-                  ></div>
-                </div>
+                {!isUnlimited('basic') && (
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className="bg-brand-primary h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, (usage.used_basic_monthly / usage.basic_monthly_limit) * 100)}%`
+                      }}
+                    ></div>
+                  </div>
+                )}
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <span className={text.footnote}>AI Formatting</span>
                   <span className={`${text.footnote} font-medium`}>
-                    {userProfile.ai_conversions || 0}/{userProfile.config?.ai_conversions_limit || 3}
+                    {formatUsageText('ai')}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    className="bg-orange-500 h-1.5 rounded-full"
-                    style={{
-                      width: `${Math.min(100, ((userProfile.ai_conversions || 0) / (userProfile.config?.ai_conversions_limit || 3)) * 100)}%`
-                    }}
-                  ></div>
-                </div>
+                {!isUnlimited('ai') && (
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className="bg-orange-500 h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, (usage.used_ai_monthly / usage.ai_monthly_limit) * 100)}%`
+                      }}
+                    ></div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

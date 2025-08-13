@@ -8,6 +8,8 @@ import {AuthDialog} from "@/components/ui/auth-dialog"
 import {useAuth} from "@/contexts/AuthContext"
 import {UserDropdown} from "@/components/ui/user-dropdown"
 import {useUserProfile} from "@/hooks/useUserProfile"
+import {usePricingPlans} from "@/hooks/usePricingPlans"
+import {usePaymentFlow} from "@/hooks/usePayment"
 import Image from "next/image"
 import {FadeInSection, SlideIn} from "@/components/ui/animated"
 import {motion, useInView, useScroll, useTransform} from "framer-motion"
@@ -153,8 +155,18 @@ export default function Home() {
     const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
     const { isAuthenticated, user } = useAuth()
     const { userProfile } = useUserProfile()
+    const { plans, isLoading: plansLoading, isUserCurrentPlan } = usePricingPlans()
+    const { initiatePayment, isLoading: paymentLoading } = usePaymentFlow()
 
-    const getPricingButtonConfig = () => {
+    // Cache user data on landing page load (called once when authenticated)
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            // User data is already cached in AuthContext, no need to call API again
+            // The user object already contains subscription_name from /auth/me
+        }
+    }, [isAuthenticated, user])
+
+    const getPricingButtonConfig = (planName?: string, isFree?: boolean) => {
         if (!isAuthenticated) {
             return {
                 text: 'Get Started',
@@ -170,9 +182,21 @@ export default function Home() {
         }
 
         // User is logged in but not subscribed (free trial)
+        if (isFree) {
+            return {
+                text: 'Get Started Free',
+                action: () => window.location.href = '/dashboard'
+            }
+        }
+
+        // Premium plan - use payment API
         return {
             text: 'Upgrade to Pro',
-            action: () => window.location.href = 'https://www.creem.io/test/payment/prod_oGpAgPwct4S52vtAbFHOX'
+            action: () => {
+                if (planName) {
+                    initiatePayment(planName, () => setShowAuthDialog(true))
+                }
+            }
         }
     }
 
@@ -636,82 +660,122 @@ export default function Home() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
-                        {/* Free Plan */}
-                        <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200">
-                            <div className="text-center">
-                                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                                <div className="mb-6">
-                                    <span className="text-3xl sm:text-4xl font-bold text-gray-900">$0</span>
-                                    <span className="text-gray-600 text-sm sm:text-base">/month</span>
-                                </div>
-                                <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-left">
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
-                                        <span className="text-gray-600 text-sm sm:text-base">5 Quick Send per month</span>
-                                    </li>
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
-                                        <span className="text-gray-600 text-sm sm:text-base">3 AI Formatting per month</span>
-                                    </li>
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
-                                        <span className="text-gray-600 text-sm sm:text-base">20 days data retention</span>
-                                    </li>
-                                </ul>
-                                <Button
-                                    className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300 cursor-pointer text-sm sm:text-base"
-                                    onClick={() => setShowLoginModal(true)}
-                                >
-                                    Get Started Free
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Paid Plan */}
-                        <div
-                            className="bg-brand-primary rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white relative">
-                            <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
-                                <span className="bg-brand-accent text-brand-primary px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap">
-                                    Most Popular
-                                </span>
-                            </div>
-                            <div className="text-center">
-                                <h3 className="text-xl sm:text-2xl font-bold mb-2">Paid</h3>
-                                <div className="mb-6">
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-lg sm:text-xl font-bold text-white/60 line-through mb-1">$14.99</span>
-                                        <div className="flex items-baseline">
-                                            <span className="text-3xl sm:text-4xl font-bold">$9.99</span>
-                                            <span className="text-white/80 text-sm sm:text-base ml-1">/month</span>
+                        {plansLoading ? (
+                            // Loading skeleton
+                            <>
+                                <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
+                                    <div className="text-center">
+                                        <div className="h-8 bg-gray-300 rounded mb-4"></div>
+                                        <div className="h-12 bg-gray-300 rounded mb-6"></div>
+                                        <div className="space-y-3 mb-8">
+                                            <div className="h-4 bg-gray-300 rounded"></div>
+                                            <div className="h-4 bg-gray-300 rounded"></div>
+                                            <div className="h-4 bg-gray-300 rounded"></div>
                                         </div>
+                                        <div className="h-12 bg-gray-300 rounded"></div>
                                     </div>
                                 </div>
-                                <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-left">
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                                        <span className="text-white/90 text-sm sm:text-base">Unlimited Quick Send</span>
-                                    </li>
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                                        <span className="text-white/90 text-sm sm:text-base">100 AI Formatting</span>
-                                    </li>
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                                        <span className="text-white/90 text-sm sm:text-base">120 days data retention</span>
-                                    </li>
-                                    <li className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                                        <span className="text-white/90 text-sm sm:text-base">Personal mail for Email forwarding</span>
-                                    </li>
-                                </ul>
-                                <Button
-                                    className="w-full bg-white text-brand-primary hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
-                                    onClick={getPricingButtonConfig().action}
-                                >
-                                    {getPricingButtonConfig().text}
-                                </Button>
-                            </div>
-                        </div>
+                                <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
+                                    <div className="text-center">
+                                        <div className="h-8 bg-gray-300 rounded mb-4"></div>
+                                        <div className="h-12 bg-gray-300 rounded mb-6"></div>
+                                        <div className="space-y-3 mb-8">
+                                            <div className="h-4 bg-gray-300 rounded"></div>
+                                            <div className="h-4 bg-gray-300 rounded"></div>
+                                            <div className="h-4 bg-gray-300 rounded"></div>
+                                        </div>
+                                        <div className="h-12 bg-gray-300 rounded"></div>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            plans.map((plan) => {
+                                const isCurrentPlan = isUserCurrentPlan(plan.name, user?.subscription_name)
+                                const isFree = plan.subscription_type === 'free'
+
+                                return (
+                                    <div
+                                        key={plan.name}
+                                        className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative ${
+                                            isFree
+                                                ? 'bg-gray-50 border border-gray-200'
+                                                : 'bg-brand-primary text-white'
+                                        }`}
+                                    >
+                                        {plan.is_most_popular && (
+                                            <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
+                                                <span className="bg-brand-accent text-brand-primary px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap">
+                                                    Most Popular
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="text-center">
+                                            <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${isFree ? 'text-gray-900' : 'text-white'}`}>
+                                                {plan.display_name}
+                                            </h3>
+                                            <div className="mb-6">
+                                                {plan.original_price !== plan.discounted_price && plan.original_price > 0 ? (
+                                                    <div className="flex flex-col items-center">
+                                                        <span className={`text-lg sm:text-xl font-bold line-through mb-1 ${isFree ? 'text-gray-500' : 'text-white/60'}`}>
+                                                            ${plan.original_price.toFixed(2)}
+                                                        </span>
+                                                        <div className="flex items-baseline">
+                                                            <span className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
+                                                                ${plan.discounted_price.toFixed(2)}
+                                                            </span>
+                                                            <span className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
+                                                                /{plan.billing_cycle}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-baseline justify-center">
+                                                        <span className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
+                                                            ${plan.discounted_price.toFixed(2)}
+                                                        </span>
+                                                        <span className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
+                                                            /{plan.billing_cycle}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-left">
+                                                {plan.features.map((feature, index) => (
+                                                    <li key={index} className="flex items-center space-x-3">
+                                                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isFree ? 'bg-gray-400' : 'bg-white'}`}></div>
+                                                        <span className={`text-sm sm:text-base ${isFree ? 'text-gray-600' : 'text-white/90'}`}>
+                                                            {feature}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <Button
+                                                className={`w-full cursor-pointer text-sm sm:text-base ${
+                                                    isCurrentPlan
+                                                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                                        : isFree
+                                                            ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                                            : 'bg-white text-brand-primary hover:bg-gray-100'
+                                                } ${paymentLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                onClick={isCurrentPlan ? undefined : getPricingButtonConfig(plan.name, isFree).action}
+                                                disabled={isCurrentPlan || paymentLoading}
+                                            >
+                                                {paymentLoading ? (
+                                                    <div className="flex items-center justify-center space-x-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <span>Processing...</span>
+                                                    </div>
+                                                ) : isCurrentPlan ? (
+                                                    'Your Current Subscription'
+                                                ) : (
+                                                    getPricingButtonConfig(plan.name, isFree).text
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        )}
                     </div>
                 </div>
             </section>

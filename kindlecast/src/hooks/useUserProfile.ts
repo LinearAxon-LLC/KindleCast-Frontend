@@ -6,23 +6,24 @@ export interface UserProfile {
   email: string
   name: string
   avatar?: string
-  
+
   // Onboarding tracking
   signed_up: boolean
   when_signed_up: string
   user_subscribed: boolean
+  subscription_name?: string
   trial_started?: string
   set_up_device: boolean
-  
+
   // Device setup
   kindle_email?: string
   ktool_email?: string
   device_setup_completed?: boolean
-  
+
   // Usage tracking
   basic_conversions: number
   ai_conversions: number
-  
+
   // Calculated fields
   trialDaysRemaining: number
   config: {
