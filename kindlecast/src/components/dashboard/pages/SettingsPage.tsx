@@ -114,9 +114,9 @@ export function SettingsPage() {
               </div>
 
               <div className="p-4 bg-black/[0.02] rounded-[8px]">
-                <div className="text-[15px] font-medium text-[#273F4F]">KTool Email</div>
+                <div className="text-[15px] font-medium text-[#273F4F]">Kinddy Sender Email</div>
                 <div className="text-[13px] text-[#273F4F]/60 font-mono">
-                  {userProfile?.ktool_email || 'Not generated'}
+                  no-reply@kindlecast.com
                 </div>
               </div>
 

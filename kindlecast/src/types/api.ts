@@ -28,7 +28,7 @@ export const API_CONFIG = {
     PROCESS_LINK: '/api/v1/link/process',
     // Auth endpoints - matching your FastAPI routes
     AUTH_GOOGLE: '/api/v1/auth/google',
-    AUTH_TWITTER: '/api/v1/auth/twitter',
+    AUTH_TWITTER: '/api/v1/auth/x',
     AUTH_APPLE: '/api/v1/auth/apple',
     AUTH_EMAIL: '/api/v1/auth/email',
     AUTH_REFRESH: '/api/v1/auth/refresh',
@@ -38,7 +38,9 @@ export const API_CONFIG = {
     // Subscription endpoints
     SUBSCRIPTION_PLANS: '/api/v1/subscription/plans',
     SUBSCRIPTION_PAYMENT: '/api/v1/subscription/payment',
-    SUBSCRIPTION_USAGE: '/api/v1/subscription/me'
+    SUBSCRIPTION_USAGE: '/api/v1/subscription/me',
+    // User info update
+    USER_INFO_UPDATE: '/api/v1/user/info-update'
   }
 } as const;
 
@@ -58,6 +60,27 @@ export interface User {
   avatar?: string;
   created_at: string;
   subscription_name?: string;
+}
+
+// User profile types (from /me endpoint)
+export interface UserProfile {
+  id: number;
+  email: string;
+  name: string;
+  provider: string;
+  avatar: string;
+  kindle_email?: string;
+  custom_email?: string;
+  acknowledged_mail_whitelisting?: string;
+  subscription_name?: string;
+  user_subscribed: boolean;
+  set_up_device: boolean;
+  basic_conversions?: number;
+  ai_conversions?: number;
+  config?: {
+    basic_conversions_limit?: number;
+    ai_conversions_limit?: number;
+  };
 }
 
 export interface AuthResponse {
@@ -125,4 +148,15 @@ export interface UserUsageResponse {
   ai_monthly_limit: number;
   used_basic_monthly: number;
   used_ai_monthly: number;
+}
+
+// User info update types
+export interface UserInformationUpdateRequest {
+  kindle_email?: string;
+  mail_whitelisting_acknowledged?: string;
+}
+
+export interface UserInformationUpdateResponse {
+  status: boolean;
+  message: string;
 }

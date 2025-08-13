@@ -943,8 +943,8 @@ export default function Home() {
                             <div className="space-y-6">
                                 <h4 className="font-semibold text-white text-lg">Legal</h4>
                                 <ul className="space-y-4 text-white/60">
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Privacy Policy</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Terms of Service</a></li>
+                                    <li><a href="/privacy-policy" className="hover:text-white transition-colors cursor-pointer text-base">Privacy Policy</a></li>
+                                    <li><a href="/terms-of-service" className="hover:text-white transition-colors cursor-pointer text-base">Terms of Service</a></li>
                                     <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Cookie Policy</a></li>
                                     <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">GDPR</a></li>
                                     <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Refund Policy</a></li>

@@ -1,37 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-
-export interface UserProfile {
-  userId: string
-  email: string
-  name: string
-  avatar?: string
-
-  // Onboarding tracking
-  signed_up: boolean
-  when_signed_up: string
-  user_subscribed: boolean
-  subscription_name?: string
-  trial_started?: string
-  set_up_device: boolean
-
-  // Device setup
-  kindle_email?: string
-  ktool_email?: string
-  device_setup_completed?: boolean
-
-  // Usage tracking
-  basic_conversions: number
-  ai_conversions: number
-
-  // Calculated fields
-  trialDaysRemaining: number
-  config: {
-    free_trial_days: number
-    basic_conversions_limit: number
-    ai_conversions_limit: number
-  }
-}
+import { UserProfile, API_CONFIG } from '@/types/api'
+import { AuthenticatedAPI } from '@/lib/auth'
 
 export function useUserProfile() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
@@ -48,27 +18,11 @@ export function useUserProfile() {
 
     try {
       setIsLoading(true)
-      // TODO: Implement actual user profile API call
-      // For now, create mock profile based on authenticated user
-      const mockProfile: UserProfile = {
-        userId: 'mock-user-id',
-        email: 'user@example.com',
-        name: 'Mock User',
-        avatar: '',
-        signed_up: true,
-        when_signed_up: new Date().toISOString(),
-        user_subscribed: false,
-        set_up_device: false,
-        basic_conversions: 0,
-        ai_conversions: 0,
-        trialDaysRemaining: 7,
-        config: {
-          free_trial_days: 7,
-          basic_conversions_limit: 5,
-          ai_conversions_limit: 3
-        }
-      }
-      setUserProfile(mockProfile)
+      // Use the actual /me API endpoint
+      const profile = await AuthenticatedAPI.makeRequest<UserProfile>(
+        API_CONFIG.ENDPOINTS.AUTH_ME
+      )
+      setUserProfile(profile)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -101,31 +55,26 @@ export function useUserProfile() {
     }
   }
 
-  const setupDevice = async (kindleEmail: string) => {
+  const setupDevice = async (kindleEmail: string, acknowledgment: string = 'yes') => {
     try {
-      const response = await fetch('/api/user/setup-device', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          kindleEmail,
-          confirmed: true
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to setup device')
-      }
-      
-      const data = await response.json()
-      
+      // Use the correct API endpoint for info update
+      const response = await AuthenticatedAPI.makeRequest(
+        API_CONFIG.ENDPOINTS.USER_INFO_UPDATE,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            kindle_email: kindleEmail,
+            mail_whitelisting_acknowledged: acknowledgment
+          }),
+        }
+      )
+
       // Refresh the profile data
       await fetchUserProfile()
-      
+
       return {
         success: true,
-        ktoolEmail: data.ktoolEmail
+        kindlecastEmail: 'no-reply@kindlecast.com' // Return the sender email
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')

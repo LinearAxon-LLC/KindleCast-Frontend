@@ -12,7 +12,7 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
   const { setupDevice } = useUserProfile()
   const [step, setStep] = useState(1)
   const [kindleEmail, setKindleEmail] = useState('')
-  const [ktoolEmail, setKtoolEmail] = useState('')
+  const [kindlecastEmail, setKindlecastEmail] = useState('')
   const [confirmed, setConfirmed] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -41,10 +41,10 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
 
       // Append @kindle.com to the email prefix
       const fullKindleEmail = `${kindleEmail}@kindle.com`
-      const result = await setupDevice(fullKindleEmail)
+      const result = await setupDevice(fullKindleEmail, 'yes')
 
       if (result.success) {
-        setKtoolEmail(result.ktoolEmail || '')
+        setKindlecastEmail(result.kindlecastEmail || '')
         setStep(3)
       } else {
         setError(result.error || 'Failed to setup device')
@@ -124,7 +124,7 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
           <div className="space-y-6">
             <div>
               <label className="block text-[15px] font-medium text-[#273F4F] mb-3">
-                Your unique KTool email address
+                Your Kinddy sender email address
                 <a href="#" className="text-brand-primary text-[13px] ml-2 hover:underline">
                   what's this?
                 </a>
@@ -132,12 +132,12 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
               <div className="flex">
                 <input
                   type="text"
-                  value="8v8as7dnvr@ktool.io"
+                  value={kindlecastEmail || 'no-reply@kindlecast.com'}
                   readOnly
                   className="flex-1 px-4 py-3 border border-gray-200 rounded-l-[8px] text-[15px] bg-gray-50"
                 />
                 <button
-                  onClick={() => copyToClipboard('8v8as7dnvr@ktool.io')}
+                  onClick={() => copyToClipboard(kindlecastEmail || 'no-reply@kindlecast.com')}
                   className="px-4 py-3 bg-brand-primary text-white rounded-r-[8px] hover:bg-brand-primary/90 transition-colors"
                 >
                   <Copy className="w-4 h-4" />

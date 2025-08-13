@@ -6,6 +6,7 @@ import { useLinkProcessor } from '@/hooks/useLinkProcessor'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { getTimeBasedGreeting } from '@/lib/time-utils'
 import { DeviceSetup } from '@/components/dashboard/DeviceSetup'
+import { InfoUpdateBox } from '@/components/dashboard/InfoUpdateBox'
 import { text } from '@/lib/typography'
 
 interface HomePageProps {
@@ -16,6 +17,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [url, setUrl] = useState('')
   const [selectedFormat, setSelectedFormat] = useState('Just PDF')
   const [customPrompt, setCustomPrompt] = useState('')
+  const [showInfoUpdate, setShowInfoUpdate] = useState(true)
   const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile()
 
@@ -29,6 +31,22 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const handleDeviceSetupComplete = () => {
     refetch() // Refresh user profile
   }
+
+  const handleInfoUpdateComplete = () => {
+    setShowInfoUpdate(false)
+    refetch() // Refresh user profile
+  }
+
+  const handleInfoUpdateDismiss = () => {
+    setShowInfoUpdate(false)
+  }
+
+  // Check if we should show the info update box
+  const shouldShowInfoUpdate = userProfile && showInfoUpdate && (
+    !userProfile.kindle_email ||
+    !userProfile.acknowledged_mail_whitelisting ||
+    userProfile.acknowledged_mail_whitelisting.toLowerCase() !== 'yes'
+  )
 
   if (profileLoading) {
     return (
@@ -59,6 +77,14 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
             <span className="text-xl">{emoji}</span>
           </h1>
         </div>
+
+        {/* Info Update Box */}
+        {shouldShowInfoUpdate && (
+          <InfoUpdateBox
+            onComplete={handleInfoUpdateComplete}
+            onDismiss={handleInfoUpdateDismiss}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Left Column - Convert & Send */}

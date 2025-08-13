@@ -50,7 +50,7 @@ export interface UserProfile {
   
   // Device setup
   kindle_email?: string
-  ktool_email?: string
+  kindlecast_email?: string
   device_setup_completed?: boolean
   
   // Usage tracking
