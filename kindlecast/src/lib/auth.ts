@@ -61,7 +61,17 @@ export class AuthenticatedAPI {
     requireAuth: boolean = true
   ): Promise<T> {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
-    
+
+    // Get caller information from stack trace
+    const stack = new Error().stack;
+    const callerLine = stack?.split('\n')[3] || 'Unknown caller';
+    const callerInfo = callerLine.trim().replace(/^at\s+/, '');
+
+    // Log API call details
+    console.log(`🌐 API CALL: ${options.method || 'GET'} ${url}`);
+    console.log(`📍 Called from: ${callerInfo}`);
+    console.log(`🔐 Requires Auth: ${requireAuth}`);
+
     // Add auth header if required and available
     if (requireAuth) {
       let accessToken = TokenManager.getAccessToken();

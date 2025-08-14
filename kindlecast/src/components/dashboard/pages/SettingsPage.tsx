@@ -126,67 +126,6 @@ export function SettingsPage() {
             </div>
           </div>
 
-          {/* Notifications Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
-                <Bell className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <h2 className="text-[17px] font-semibold text-[#273F4F]">Notifications</h2>
-                <p className="text-[13px] text-[#273F4F]/60">Choose what notifications you receive</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                { key: 'email', label: 'Email Notifications', description: 'Get notified when conversions complete' },
-                { key: 'push', label: 'Push Notifications', description: 'Browser notifications for real-time updates' },
-                { key: 'marketing', label: 'Marketing Emails', description: 'Product updates and feature announcements' }
-              ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-4 bg-black/[0.02] rounded-[8px]">
-                  <div>
-                    <div className="text-[15px] font-medium text-[#273F4F]">{item.label}</div>
-                    <div className="text-[13px] text-[#273F4F]/60">{item.description}</div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={notifications[item.key as keyof typeof notifications]}
-                      onChange={(e) => setNotifications(prev => ({ ...prev, [item.key]: e.target.checked }))}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-primary"></div>
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Security Section */}
-          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-green-500/10 rounded-[8px] flex items-center justify-center">
-                <Shield className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <h2 className="text-[17px] font-semibold text-[#273F4F]">Security</h2>
-                <p className="text-[13px] text-[#273F4F]/60">Manage your account security</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <button className="w-full text-left p-4 bg-black/[0.02] rounded-[8px] hover:bg-black/[0.04] transition-colors duration-150">
-                <div className="text-[15px] font-medium text-[#273F4F]">Change Password</div>
-                <div className="text-[13px] text-[#273F4F]/60">Update your account password</div>
-              </button>
-              <button className="w-full text-left p-4 bg-black/[0.02] rounded-[8px] hover:bg-black/[0.04] transition-colors duration-150">
-                <div className="text-[15px] font-medium text-[#273F4F]">Two-Factor Authentication</div>
-                <div className="text-[13px] text-[#273F4F]/60">Add an extra layer of security</div>
-              </button>
-            </div>
-          </div>
-
           {/* Billing Section */}
           <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">

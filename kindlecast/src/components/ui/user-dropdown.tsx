@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { User, Settings, LogOut, Zap } from 'lucide-react'
-import Image from 'next/image'
+// Using regular img tag instead of Next/Image for better compatibility
 import { useRouter } from 'next/navigation'
 
 interface UserDropdownProps {
@@ -56,12 +56,13 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 p-1 rounded-full hover:bg-black/5 transition-colors duration-200"
       >
-        <Image
+        <img
           src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
           alt={user.name || 'User'}
-          width={32}
-          height={32}
-          className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
+          className="w-8 h-8 rounded-full border-2 border-brand-primary/20 object-cover"
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"
+          }}
         />
       </button>
 
@@ -71,12 +72,13 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
           {/* User Info */}
           <div className="px-4 py-3 border-b border-black/[0.08]">
             <div className="flex items-center space-x-3">
-              <Image
+              <img
                 src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
                 alt={user.name || 'User'}
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
+                className="w-8 h-8 rounded-full border-2 border-brand-primary/20 object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"
+                }}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-medium text-black/85 truncate">

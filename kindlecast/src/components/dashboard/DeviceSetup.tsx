@@ -47,7 +47,6 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
         const result = await setupDevice(fullKindleEmail, confirmed)
 
         if (result.success) {
-          console.log('DeviceSetup: API call successful, calling onComplete...')
           // Success! Call onComplete to hide DeviceSetup and show main screen
           // onComplete()
           window.location.reload()

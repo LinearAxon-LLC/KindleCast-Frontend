@@ -1,12 +1,13 @@
 'use client'
 
 import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useUsageDisplay } from '@/hooks/useUserUsage'
 import { text } from '@/lib/typography'
-import Image from 'next/image'
+// Using regular img tag instead of Next/Image for better compatibility
 
 interface DashboardSidebarProps {
   activeTab: string
@@ -28,15 +29,19 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
     <aside className="w-64 h-full bg-[#EFEEEA]/95 backdrop-blur-xl border-r border-[#273F4F]/20 flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-[#273F4F]/10">
-        <a href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
-          <div className="w-8 h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-              <rect x="4" y="6" width="6" height="12" rx="1" fill="currentColor"/>
-              <path d="M12 8L18 8M12 12L16 12M12 16L14 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+        <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img
+              src="/logo_send.svg"
+              alt="KindleCast Logo"
+              className="w-8 h-8"
+              onError={(e) => {
+                e.currentTarget.src = "/logo.png"
+              }}
+            />
           </div>
-          <span className={text.componentTitle}>Kinddy</span>
-        </a>
+          <span className="text-xl font-bold text-[#273F4F]">KindleCast</span>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -51,7 +56,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
                 <button
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    `w-full flex items-center gap-3 px-3 py-2.5 rounded-md font-light transition-all duration-200 ${text.body}`,
+                    `w-full flex items-center gap-3 px-3 py-2.5 rounded-md font-medium transition-all duration-200 ${text.body}`,
                     isActive
                       ? "bg-brand-primary text-white"
                       : "text-[#273F4F] hover:text-[#273F4F] hover:bg-white/40"
@@ -76,6 +81,9 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
             src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
             alt="User Avatar"
             className="w-10 h-10 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
+            }}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">

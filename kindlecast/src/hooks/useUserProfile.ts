@@ -51,8 +51,6 @@ export function useUserProfile() {
         globalIsLoading = true
         isCurrentlyFetching = true
 
-        console.log('🔍 useUserProfile: Making SINGLE API call to /auth/me')
-
         // Single API call to /me endpoint
         const profile = await AuthenticatedAPI.makeRequest<UserProfile>(
           API_CONFIG.ENDPOINTS.AUTH_ME

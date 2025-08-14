@@ -5,7 +5,7 @@
 
 // Test configuration
 const TEST_CONFIG = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'http://localhost:3001',
   timeout: 10000,
   pages: [
     '/',

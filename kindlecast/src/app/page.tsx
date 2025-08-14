@@ -10,7 +10,7 @@ import {UserDropdown} from "@/components/ui/user-dropdown"
 import {useUserProfile} from "@/hooks/useUserProfile"
 import {usePricingPlans} from "@/hooks/usePricingPlans"
 import {usePaymentFlow} from "@/hooks/usePayment"
-import Image from "next/image"
+// Using regular img tags instead of Next/Image for better compatibility
 import {FadeInSection, SlideIn} from "@/components/ui/animated"
 import {motion, useInView, useScroll, useTransform} from "framer-motion"
 
