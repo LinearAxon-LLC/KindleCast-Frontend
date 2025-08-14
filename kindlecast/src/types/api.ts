@@ -4,6 +4,7 @@ export interface LinkProcessRequest {
   url: string;
   format: string; // "epub", "summarize", "learning", "custom"
   custom_prompt?: string;
+  include_image?: boolean;
 }
 
 export interface LinkProcessResponse {

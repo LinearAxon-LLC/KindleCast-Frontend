@@ -1,12 +1,13 @@
 'use client'
 
-import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import { LayoutDashboard, FileText, Settings, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useUsageDisplay } from '@/hooks/useUserUsage'
 import { text } from '@/lib/typography'
+import { useState, useEffect } from 'react'
 // Using regular img tag instead of Next/Image for better compatibility
 
 interface DashboardSidebarProps {
@@ -24,11 +25,62 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
   const { user } = useAuth()
   const { userProfile } = useUserProfile()
   const { usage, formatUsageText, isUnlimited } = useUsageDisplay()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Close mobile menu when tab changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [activeTab])
+
+  // Close mobile menu on window resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
-    <aside className="w-64 h-full bg-[#EFEEEA]/95 backdrop-blur-xl border-r border-[#273F4F]/20 flex flex-col">
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[8px] shadow-lg"
+      >
+        <Menu className="w-5 h-5 text-[#273F4F]" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={cn(
+        "h-full bg-[#EFEEEA]/95 backdrop-blur-xl border-r border-[#273F4F]/20 flex flex-col transition-transform duration-300 ease-in-out",
+        "lg:w-64 lg:relative lg:translate-x-0",
+        "fixed top-0 left-0 w-80 z-50",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+      {/* Mobile Close Button */}
+      <div className="lg:hidden flex justify-end p-4">
+        <button
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="p-2 hover:bg-black/[0.05] rounded-[8px] transition-colors duration-150"
+        >
+          <X className="w-5 h-5 text-[#273F4F]" />
+        </button>
+      </div>
+
       {/* Logo */}
-      <div className="p-6 border-b border-[#273F4F]/10">
+      <div className="p-6 border-b border-[#273F4F]/10 lg:pt-6 pt-2">
         <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
           <div className="w-10 h-10 flex items-center justify-center">
             <img
@@ -150,5 +202,6 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
 
       </div>
     </aside>
+    </>
   )
 }
