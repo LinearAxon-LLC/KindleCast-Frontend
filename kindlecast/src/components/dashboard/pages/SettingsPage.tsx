@@ -7,6 +7,7 @@ import { useUserProfile } from '@/hooks/useUserProfile'
 import { usePricingPlans } from '@/hooks/usePricingPlans'
 import { usePayment } from '@/hooks/usePayment'
 import { text } from '@/lib/typography'
+import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 
 export function SettingsPage() {
   const { user } = useAuth()
@@ -18,20 +19,15 @@ export function SettingsPage() {
     push: false,
     marketing: false
   })
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   // Get user's current plan and premium plan for upgrade
   const currentPlan = getUserCurrentPlan(user?.subscription_name)
   const premiumPlan = plans.find(plan => plan.subscription_type === 'premium')
   const isFreePlan = !userProfile?.user_subscribed || currentPlan?.subscription_type === 'free'
 
-  const handleUpgrade = async () => {
-    if (premiumPlan && !paymentLoading) {
-      try {
-        await redirectToPayment(premiumPlan.name)
-      } catch (error) {
-        console.error('Failed to initiate payment:', error)
-      }
-    }
+  const handleUpgrade = () => {
+    setShowUpgradeModal(true)
   }
 
   return (
@@ -180,20 +176,11 @@ export function SettingsPage() {
                   </div>
                   <button
                     onClick={handleUpgrade}
-                    disabled={paymentLoading}
+                    disabled={false}
                     className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    {paymentLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="w-4 h-4" />
-                        Upgrade Now
-                      </>
-                    )}
+                    <Crown className="w-4 h-4" />
+                    Upgrade Now
                   </button>
                 </div>
               </div>
@@ -227,6 +214,12 @@ export function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Plans Modal */}
+      <UpgradePlansModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   )
 }

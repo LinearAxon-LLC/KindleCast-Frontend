@@ -45,7 +45,7 @@ function DashboardContent() {
     <div className="min-h-screen bg-[#EFEEEA] font-rubik">
       <div className="flex h-screen">
         <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 overflow-hidden bg-[#EFEEEA] relative">
+        <main className="flex-1 overflow-hidden bg-[#EFEEEA] relative lg:ml-0">
           {/* Render all tabs but show only the active one */}
           {Object.entries(cachedComponents).map(([tabKey, component]) => (
             <div

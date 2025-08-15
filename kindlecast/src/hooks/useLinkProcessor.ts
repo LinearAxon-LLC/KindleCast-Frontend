@@ -65,6 +65,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
         url: url.trim(),
         format: backendFormat,
         custom_prompt: customPrompt?.trim() || undefined,
+        include_image: false, // Default to false for now
       };
 
       // Make the API call

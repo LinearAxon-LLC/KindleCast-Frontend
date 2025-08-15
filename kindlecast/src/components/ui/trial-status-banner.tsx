@@ -1,10 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Crown, Clock } from 'lucide-react'
 import { text } from '@/lib/typography'
 import { usePayment } from '@/hooks/usePayment'
-// Removed usePricingPlans - will use hardcoded premium plan name
+import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 
 interface TrialStatusBannerProps {
   userSubscribed: boolean
@@ -17,23 +17,16 @@ export function TrialStatusBanner({
   trialDaysRemaining,
   className = ''
 }: TrialStatusBannerProps) {
-  const { redirectToPayment, isLoading } = usePayment()
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   // Don't show banner for subscribed users
   if (userSubscribed) {
     return null
   }
 
-  const handleUpgradeClick = async (e: React.MouseEvent) => {
+  const handleUpgradeClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (!isLoading) {
-      try {
-        // Use hardcoded premium plan name to avoid API call
-        await redirectToPayment('premium-monthly')
-      } catch (error) {
-        console.error('Failed to initiate payment:', error)
-      }
-    }
+    setShowUpgradeModal(true)
   }
 
   // Trial expired
@@ -48,10 +41,9 @@ export function TrialStatusBanner({
             </span>
             <button
               onClick={handleUpgradeClick}
-              disabled={isLoading}
-              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
             >
-              {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}
+              Upgrade Now, Save your Eyes!
             </button>
           </div>
         </div>
@@ -70,13 +62,18 @@ export function TrialStatusBanner({
           </span>
           <button
             onClick={handleUpgradeClick}
-            disabled={isLoading}
-            className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
           >
-            {isLoading ? 'Processing...' : 'Upgrade Now, Save your Eyes!'}
+            Upgrade Now, Save your Eyes!
           </button>
         </div>
       </div>
+
+      {/* Upgrade Plans Modal */}
+      <UpgradePlansModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   )
 }
