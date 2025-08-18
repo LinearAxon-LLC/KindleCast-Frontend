@@ -61,6 +61,7 @@ export interface User {
   avatar?: string;
   created_at: string;
   subscription_name?: string;
+  subscription_type?: string;
 }
 
 // User profile types (from /me endpoint)
@@ -74,6 +75,7 @@ export interface UserProfile {
   custom_email?: string;
   acknowledged_mail_whitelisting?: string;
   subscription_name?: string;
+  subscription_type?: string;
   user_subscribed: boolean;
   set_up_device: boolean;
   basic_conversions?: number;

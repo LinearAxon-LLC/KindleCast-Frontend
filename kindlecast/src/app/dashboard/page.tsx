@@ -58,7 +58,7 @@ function DashboardContent() {
               <div className="h-full flex flex-col">
                 {userProfile && (
                   <TrialStatusBanner
-                    userSubscribed={userProfile.user_subscribed}
+                    subscriptionType={userProfile.subscription_type}
                     trialDaysRemaining={12}
                   />
                 )}

@@ -143,9 +143,11 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
                 {user?.name || 'User'}
               </div>
               <div className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
-                userProfile?.user_subscribed ? 'bg-brand-primary' : 'bg-gray-400'
+                userProfile?.subscription_type && userProfile.subscription_type !== 'free' ? 'bg-brand-primary' : 'bg-gray-400'
               }`}>
-                {userProfile?.user_subscribed ? 'PRO' : 'FREE'}
+                {userProfile?.subscription_type && userProfile.subscription_type !== 'free'
+                  ? userProfile.subscription_type.toUpperCase()
+                  : 'FREE'}
               </div>
             </div>
             <div className={`${text.caption} truncate`}>

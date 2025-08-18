@@ -7,20 +7,20 @@ import { usePayment } from '@/hooks/usePayment'
 import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 
 interface TrialStatusBannerProps {
-  userSubscribed: boolean
+  subscriptionType?: string
   trialDaysRemaining: number
   className?: string
 }
 
 export function TrialStatusBanner({
-  userSubscribed,
+  subscriptionType,
   trialDaysRemaining,
   className = ''
 }: TrialStatusBannerProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Don't show banner for subscribed users
-  if (userSubscribed) {
+  // Don't show banner for non-free users
+  if (subscriptionType && subscriptionType !== 'free') {
     return null
   }
 

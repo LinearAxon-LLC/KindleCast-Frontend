@@ -58,7 +58,8 @@ export class AuthenticatedAPI {
   static async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {},
-    requireAuth: boolean = true
+    requireAuth: boolean = true,
+    isRetryAfterRefresh: boolean = false
   ): Promise<T> {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
@@ -115,7 +116,21 @@ export class AuthenticatedAPI {
         switch (response.status) {
           case 401:
             errorType = 'authentication';
-            TokenManager.clearTokens();
+
+            // Try to refresh token if we haven't already tried and have a refresh token
+            if (!isRetryAfterRefresh && requireAuth && TokenManager.getRefreshToken()) {
+              try {
+                await this.refreshToken();
+                // Retry the original request with the new token
+                return await this.makeRequest<T>(endpoint, options, requireAuth, true);
+              } catch (refreshError) {
+                // Refresh failed, clear tokens and continue with original error
+                TokenManager.clearTokens();
+              }
+            } else {
+              // Either already retried or no refresh token available
+              TokenManager.clearTokens();
+            }
             break;
           case 403:
             errorType = 'authorization';
@@ -133,7 +148,7 @@ export class AuthenticatedAPI {
             errorType = 'server_error';
             break;
         }
-        
+
         throw new APIException(
           errorData.detail || `HTTP ${response.status}`,
           response.status,
