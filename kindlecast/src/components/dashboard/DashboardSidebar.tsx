@@ -81,7 +81,6 @@ export function DashboardSidebar({
       )}
 
       {/* Sidebar */}
-
       <aside
         className={cn(
           "h-full bg-[#EFEEEA]/95 backdrop-blur-xl border-r border-[#273F4F]/20 flex flex-col transition-transform duration-300 ease-in-out",
@@ -188,95 +187,6 @@ export function DashboardSidebar({
                   userProfile.subscription_type !== "free"
                     ? userProfile.subscription_type.toUpperCase()
                     : "FREE"}
-                </div>
-              </div>
-              <div className={`${text.caption} truncate`}>
-                {user?.email || "user@example.com"}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Logo */}
-        <div className="p-6 border-b border-[#273F4F]/10 lg:pt-6 pt-2">
-          <Link
-            href="/"
-            className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200"
-          >
-            <div className="w-10 h-10 flex items-center justify-center">
-              <img
-                src="/logo_send.svg"
-                alt="KindleCast Logo"
-                className="w-8 h-8"
-                onError={(e) => {
-                  e.currentTarget.src = "/logo.png";
-                }}
-              />
-            </div>
-            <span className="text-xl font-bold text-[#273F4F]">KindleCast</span>
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 pt-6">
-          <ul className="space-y-1">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => onTabChange(item.id)}
-                    className={cn(
-                      `w-full flex items-center gap-3 px-3 py-2.5 rounded-md font-medium transition-all duration-200 ${text.body}`,
-                      isActive
-                        ? "bg-brand-primary text-white"
-                        : "text-[#273F4F] hover:text-[#273F4F] hover:bg-white/40"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "w-5 h-5",
-                        isActive ? "text-white" : item.iconColor
-                      )}
-                    />
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User Profile Section */}
-        <div className="p-4 border-t border-[#273F4F]/20">
-          <div className="flex items-center gap-3 mb-3">
-            <img
-              src={
-                user?.avatar ||
-                "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
-              }
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png";
-              }}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className={`${text.body} font-semibold truncate`}>
-                  {user?.name || "User"}
-                </div>
-                <div
-                  className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    userProfile?.user_subscribed
-                      ? "bg-brand-primary"
-                      : "bg-gray-400"
-                  }`}
-                >
-                  {userProfile?.user_subscribed ? "PRO" : "FREE"}
                 </div>
               </div>
               <div className={`${text.caption} truncate`}>
