@@ -152,15 +152,10 @@ export default function Home() {
     const [url, setUrl] = useState('')
     const [customPrompt, setCustomPrompt] = useState('')
     const [showAuthDialog, setShowAuthDialog] = useState(false)
-    const [pendingLinkData, setPendingLinkData] = useState<{
-        url: string,
-        format: string,
-        customPrompt?: string
-    } | null>(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     const {isLoading, isSuccess, error, submitLink} = useLinkProcessor()
-    const {isAuthenticated, user} = useAuth()
+    const {isAuthenticated, user, setRedirectIntent, setPendingLinkData, getPendingLinkData} = useAuth()
     const {userProfile} = useUserProfile()
     const {plans, isLoading: plansLoading, isUserCurrentPlan} = usePricingPlans()
     const {initiatePayment, isLoading: paymentLoading} = usePaymentFlow()
@@ -177,14 +172,33 @@ export default function Home() {
         if (!isAuthenticated) {
             return {
                 text: 'Get Started',
-                action: () => setShowAuthDialog(true)
+                action: () => {
+                    // Set redirect intent for premium plans
+                    if (!isFree && planName) {
+                        setRedirectIntent('payment', planName)
+                    } else {
+                        setRedirectIntent('dashboard')
+                    }
+                    setShowAuthDialog(true)
+                },
+                disabled: false
+            }
+        }
+
+        // If user is pro and this is the free plan, disable the button
+        if (isFree && userProfile?.subscription_type === 'premium') {
+            return {
+                text: 'Get Started Free',
+                action: () => {},
+                disabled: true
             }
         }
 
         if (userProfile?.user_subscribed) {
             return {
                 text: 'Go to Dashboard',
-                action: () => window.location.href = '/dashboard'
+                action: () => window.location.href = '/dashboard',
+                disabled: false
             }
         }
 
@@ -192,7 +206,8 @@ export default function Home() {
         if (isFree) {
             return {
                 text: 'Get Started Free',
-                action: () => window.location.href = '/dashboard'
+                action: () => window.location.href = '/dashboard',
+                disabled: false
             }
         }
 
@@ -203,7 +218,8 @@ export default function Home() {
                 if (planName) {
                     initiatePayment(planName, () => setShowAuthDialog(true))
                 }
-            }
+            },
+            disabled: false
         }
     }
 
@@ -792,14 +808,14 @@ export default function Home() {
                                             </ul>
                                             <Button
                                                 className={`w-full cursor-pointer text-sm sm:text-base ${
-                                                    isCurrentPlan
+                                                    isCurrentPlan || getPricingButtonConfig(plan.name, isFree).disabled
                                                         ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                                         : isFree
                                                             ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                                             : 'bg-white text-brand-primary hover:bg-gray-100'
                                                 } ${paymentLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                onClick={isCurrentPlan ? undefined : getPricingButtonConfig(plan.name, isFree).action}
-                                                disabled={isCurrentPlan || paymentLoading}
+                                                onClick={isCurrentPlan || getPricingButtonConfig(plan.name, isFree).disabled ? undefined : getPricingButtonConfig(plan.name, isFree).action}
+                                                disabled={isCurrentPlan || paymentLoading || getPricingButtonConfig(plan.name, isFree).disabled}
                                             >
                                                 {paymentLoading ? (
                                                     <div className="flex items-center justify-center space-x-2">
@@ -1074,7 +1090,7 @@ export default function Home() {
             <AuthDialog
                 isOpen={showAuthDialog}
                 onClose={() => setShowAuthDialog(false)}
-                linkData={pendingLinkData || undefined}
+                linkData={getPendingLinkData() || undefined}
             />
 
             {/* SEO Structured Data */}

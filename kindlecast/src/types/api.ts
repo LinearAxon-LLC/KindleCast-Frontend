@@ -42,7 +42,9 @@ export const API_CONFIG = {
     SUBSCRIPTION_PAYMENT: '/api/v1/subscription/payment',
     SUBSCRIPTION_USAGE: '/api/v1/subscription/me',
     // User info update
-    USER_INFO_UPDATE: '/api/v1/user/info-update'
+    USER_INFO_UPDATE: '/api/v1/user/info-update',
+    // Billing portal
+    CUSTOMER_BILLING_PORTAL: '/api/v1/user/customer-billing-portal'
   }
 } as const;
 

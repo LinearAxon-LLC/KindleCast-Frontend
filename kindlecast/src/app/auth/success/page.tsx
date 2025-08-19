@@ -4,10 +4,14 @@ import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TokenManager } from '@/lib/auth'
 import { AuthTokens } from '@/types/api'
+import { useAuth } from '@/contexts/AuthContext'
+import { usePaymentFlow } from '@/hooks/usePayment'
 
 function AuthSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { getRedirectIntent, clearRedirectIntent } = useAuth()
+  const { initiatePayment } = usePaymentFlow()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
@@ -60,9 +64,21 @@ function AuthSuccessContent() {
 
         setStatus('success')
 
-        // Redirect to dashboard after a brief delay
+        // Handle redirect intent after a brief delay
         setTimeout(() => {
-          router.push('/dashboard')
+          const redirectIntent = getRedirectIntent()
+
+          if (redirectIntent.intent === 'payment' && redirectIntent.planName) {
+            // Clear the intent and initiate payment
+            clearRedirectIntent()
+            initiatePayment(redirectIntent.planName, () => {
+              // Fallback to dashboard if payment fails
+              router.push('/dashboard')
+            })
+          } else {
+            // Default redirect to dashboard
+            router.push('/dashboard')
+          }
         }, 1500)
 
       } catch (error) {

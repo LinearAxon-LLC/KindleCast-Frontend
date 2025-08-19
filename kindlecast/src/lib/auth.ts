@@ -228,6 +228,13 @@ export class AuthenticatedAPI {
       `${API_CONFIG.ENDPOINTS.LINK_HISTORY}?${params.toString()}`
     );
   }
+
+  static async getCustomerBillingPortal(): Promise<{ url: string }> {
+    return await this.makeRequest<{ url: string }>(
+      API_CONFIG.ENDPOINTS.CUSTOMER_BILLING_PORTAL,
+      { method: 'GET' }
+    );
+  }
 }
 
 // OAuth utilities

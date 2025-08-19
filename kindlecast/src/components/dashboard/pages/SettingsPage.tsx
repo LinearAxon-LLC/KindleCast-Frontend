@@ -6,25 +6,25 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { usePricingPlans } from '@/hooks/usePricingPlans'
 import { usePayment } from '@/hooks/usePayment'
+import Image from "next/image"
+import { useBillingPortal } from '@/hooks/useBillingPortal'
 import { text } from '@/lib/typography'
 import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
+import {useUserUsage} from "@/hooks/useUserUsage";
 
 export function SettingsPage() {
   const { user } = useAuth()
   const { userProfile } = useUserProfile()
   const { plans, getUserCurrentPlan } = usePricingPlans()
   const { redirectToPayment, isLoading: paymentLoading } = usePayment()
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-    marketing: false
-  })
+  const { openBillingPortal, isLoading: billingLoading } = useBillingPortal()
+  const {usage} = useUserUsage()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   // Get user's current plan and premium plan for upgrade
   const currentPlan = getUserCurrentPlan(user?.subscription_name)
-  const premiumPlan = plans.find(plan => plan.subscription_type === 'premium')
-  const isFreePlan = !userProfile?.user_subscribed || currentPlan?.subscription_type === 'free'
+  const premiumPlan = plans.find(plan => plan.subscription_type.toLowerCase() === 'premium')
+  const isFreePlan =  currentPlan?.subscription_type.toLowerCase() === 'free'
 
   const handleUpgrade = () => {
     setShowUpgradeModal(true)
@@ -43,39 +43,48 @@ export function SettingsPage() {
           {/* Profile Section */}
           <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-500/10 rounded-[8px] flex items-center justify-center">
-                <User className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10  rounded-[8px] flex items-center justify-center">
+
+                  <img src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
+                       alt="User Avatar"
+                       className="w-8 h-8 rounded-full object-cover"
+                       onError={(e) => {
+                         e.currentTarget.src = "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
+                       }}
+                  />
               </div>
               <div>
-                <h2 className={text.componentTitle}>Profile</h2>
-                <p className={text.caption}>Update your personal information</p>
+                <h2 className={text.componentTitle}>Your Profile</h2>
+                {/*<p className={text.caption}>Update your personal information</p>*/}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Full Name</label>
+                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Display Name</label>
                 <input
+                  disabled
                   type="text"
                   defaultValue={user?.name || ''}
                   className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200"
                 />
               </div>
               <div>
-                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Email</label>
+                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Email (Signed Up)</label>
                 <input
                   type="email"
+                  disabled
                   defaultValue={user?.email || ''}
                   className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end mt-6">
-              <button className="px-6 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">
-                Save Changes
-              </button>
-            </div>
+            {/*<div className="flex justify-end mt-6">*/}
+            {/*  <button className="px-6 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">*/}
+            {/*    Save Changes*/}
+            {/*  </button>*/}
+            {/*</div>*/}
           </div>
 
           {/* Device Settings Section */}
@@ -99,25 +108,19 @@ export function SettingsPage() {
                       {userProfile?.kindle_email || 'Not configured'}
                     </div>
                   </div>
-                  <div className={`px-2 py-1 rounded-full text-[11px] font-medium ${
-                    userProfile?.set_up_device
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-orange-100 text-orange-700'
-                  }`}>
-                    {userProfile?.set_up_device ? 'Connected' : 'Not Setup'}
-                  </div>
                 </div>
               </div>
 
               <div className="p-4 bg-black/[0.02] rounded-[8px]">
                 <div className="text-[15px] font-medium text-[#273F4F]">Kinddy Sender Email</div>
-                <div className="text-[13px] text-[#273F4F]/60 font-mono">
-                  no-reply@kindlecast.com
+                <p className={text.caption}>You will receive converted content from this email.</p>
+                <div className="text-lg text-brand-secondary italic font-medium mt-4">
+                  send@kinddy.com
                 </div>
               </div>
 
               <button className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">
-                Reconfigure Device
+                {userProfile?.kindle_email ?  'Change Kindle Email' : 'Configure Device'}
               </button>
             </div>
           </div>
@@ -146,9 +149,7 @@ export function SettingsPage() {
                     {currentPlan?.display_name || 'Free Plan'}
                   </div>
                   <div className="text-[13px] text-[#273F4F]/60">
-                    {isFreePlan
-                      ? `${userProfile?.config?.basic_conversions_limit || 5} conversions per month`
-                      : 'Unlimited conversions per month'
+                    {`${usage?.basic_monthly_limit === -1 ? 'Unlimited' : usage?.basic_monthly_limit} basic conversions & ${usage?.ai_monthly_limit} AI conversions per month`
                     }
                   </div>
                 </div>
@@ -187,31 +188,41 @@ export function SettingsPage() {
             )}
 
             <div className="flex gap-3 mt-4">
-              <button className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150">
+              <button
+                onClick={openBillingPortal}
+                disabled={billingLoading}
+                className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {billingLoading && <Loader2 className="w-3 h-3 animate-spin" />}
                 View Billing History
               </button>
-              <button className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150">
+              <button
+                onClick={openBillingPortal}
+                disabled={billingLoading}
+                className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {billingLoading && <Loader2 className="w-3 h-3 animate-spin" />}
                 Update Payment Method
               </button>
             </div>
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-white/80 backdrop-blur-xl border border-red-200 rounded-[16px] p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-red-500/10 rounded-[8px] flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-500" />
-              </div>
-              <div>
-                <h2 className="text-[17px] font-semibold text-red-600">Danger Zone</h2>
-                <p className="text-[13px] text-red-500/70">Irreversible actions</p>
-              </div>
-            </div>
+          {/*<div className="bg-white/80 backdrop-blur-xl border border-red-200 rounded-[16px] p-6">*/}
+          {/*  <div className="flex items-center gap-3 mb-6">*/}
+          {/*    <div className="w-10 h-10 bg-red-500/10 rounded-[8px] flex items-center justify-center">*/}
+          {/*      <Trash2 className="w-5 h-5 text-red-500" />*/}
+          {/*    </div>*/}
+          {/*    <div>*/}
+          {/*      <h2 className="text-[17px] font-semibold text-red-600">Danger Zone</h2>*/}
+          {/*      <p className="text-[13px] text-red-500/70">Irreversible actions</p>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
 
-            <button className="px-4 py-2.5 bg-red-50 text-red-600 text-[13px] font-medium rounded-[8px] hover:bg-red-100 transition-colors duration-150 border border-red-200">
-              Delete Account
-            </button>
-          </div>
+          {/*  <button className="px-4 py-2.5 bg-red-50 text-red-600 text-[13px] font-medium rounded-[8px] hover:bg-red-100 transition-colors duration-150 border border-red-200">*/}
+          {/*    Delete Account*/}
+          {/*  </button>*/}
+          {/*</div>*/}
         </div>
       </div>
 

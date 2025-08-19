@@ -1,12 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Plus, FileText, Upload } from 'lucide-react'
 import { useLinkProcessor } from '@/hooks/useLinkProcessor'
 import { useUserProfile } from '@/hooks/useUserProfile'
+import { useUserUsage } from '@/hooks/useUserUsage'
+import { useAuth } from '@/contexts/AuthContext'
 import { getTimeBasedGreeting } from '@/lib/time-utils'
 import { DeviceSetup } from '@/components/dashboard/DeviceSetup'
 import { InfoUpdateBox } from '@/components/dashboard/InfoUpdateBox'
+import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 import { text } from '@/lib/typography'
 import { isValidUrl } from '@/lib/api'
 
@@ -20,10 +23,28 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [customPrompt, setCustomPrompt] = useState('')
   const [showInfoUpdate, setShowInfoUpdate] = useState(true)
   const [urlError, setUrlError] = useState<string | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile()
+  const { getRemainingUsage, isUnlimited } = useUserUsage()
+  const { getPendingLinkData, clearPendingLinkData } = useAuth()
 
   const { greeting, emoji } = getTimeBasedGreeting()
+
+  // Prefill form with pending link data after login
+  useEffect(() => {
+    const pendingData = getPendingLinkData()
+    if (pendingData) {
+      console.log('Prefilling form with pending link data:', pendingData)
+      setUrl(pendingData.url)
+      setSelectedFormat(pendingData.format)
+      if (pendingData.customPrompt) {
+        setCustomPrompt(pendingData.customPrompt)
+      }
+      // Clear the pending data after prefilling
+      clearPendingLinkData()
+    }
+  }, [getPendingLinkData, clearPendingLinkData])
 
   // URL validation function
   const validateUrl = (inputUrl: string): string | null => {
@@ -56,6 +77,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // If user has exceeded limit, show upgrade modal instead
+    if (hasExceededLimit) {
+      handleUpgradeClick()
+      return
+    }
 
     // Validate URL
     const validationError = validateUrl(url)
@@ -96,6 +123,21 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
   // Only show onboarding if user doesn't have a complete setup
   const shouldShowInfoUpdate = userProfile && showInfoUpdate && !hasKindleSetup
+
+  // Check if user has exceeded limits
+  const getUsageType = (format: string): 'basic' | 'ai' => {
+    return format === 'Just PDF' ? 'basic' : 'ai'
+  }
+
+  const usageType = getUsageType(selectedFormat)
+  const remainingUsage = getRemainingUsage(usageType)
+  const hasUnlimitedUsage = isUnlimited(usageType)
+  const hasExceededLimit = !hasUnlimitedUsage && remainingUsage <= 0
+
+  // Handle upgrade button click
+  const handleUpgradeClick = () => {
+    setShowUpgradeModal(true)
+  }
 
   // Debug what we're getting from API
   // React.useEffect(() => {
@@ -239,7 +281,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                 <button
                   type="submit"
                   disabled={isLoading || !url.trim() || (selectedFormat === 'Custom' && !customPrompt.trim())}
-                  className="w-full px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className={`w-full px-6 py-3 text-white text-base font-medium rounded-[8px] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
+                    hasExceededLimit
+                      ? 'bg-orange-500 hover:bg-orange-600'
+                      : 'bg-brand-primary hover:bg-brand-primary/90'
+                  }`}
                 >
                   {isLoading ? (
                     <>
@@ -247,7 +293,9 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       <span>Converting...</span>
                     </>
                   ) : (
-                    <span>Send to Kindle</span>
+                    <span>
+                      {hasExceededLimit ? 'Upgrade to Send to Kindle' : 'Send to Kindle'}
+                    </span>
                   )}
                 </button>
 
@@ -318,6 +366,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Plans Modal */}
+      <UpgradePlansModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </div>
   )
 }

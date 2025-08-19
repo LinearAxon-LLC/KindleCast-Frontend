@@ -8,13 +8,11 @@ import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 
 interface TrialStatusBannerProps {
   subscriptionType?: string
-  trialDaysRemaining: number
   className?: string
 }
 
 export function TrialStatusBanner({
   subscriptionType,
-  trialDaysRemaining,
   className = ''
 }: TrialStatusBannerProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -29,29 +27,7 @@ export function TrialStatusBanner({
     setShowUpgradeModal(true)
   }
 
-  // Trial expired
-  if (trialDaysRemaining <= 0) {
-    return (
-      <div className={`w-full bg-red-500 ${className}`}>
-        <div className="flex items-center justify-center py-2 px-4">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-white" />
-            <span className={`${text.caption} text-white`}>
-              Your trial has expired.
-            </span>
-            <button
-              onClick={handleUpgradeClick}
-              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
-            >
-              Upgrade Now, Save your Eyes!
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Active trial
+  // Show upgrade banner for free users
   return (
     <div className={`w-full bg-violet-500 ${className}`}>
       <div className="flex items-center justify-center py-2 px-4">
