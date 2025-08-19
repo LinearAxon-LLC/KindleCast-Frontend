@@ -59,7 +59,7 @@ function DashboardContent() {
                 {userProfile && (
                   <TrialStatusBanner
                     subscriptionType={userProfile.subscription_type}
-                    trialDaysRemaining={12}
+                    trialDaysRemaining={1}
                   />
                 )}
                 <div className="flex-1 overflow-hidden">

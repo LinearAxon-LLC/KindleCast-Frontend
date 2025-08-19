@@ -29,10 +29,12 @@ export function HistoryPage({ isActive = false }: HistoryPageProps) {
 
   // Fetch data when the History tab becomes active
   useEffect(() => {
-    if (isActive && conversions.length === 0 && !isLoading) {
+    // Only fetch if tab is active, no data exists, not currently loading, and no error
+    if (isActive && conversions.length === 0 && !isLoading && !error) {
+      console.log('History tab became active, fetching data...')
       fetchHistory(1)
     }
-  }, [isActive, conversions.length, isLoading, fetchHistory])
+  }, [isActive]) // Only depend on isActive to prevent re-renders
 
   const getStatusIcon = (status: ProcessingStatus) => {
     switch (status) {
