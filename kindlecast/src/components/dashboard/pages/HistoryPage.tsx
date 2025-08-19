@@ -1,32 +1,63 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Download, ExternalLink, Clock, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import { text } from '@/lib/typography'
+import { useConversionHistory } from '@/hooks/useConversionHistory'
+import { ConversionHistoryShimmer } from '@/components/ui/shimmer'
+import { ProcessingStatus, Conversion } from '@/types/api'
 
-export function HistoryPage() {
-  const [filter, setFilter] = useState('all')
+interface HistoryPageProps {
+  isActive?: boolean
+}
+
+export function HistoryPage({ isActive = false }: HistoryPageProps) {
+  const [filter, setFilter] = useState<ProcessingStatus | 'all'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // TODO: Replace with real API call to get user's conversion history
-  const jobs: any[] = [] // No mock data - show empty state until API is implemented
+  const {
+    conversions,
+    isLoading,
+    error,
+    fetchHistory,
+    filterByStatus
+  } = useConversionHistory({
+    pageSize: itemsPerPage,
+    autoFetch: false // We'll fetch manually when tab becomes active
+  })
 
-  const getStatusIcon = (status: string) => {
+  // Fetch data when the History tab becomes active
+  useEffect(() => {
+    if (isActive && conversions.length === 0 && !isLoading) {
+      fetchHistory(1)
+    }
+  }, [isActive, conversions.length, isLoading, fetchHistory])
+
+  const getStatusIcon = (status: ProcessingStatus) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="w-5 h-5 text-green-500" />
-      case 'processing': return <Clock className="w-5 h-5 text-blue-500" />
-      case 'failed': return <AlertCircle className="w-5 h-5 text-red-500" />
+      case ProcessingStatus.OK: return <CheckCircle className="w-5 h-5 text-green-500" />
+      case ProcessingStatus.PROCESSING: return <Clock className="w-5 h-5 text-blue-500" />
+      case ProcessingStatus.FAILED: return <AlertCircle className="w-5 h-5 text-red-500" />
       default: return <Clock className="w-5 h-5 text-gray-500" />
     }
   }
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: ProcessingStatus) => {
     switch (status) {
-      case 'completed': return 'Completed'
-      case 'processing': return 'Processing'
-      case 'failed': return 'Failed'
+      case ProcessingStatus.OK: return 'Completed'
+      case ProcessingStatus.PROCESSING: return 'Processing'
+      case ProcessingStatus.FAILED: return 'Failed'
       default: return 'Unknown'
+    }
+  }
+
+  const getStatusColor = (status: ProcessingStatus) => {
+    switch (status) {
+      case ProcessingStatus.OK: return 'bg-green-100 text-green-700'
+      case ProcessingStatus.PROCESSING: return 'bg-blue-100 text-blue-700'
+      case ProcessingStatus.FAILED: return 'bg-red-100 text-red-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
@@ -39,15 +70,40 @@ export function HistoryPage() {
     })
   }
 
-  const filteredJobs = jobs.filter(job => {
-    if (filter === 'all') return true
-    return job.status === filter
-  })
+  const extractTitleFromUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      return urlObj.hostname.replace('www.', '') + urlObj.pathname
+    } catch {
+      return url
+    }
+  }
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage)
+  const formatType = (formatType: string, secondaryFormatType: string) => {
+    if (secondaryFormatType && secondaryFormatType !== formatType) {
+      return `${formatType} + ${secondaryFormatType}`
+    }
+    return formatType
+  }
+
+  // Apply filter to conversions
+  const filteredConversions = filterByStatus(filter)
+
+  // Client-side pagination for filtered results
+  const totalPages = Math.ceil(filteredConversions.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedConversions = filteredConversions.slice(startIndex, startIndex + itemsPerPage)
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  // Handle filter change
+  const handleFilterChange = (newFilter: ProcessingStatus | 'all') => {
+    setFilter(newFilter)
+    setCurrentPage(1) // Reset to first page when filtering
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -64,86 +120,109 @@ export function HistoryPage() {
             <Filter className="w-4 h-4 text-[#273F4F]/60" />
             <select
               value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value)
-                setCurrentPage(1) // Reset to first page when filtering
-              }}
+              onChange={(e) => handleFilterChange(e.target.value as ProcessingStatus | 'all')}
               className={`px-3 py-2 bg-white/80 border border-black/[0.08] rounded-[8px] ${text.caption} text-[#273F4F] focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
             >
               <option value="all">All Status</option>
-              <option value="completed">Success</option>
-              <option value="processing">Processing</option>
-              <option value="failed">Failed</option>
+              <option value={ProcessingStatus.OK}>Success</option>
+              <option value={ProcessingStatus.PROCESSING}>Processing</option>
+              <option value={ProcessingStatus.FAILED}>Failed</option>
             </select>
           </div>
         </div>
 
-        {/* Jobs List */}
-        <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] overflow-hidden">
-          {paginatedJobs.length === 0 ? (
+        {/* Conversions List */}
+        {isLoading ? (
+          <ConversionHistoryShimmer count={5} />
+        ) : error ? (
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] overflow-hidden">
             <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-black/[0.04] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-[#273F4F]/40" />
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-red-500" />
               </div>
-              <h3 className={`${text.componentTitle} mb-2`}>No conversions found</h3>
-              <p className={text.caption}>Try adjusting your filter or start a new conversion</p>
+              <h3 className={`${text.componentTitle} mb-2`}>Failed to load conversions</h3>
+              <p className={text.caption}>Please try refreshing the page</p>
+              <button
+                onClick={() => fetchHistory(1)}
+                className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
+              >
+                Retry
+              </button>
             </div>
-          ) : (
-            <div className="divide-y divide-black/[0.06]">
-              {paginatedJobs.map((job) => (
-                <div key={job.id} className="p-4 hover:bg-black/[0.02] transition-colors duration-150">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      {getStatusIcon(job.status)}
+          </div>
+        ) : (
+          <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] overflow-hidden">
+            {paginatedConversions.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-black/[0.04] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-[#273F4F]/40" />
+                </div>
+                <h3 className={`${text.componentTitle} mb-2`}>No conversions found</h3>
+                <p className={text.caption}>
+                  {filter === 'all'
+                    ? 'Start your first conversion to see it here'
+                    : 'Try adjusting your filter or start a new conversion'
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-black/[0.06]">
+                {paginatedConversions.map((conversion, index) => (
+                  <div key={`${conversion.file_id}-${index}`} className="p-4 hover:bg-black/[0.02] transition-colors duration-150">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        {getStatusIcon(conversion.processing_status)}
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className={`${text.body} font-medium truncate mb-1`}>
-                          {job.title}
-                        </h3>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`${text.body} font-medium truncate mb-1`}>
+                            {extractTitleFromUrl(conversion.source_url)}
+                          </h3>
 
-                        <div className="flex items-center gap-3">
-                          <span className={`${text.footnote} text-[#273F4F]/50`}>
-                            {formatDate(job.createdAt)}
-                          </span>
-                          <span className={`${text.footnote} px-1.5 py-0.5 bg-gray-100 rounded`}>
-                            {job.format}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className={`${text.footnote} text-[#273F4F]/50`}>
+                              {formatDate(conversion.created_at)}
+                            </span>
+                            <span className={`${text.footnote} px-1.5 py-0.5 bg-gray-100 rounded`}>
+                              {formatType(conversion.format_type, conversion.secondary_format_type)}
+                            </span>
+                            {conversion.processing_time > 0 && (
+                              <span className={`${text.footnote} text-[#273F4F]/50`}>
+                                {conversion.processing_time}s
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className={`${text.footnote} font-medium px-2 py-1 rounded-full ${
-                        job.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        job.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {getStatusText(job.status)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`${text.footnote} font-medium px-2 py-1 rounded-full ${getStatusColor(conversion.processing_status)}`}>
+                          {getStatusText(conversion.processing_status)}
+                        </span>
 
-                      {job.status === 'completed' && (
-                        <button className="p-2 hover:bg-black/[0.06] rounded-[6px] transition-colors duration-150">
-                          <Download className="w-4 h-4 text-[#273F4F]/60" />
-                        </button>
-                      )}
+                        {conversion.processing_status === ProcessingStatus.OK && (
+                          <button className="p-2 hover:bg-black/[0.06] rounded-[6px] transition-colors duration-150">
+                            <Download className="w-4 h-4 text-[#273F4F]/60" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {!isLoading && totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
             <div className={text.caption}>
-              Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredJobs.length)} of {filteredJobs.length} results
+              Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredConversions.length)} of {filteredConversions.length} results
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className={`p-2 rounded-[6px] transition-colors duration-150 ${
                   currentPage === 1
@@ -158,7 +237,7 @@ export function HistoryPage() {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
-                    onClick={() => setCurrentPage(page)}
+                    onClick={() => handlePageChange(page)}
                     className={`px-3 py-1.5 rounded-[6px] ${text.footnote} font-medium transition-colors duration-150 ${
                       currentPage === page
                         ? 'bg-brand-primary text-white'
@@ -171,7 +250,7 @@ export function HistoryPage() {
               </div>
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className={`p-2 rounded-[6px] transition-colors duration-150 ${
                   currentPage === totalPages

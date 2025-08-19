@@ -62,7 +62,7 @@ export default function NotFound() {
                 <Search className="w-4 h-4 text-brand-primary" />
               </div>
               <div>
-                <div className={`${text.small} font-medium text-[#273F4F]`}>Dashboard</div>
+                <div className={`${text.body} font-medium text-[#273F4F]`}>Dashboard</div>
                 <div className={`${text.caption} text-[#273F4F]/60`}>Convert & manage files</div>
               </div>
             </Link>
@@ -75,7 +75,7 @@ export default function NotFound() {
                 <FileQuestion className="w-4 h-4 text-green-500" />
               </div>
               <div>
-                <div className={`${text.small} font-medium text-[#273F4F]`}>Pricing</div>
+                <div className={`${text.body} font-medium text-[#273F4F]`}>Pricing</div>
                 <div className={`${text.caption} text-[#273F4F]/60`}>View our plans</div>
               </div>
             </Link>

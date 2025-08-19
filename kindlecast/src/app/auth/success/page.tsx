@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TokenManager } from '@/lib/auth'
 import { AuthTokens } from '@/types/api'
 
-
-export default function AuthSuccessPage() {
+function AuthSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
@@ -132,5 +131,20 @@ export default function AuthSuccessPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#EFEEEA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#273F4F]/70">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AuthSuccessContent />
+    </Suspense>
   )
 }

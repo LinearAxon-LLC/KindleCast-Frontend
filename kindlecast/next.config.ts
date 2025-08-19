@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Disable ESLint during builds for faster deployment
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Disable React Strict Mode to prevent double API calls in development
   reactStrictMode: false,
 

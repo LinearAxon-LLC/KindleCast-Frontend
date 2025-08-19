@@ -1,5 +1,5 @@
 // Authentication service for KindleCast
-import { API_CONFIG, AuthTokens, User, AuthResponse, RefreshTokenRequest, RefreshTokenResponse, APIException } from '@/types/api';
+import { API_CONFIG, AuthTokens, User, AuthResponse, RefreshTokenRequest, RefreshTokenResponse, APIException, ConversionsResponse } from '@/types/api';
 
 // Re-export types and utilities for other modules
 export { APIException } from '@/types/api';
@@ -216,6 +216,17 @@ export class AuthenticatedAPI {
     } finally {
       TokenManager.clearTokens();
     }
+  }
+
+  static async getLinkHistory(page: number = 1, pageSize: number = 10): Promise<ConversionsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString()
+    });
+
+    return await this.makeRequest<ConversionsResponse>(
+      `${API_CONFIG.ENDPOINTS.LINK_HISTORY}?${params.toString()}`
+    );
   }
 }
 

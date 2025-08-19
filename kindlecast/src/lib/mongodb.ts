@@ -141,7 +141,6 @@ export class UserService {
   async setupDevice(userId: string, kindleEmail: string, ktoolEmail: string): Promise<void> {
     await this.updateUserProfile(userId, {
       kindle_email: kindleEmail,
-      ktool_email: ktoolEmail,
       set_up_device: true,
       device_setup_completed: true
     })

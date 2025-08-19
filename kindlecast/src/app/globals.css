@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* Custom scrollbar styling - Apple-inspired */
 ::-webkit-scrollbar {
   width: 6px;

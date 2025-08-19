@@ -23,10 +23,11 @@ export const FORMAT_MAPPING: Record<string, string> = {
 // API configuration
 export const API_CONFIG = {
   BASE_URL: process.env.NODE_ENV === 'production'
-    ? 'https://api.kindlecast.com'
+    ? 'https://api.kinddy.com'
     : 'http://localhost:8000',
   ENDPOINTS: {
     PROCESS_LINK: '/api/v1/link/process',
+    LINK_HISTORY: '/api/v1/link/history',
     // Auth endpoints - matching your FastAPI routes
     AUTH_GOOGLE: '/api/v1/auth/google',
     AUTH_TWITTER: '/api/v1/auth/x',
@@ -151,6 +152,32 @@ export interface UserUsageResponse {
   ai_monthly_limit: number;
   used_basic_monthly: number;
   used_ai_monthly: number;
+}
+
+// Conversion history types
+export enum ProcessingStatus {
+  OK = "ok",
+  FAILED = "failed",
+  PROCESSING = "processing"
+}
+
+export interface Conversion {
+  source_url: string;
+  format_type: string;
+  secondary_format_type: string;
+  processing_status: ProcessingStatus;
+  processing_time: number;
+  file_id: string;
+  created_at: string;
+}
+
+export interface ConversionsResponse {
+  conversions: Conversion[];
+}
+
+export interface LinkHistoryRequest {
+  page: number; // default: 1
+  page_size: number; // default: 10
 }
 
 // User info update types

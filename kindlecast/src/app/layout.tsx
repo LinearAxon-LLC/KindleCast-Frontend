@@ -12,7 +12,7 @@ const rubik = Rubik({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kindlecast.com'),
+  metadataBase: new URL('https://kinddy.com'),
   title: {
     default: "Kinddy - Save Your Eyes. Read Anything on Kindle.",
     template: "%s | Kinddy"
@@ -20,31 +20,38 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/logo.png',
-        type: 'image/png',
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+      {
+        url: '/favicon.ico',
+        type: 'image/x-icon',
       }
     ],
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
-  description: "Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain. Join 2,847+ readers who upgraded their reading experience.",
+  description: "Transform web pages, newsletters, podcasts, videos & threads into perfectly formatted Kindle reading. Reduce eye strain with Kinddy's smart content conversion. Free to start.",
   keywords: [
-    "kindle pdf converter",
+    "kindle converter",
     "webpage to kindle",
+    "newsletter to kindle",
+    "podcast transcript to kindle",
     "video transcript to pdf",
-    "audio to kindle",
-    "document converter",
+    "thread reader kindle",
     "eye strain relief",
-    "digital reading",
-    "content conversion",
-    "kindle formatting",
-    "screen to kindle",
-    "pdf generator",
-    "reading comfort"
+    "digital reading comfort",
+    "content conversion tool",
+    "kindle formatting service",
+    "screen to kindle converter",
+    "pdf generator for kindle",
+    "reading comfort app",
+    "kindle pdf maker",
+    "web content to ebook"
   ],
-  authors: [{ name: "KindleCast Team", url: "https://kindlecast.app" }],
-  creator: "KindleCast",
-  publisher: "KindleCast",
+  authors: [{ name: "Kinddy Team", url: "https://kinddy.com" }],
+  creator: "Kinddy",
+  publisher: "Kinddy",
   robots: {
     index: true,
     follow: true,
@@ -59,30 +66,31 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://kindlecast.app",
-    title: "KindleCast - Save Your Eyes. Read Anything on Kindle.",
-    description: "Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain. Join 2,847+ readers who upgraded their reading experience.",
-    siteName: "KindleCast",
+    url: "https://kinddy.com",
+    title: "Kinddy - Save Your Eyes. Read Anything on Kindle.",
+    description: "Transform web pages, newsletters, podcasts, videos & threads into perfectly formatted Kindle reading. Reduce eye strain with Kinddy's smart content conversion.",
+    siteName: "Kinddy",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "KindleCast - Save Your Eyes. Read Anything on Kindle.",
+        alt: "Kinddy - Convert any content to Kindle format and save your eyes",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KindleCast - Save Your Eyes. Read Anything on Kindle.",
-    description: "Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain. Join 2,847+ readers who upgraded their reading experience.",
+    title: "Kinddy - Save Your Eyes. Read Anything on Kindle.",
+    description: "Transform web pages, newsletters, podcasts, videos & threads into perfectly formatted Kindle reading. Reduce eye strain with smart content conversion.",
     images: ["/twitter-image.png"],
-    creator: "@kindlecast_app",
+    creator: "@kinddy_app",
   },
   alternates: {
-    canonical: "https://kindlecast.com",
+    canonical: "https://kinddy.com",
   },
-  category: "Technology",
+  category: "Productivity",
+  classification: "Content Conversion Tool",
 };
 
 export default function RootLayout({
@@ -93,21 +101,44 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'KindleCast',
-    description: 'Transform any webpage, article, or document into perfectly formatted Kindle reading. No more screen glare, no more eye strain.',
-    url: 'https://kindlecast.com',
+    name: 'Kinddy',
+    alternateName: 'Kinddy - Kindle Content Converter',
+    description: 'Transform web pages, newsletters, podcasts, videos and threads into perfectly formatted Kindle reading. Reduce eye strain with smart content conversion.',
+    url: 'https://kinddy.com',
     applicationCategory: 'ProductivityApplication',
     operatingSystem: 'Web Browser',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      description: 'Free tier with 3 conversions'
-    },
+    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    offers: [
+      {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+        name: 'Free Plan',
+        description: 'Free tier with 5 Quick Send per month and 3 AI Formatting per month'
+      },
+      {
+        '@type': 'Offer',
+        price: '9.99',
+        priceCurrency: 'USD',
+        name: 'Premium Plan',
+        description: 'Unlimited Quick Send, 100 AI Formatting per month, 120 days retention, personal email forwarding'
+      }
+    ],
     creator: {
       '@type': 'Organization',
-      name: 'KindleCast Team'
-    }
+      name: 'Kinddy Team',
+      url: 'https://kinddy.com'
+    },
+    featureList: [
+      'Convert web pages to Kindle format',
+      'Newsletter to Kindle conversion',
+      'Podcast transcript extraction',
+      'Video transcript to PDF',
+      'Thread reader for Kindle',
+      'AI-powered content summarization',
+      'Custom formatting options',
+      'Direct Kindle delivery'
+    ]
   };
 
   return (
@@ -115,10 +146,32 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#8F87F1" />
+        <meta name="color-scheme" content="light" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Kinddy" />
+        <meta name="application-name" content="Kinddy" />
+        <meta name="msapplication-TileColor" content="#8F87F1" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        {/* Favicons */}
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/favicon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/manifest.json" />
+
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* DNS prefetch for performance */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

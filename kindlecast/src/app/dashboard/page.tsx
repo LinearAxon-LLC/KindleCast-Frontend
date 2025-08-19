@@ -28,9 +28,9 @@ function DashboardContent() {
   // Cache all tab components to prevent re-rendering and flickering
   const cachedComponents = useMemo(() => ({
     home: <HomePage onSwitchTab={setActiveTab} />,
-    history: <HistoryPage />,
+    history: <HistoryPage isActive={activeTab === 'history'} />,
     settings: <SettingsPage />
-  }), [])
+  }), [activeTab])
 
   // Show loading state
   if (isLoading) {

@@ -80,11 +80,11 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
       </div>
 
       {/* Logo */}
-      <div className="p-6 border-b border-[#273F4F]/10 lg:pt-6 pt-2">
+      <div className="p-3 border-b border-[#273F4F]/10 lg:pt-4">
         <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
           <div className="w-10 h-10 flex items-center justify-center">
             <img
-              src="/logo_send.svg"
+              src="/logo.png"
               alt="KindleCast Logo"
               className="w-8 h-8"
               onError={(e) => {
@@ -92,7 +92,7 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
               }}
             />
           </div>
-          <span className="text-xl font-bold text-[#273F4F]">KindleCast</span>
+          <span className="text-3xl sm:text-2xl font-bold text-[#273F4F]">Kinddy</span>
         </Link>
       </div>
 

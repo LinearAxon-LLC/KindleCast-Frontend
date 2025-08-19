@@ -1,15 +1,27 @@
+# Robots.txt for Kinddy.com
+# https://kinddy.com/robots.txt
+
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://screencast.app/sitemap.xml
+Sitemap: https://kinddy.com/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
 
-# Disallow admin or private areas (if any in future)
-# Disallow: /admin/
-# Disallow: /api/private/
+# Disallow admin and private areas
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /auth/
+
+# Allow important pages for SEO
+Allow: /
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /refund-policy
 
 # Allow all major search engines
 User-agent: Googlebot

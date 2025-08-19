@@ -45,7 +45,7 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Development Error Details */}
           {isDevelopment && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-[8px] text-left">
-              <h3 className={`${text.small} font-semibold text-red-800 mb-2`}>
+              <h3 className={`${text.caption} font-semibold text-red-800 mb-2`}>
                 Development Error Details:
               </h3>
               <pre className="text-xs text-red-700 overflow-auto max-h-32">
@@ -85,7 +85,7 @@ export default function Error({ error, reset }: ErrorProps) {
             <Bug className="w-5 h-5 text-[#273F4F]/60" />
             <h3 className={`${text.componentTitle}`}>Help us improve</h3>
           </div>
-          <p className={`${text.small} text-[#273F4F]/70 mb-4`}>
+          <p className={`${text.body} text-[#273F4F]/70 mb-4`}>
             If this error persists, please let us know what you were doing when it occurred.
           </p>
           <a

@@ -72,10 +72,10 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
         </div>
         
         <div className="p-3 bg-green-50 rounded-[8px]">
-          <p className={`${text.small} text-green-800`}>
+          <p className={`${text.caption} text-green-800`}>
             ✓ Kindle email configured: {kindleEmail}@kindle.com
           </p>
-          <p className={`${text.small} text-green-800`}>
+          <p className={`${text.caption} text-green-800`}>
             ✓ Mail whitelisting acknowledged
           </p>
         </div>
@@ -108,7 +108,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Kindle Email Input */}
         <div>
-          <label className={`${text.small} font-medium text-[#273F4F] mb-2 block`}>
+          <label className={`${text.caption} font-medium text-[#273F4F] mb-2 block`}>
             Your Kindle Email Address
           </label>
           <div className="flex items-center">
@@ -134,7 +134,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
           <div className="flex items-start gap-3 mb-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h4 className={`${text.small} font-semibold text-blue-800 mb-1`}>
+              <h4 className={`${text.caption} font-semibold text-blue-800 mb-1`}>
                 Important: Email Whitelisting Required
               </h4>
               <p className={`${text.caption} text-blue-700 mb-2`}>
@@ -150,7 +150,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
           </div>
           
           <div>
-            <label className={`${text.small} font-medium text-blue-800 mb-2 block`}>
+            <label className={`${text.caption} font-medium text-blue-800 mb-2 block`}>
               Type "YES" to confirm you've added our email to your approved sender list:
             </label>
             <input
@@ -167,7 +167,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
         {/* Error Display */}
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-[8px]">
-            <p className={`${text.small} text-red-800`}>
+            <p className={`${text.caption} text-red-800`}>
               ❌ {error}
             </p>
           </div>

@@ -1,15 +1,15 @@
 {
-  "name": "ScreenCast - Content to Kindle PDF Converter",
-  "short_name": "ScreenCast",
-  "description": "Convert any content into Kindle-ready PDFs. Save your eyes from screen strain.",
+  "name": "Kinddy - Save Your Eyes. Read Anything on Kindle.",
+  "short_name": "Kinddy",
+  "description": "Transform web pages, newsletters, podcasts, videos & threads into perfectly formatted Kindle reading. Reduce eye strain with smart content conversion.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#EFEEEA",
   "theme_color": "#8F87F1",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["productivity", "utilities", "education"],
+  "categories": ["productivity", "utilities", "education", "reading"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -42,8 +42,20 @@
     {
       "name": "Convert Content",
       "short_name": "Convert",
-      "description": "Convert content to Kindle PDF",
-      "url": "/convert",
+      "description": "Convert web content to Kindle format",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your conversion history",
+      "url": "/dashboard",
       "icons": [
         {
           "src": "/icon-192.png",
