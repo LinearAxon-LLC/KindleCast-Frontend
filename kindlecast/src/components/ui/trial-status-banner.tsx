@@ -7,20 +7,18 @@ import { usePayment } from '@/hooks/usePayment'
 import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
 
 interface TrialStatusBannerProps {
-  userSubscribed: boolean
-  trialDaysRemaining: number
+  subscriptionType?: string
   className?: string
 }
 
 export function TrialStatusBanner({
-  userSubscribed,
-  trialDaysRemaining,
+  subscriptionType,
   className = ''
 }: TrialStatusBannerProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Don't show banner for subscribed users
-  if (userSubscribed) {
+  // Don't show banner for non-free users
+  if (subscriptionType && subscriptionType !== 'free') {
     return null
   }
 
@@ -29,37 +27,11 @@ export function TrialStatusBanner({
     setShowUpgradeModal(true)
   }
 
-  // Trial expired
-  if (trialDaysRemaining <= 0) {
-    return (
-      <div className={`w-full bg-red-500 ${className}`}>
-        <div className="flex items-center justify-center py-2 px-4">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-white" />
-            <span className={`${text.caption} text-white`}>
-              Your trial has expired.
-            </span>
-            <button
-              onClick={handleUpgradeClick}
-              className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}
-            >
-              Upgrade Now, Save your Eyes!
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Active trial
+  // Show upgrade banner for free users
   return (
-    <div className={`w-full bg-orange-500 ${className}`}>
+    <div className={`w-full bg-violet-500 ${className}`}>
       <div className="flex items-center justify-center py-2 px-4">
         <div className="flex items-center space-x-2">
-          <Clock className="w-4 h-4 text-white" />
-          <span className={`${text.caption} text-white`}>
-            {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} left in trial.
-          </span>
           <button
             onClick={handleUpgradeClick}
             className={`${text.caption} text-white underline hover:text-white/80 transition-colors ml-2`}

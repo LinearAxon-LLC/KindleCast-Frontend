@@ -33,7 +33,7 @@ export default function PrivacyPolicy() {
               className="flex items-center gap-2 px-4 py-2 text-[#273F4F] hover:bg-black/[0.04] rounded-[8px] transition-colors duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className={text.small}>Back to Home</span>
+              <span className={text.caption}>Back to Home</span>
             </Link>
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
           <p className={`${text.body} text-[#273F4F]/70 max-w-2xl mx-auto`}>
             We respect your privacy and are committed to protecting your personal information.
           </p>
-          <p className={`${text.small} text-[#273F4F]/50 mt-2`}>
+          <p className={`${text.caption} text-[#273F4F]/50 mt-2`}>
             Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -102,17 +102,16 @@ export default function PrivacyPolicy() {
               2. How We Use Your Information
             </h2>
             <div className={`${text.body} text-[#273F4F]/80 space-y-4`}>
-              <p>We use your information to:</p>
+              <p>We process your information based on the following legal grounds:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Provide and improve our content conversion services</li>
-                <li>Deliver converted content to your Kindle device</li>
-                <li>Process payments and manage subscriptions</li>
-                <li>Send service-related communications</li>
-                <li>Analyze usage patterns to improve our service</li>
-                <li>Ensure security and prevent abuse</li>
+                <li><strong>Contract Performance:</strong> To provide content conversion and delivery services</li>
+                <li><strong>Legitimate Interest:</strong> To improve our service, ensure security, and prevent abuse</li>
+                <li><strong>Legal Obligation:</strong> To comply with tax, accounting, and regulatory requirements</li>
+                <li><strong>Consent:</strong> For marketing communications (where required by law)</li>
               </ul>
               <p>
                 <strong>We do not sell your personal information to third parties.</strong>
+                You have the right to withdraw consent at any time where processing is based on consent.
               </p>
             </div>
           </section>
@@ -131,7 +130,7 @@ export default function PrivacyPolicy() {
                 <li>We do not read, analyze, or use your content for any purpose other than conversion</li>
               </ul>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-[8px]">
-                <p className={`${text.small} text-blue-800`}>
+                <p className={`${text.caption} text-blue-800`}>
                   <strong>Important:</strong> Only submit content you have the right to convert and use. 
                   We are not responsible for copyright violations.
                 </p>
@@ -250,17 +249,36 @@ export default function PrivacyPolicy() {
             </div>
           </section>
 
-          {/* 11. Contact Us */}
+          {/* 11. Your Rights Under GDPR */}
           <section>
-            <h2 className={`${text.sectionTitle} mb-4`}>11. Contact Us</h2>
+            <h2 className={`${text.sectionTitle} mb-4`}>11. Your Rights Under GDPR</h2>
+            <div className={`${text.body} text-[#273F4F]/80 space-y-4`}>
+              <p>If you are in the European Economic Area, you have the following rights:</p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li><strong>Access:</strong> Request a copy of your personal data</li>
+                <li><strong>Rectification:</strong> Correct inaccurate or incomplete data</li>
+                <li><strong>Erasure:</strong> Request deletion of your personal data</li>
+                <li><strong>Portability:</strong> Receive your data in a structured format</li>
+                <li><strong>Restriction:</strong> Limit how we process your data</li>
+                <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
+                <li><strong>Complaint:</strong> Lodge a complaint with your data protection authority</li>
+              </ul>
+              <p>To exercise these rights, contact us at privacy@kindlecast.com. We will respond within 30 days.</p>
+            </div>
+          </section>
+
+          {/* 12. Contact Us */}
+          <section>
+            <h2 className={`${text.sectionTitle} mb-4`}>12. Contact Us</h2>
             <div className={`${text.body} text-[#273F4F]/80 space-y-4`}>
               <p>
-                If you have questions about this Privacy Policy or our privacy practices, please contact us:
+                For questions about this Privacy Policy or to exercise your rights:
               </p>
               <div className="p-4 bg-gray-50 rounded-[8px]">
-                <p><strong>Email:</strong> privacy@kindlecast.com</p>
-                <p><strong>Address:</strong> Kinddy Privacy Team</p>
-                <p><strong>Response Time:</strong> We respond to privacy inquiries within 30 days</p>
+                <p><strong>Privacy Officer:</strong> privacy@kinddy.com</p>
+                <p><strong>General Support:</strong> support@kinddy.com</p>
+                <p><strong>Data Protection Officer:</strong> dpo@kinddy.com</p>
+                <p><strong>Response Time:</strong> Within 30 days for privacy requests</p>
               </div>
             </div>
           </section>

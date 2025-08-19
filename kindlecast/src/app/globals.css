@@ -1,6 +1,23 @@
+/*@import url('https://fonts.googleapis.com/css2?family=Chela+One&display=swap');*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*.font-logo {*/
+/*  font-family: 'Chela One', system-ui;*/
+/*  font-weight: 700;*/
+/*}*/
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
 
 /* Custom scrollbar styling - Apple-inspired */
 ::-webkit-scrollbar {

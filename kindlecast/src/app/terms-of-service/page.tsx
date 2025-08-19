@@ -33,7 +33,7 @@ export default function TermsOfService() {
               className="flex items-center gap-2 px-4 py-2 text-[#273F4F] hover:bg-black/[0.04] rounded-[8px] transition-colors duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className={text.small}>Back to Home</span>
+              <span className={text.caption}>Back to Home</span>
             </Link>
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function TermsOfService() {
           <p className={`${text.body} text-[#273F4F]/70 max-w-2xl mx-auto`}>
             These terms govern your use of Kinddy's content conversion services.
           </p>
-          <p className={`${text.small} text-[#273F4F]/50 mt-2`}>
+          <p className={`${text.caption} text-[#273F4F]/50 mt-2`}>
             Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -125,7 +125,8 @@ export default function TermsOfService() {
                 <li>Not attempt to circumvent usage restrictions</li>
               </ul>
               <p>
-                Subscription fees are billed monthly and are non-refundable except as required by law.
+                Subscription fees are billed monthly in advance. You may cancel anytime.
+                Refunds are subject to our Refund Policy and applicable consumer protection laws.
               </p>
             </div>
           </section>
@@ -199,21 +200,39 @@ export default function TermsOfService() {
             </div>
           </section>
 
-          {/* 10. Contact Information */}
+          {/* 10. Data Protection and Privacy */}
+          <section>
+            <h2 className={`${text.sectionTitle} mb-4`}>10. Data Protection and Privacy</h2>
+            <div className={`${text.body} text-[#273F4F]/80 space-y-4`}>
+              <p>
+                Your privacy is important to us. Our processing of personal data is governed by our Privacy Policy,
+                which complies with GDPR and other applicable data protection laws. You have rights regarding your personal data, including:
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>Right to access, rectify, or delete your personal data</li>
+                <li>Right to data portability and restriction of processing</li>
+                <li>Right to withdraw consent at any time</li>
+                <li>Right to lodge a complaint with supervisory authorities</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* 11. Contact Information */}
           <section>
             <h2 className={`${text.sectionTitle} mb-4 flex items-center gap-3`}>
               <div className="w-8 h-8 bg-green-100 rounded-[6px] flex items-center justify-center">
                 <Users className="w-4 h-4 text-green-600" />
               </div>
-              10. Contact Information
+              11. Contact Information
             </h2>
             <div className={`${text.body} text-[#273F4F]/80 space-y-4`}>
               <p>
-                If you have questions about these Terms, please contact us at:
+                For questions about these Terms or to exercise your data protection rights:
               </p>
               <div className="p-4 bg-gray-50 rounded-[8px]">
-                <p><strong>Email:</strong> legal@kindlecast.com</p>
-                <p><strong>Address:</strong> Kinddy Legal Department</p>
+                <p><strong>Email:</strong> support@kinddy.com</p>
+                <p><strong>Legal:</strong> legal@kinddy.com</p>
+                <p><strong>Data Protection:</strong> privacy@kinddy.com</p>
               </div>
             </div>
           </section>

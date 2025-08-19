@@ -10,21 +10,22 @@ import {UserDropdown} from "@/components/ui/user-dropdown"
 import {useUserProfile} from "@/hooks/useUserProfile"
 import {usePricingPlans} from "@/hooks/usePricingPlans"
 import {usePaymentFlow} from "@/hooks/usePayment"
-// Using regular img tags instead of Next/Image for better compatibility
+import Image from "next/image"
 import {FadeInSection, SlideIn} from "@/components/ui/animated"
 import {motion, useInView, useScroll, useTransform} from "framer-motion"
+import { HomePageStructuredData } from "@/components/seo/StructuredData"
 
 // Animation component for scroll-triggered animations
-function AnimatedFeature({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) {
+function AnimatedFeature({children, delay = 0}: { children: React.ReactNode, delay?: number }) {
     const ref = useRef(null)
-    const isInView = useInView(ref, { once: true, margin: "-100px" })
+    const isInView = useInView(ref, {once: true, margin: "-100px"})
 
     return (
         <motion.div
             ref={ref}
-            initial={{ opacity: 0, y: 50 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
+            initial={{opacity: 0, y: 50}}
+            animate={isInView ? {opacity: 1, y: 0} : {opacity: 0, y: 50}}
+            transition={{duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1]}}
         >
             {children}
         </motion.div>
@@ -65,7 +66,8 @@ function GraphicStep2() {
                 <div className="flex items-center space-x-3 mb-6">
                     <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                         </svg>
                     </div>
                     <span className="font-medium text-gray-900">AI Processing</span>
@@ -116,7 +118,8 @@ function GraphicStep4() {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900">Sending to Kindle...</span>
-                    <div className="w-6 h-6 border-2 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
+                    <div
+                        className="w-6 h-6 border-2 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
                 </div>
                 <div className="space-y-3">
                     <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
@@ -138,7 +141,7 @@ function GraphicStep4() {
 }
 
 // Image Placeholders with taller aspect ratio for screenshots
-function FeatureImage({ color, className = "" }: { color: string, className?: string }) {
+function FeatureImage({color, className = ""}: { color: string, className?: string }) {
     return (
         <div className={`w-full aspect-[4/5] rounded-2xl ${color} ${className}`}></div>
     )
@@ -149,14 +152,13 @@ export default function Home() {
     const [url, setUrl] = useState('')
     const [customPrompt, setCustomPrompt] = useState('')
     const [showAuthDialog, setShowAuthDialog] = useState(false)
-    const [pendingLinkData, setPendingLinkData] = useState<{url: string, format: string, customPrompt?: string} | null>(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-    const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
-    const { isAuthenticated, user } = useAuth()
-    const { userProfile } = useUserProfile()
-    const { plans, isLoading: plansLoading, isUserCurrentPlan } = usePricingPlans()
-    const { initiatePayment, isLoading: paymentLoading } = usePaymentFlow()
+    const {isLoading, isSuccess, error, submitLink} = useLinkProcessor()
+    const {isAuthenticated, user, setRedirectIntent, setPendingLinkData, getPendingLinkData} = useAuth()
+    const {userProfile} = useUserProfile()
+    const {plans, isLoading: plansLoading, isUserCurrentPlan} = usePricingPlans()
+    const {initiatePayment, isLoading: paymentLoading} = usePaymentFlow()
 
     // Cache user data on landing page load (called once when authenticated)
     useEffect(() => {
@@ -170,14 +172,33 @@ export default function Home() {
         if (!isAuthenticated) {
             return {
                 text: 'Get Started',
-                action: () => setShowAuthDialog(true)
+                action: () => {
+                    // Set redirect intent for premium plans
+                    if (!isFree && planName) {
+                        setRedirectIntent('payment', planName)
+                    } else {
+                        setRedirectIntent('dashboard')
+                    }
+                    setShowAuthDialog(true)
+                },
+                disabled: false
+            }
+        }
+
+        // If user is pro and this is the free plan, disable the button
+        if (isFree && userProfile?.subscription_type === 'premium') {
+            return {
+                text: 'Get Started Free',
+                action: () => {},
+                disabled: true
             }
         }
 
         if (userProfile?.user_subscribed) {
             return {
                 text: 'Go to Dashboard',
-                action: () => window.location.href = '/dashboard'
+                action: () => window.location.href = '/dashboard',
+                disabled: false
             }
         }
 
@@ -185,7 +206,8 @@ export default function Home() {
         if (isFree) {
             return {
                 text: 'Get Started Free',
-                action: () => window.location.href = '/dashboard'
+                action: () => window.location.href = '/dashboard',
+                disabled: false
             }
         }
 
@@ -196,7 +218,8 @@ export default function Home() {
                 if (planName) {
                     initiatePayment(planName, () => setShowAuthDialog(true))
                 }
-            }
+            },
+            disabled: false
         }
     }
 
@@ -205,7 +228,7 @@ export default function Home() {
 
         // If user is not authenticated, show auth dialog
         if (!isAuthenticated) {
-            setPendingLinkData({ url, format: selectedFormat, customPrompt })
+            setPendingLinkData({url, format: selectedFormat, customPrompt})
             setShowAuthDialog(true)
             return
         }
@@ -215,24 +238,31 @@ export default function Home() {
     }
 
 
-
     return (
         <div className="min-h-screen bg-[#EFEEEA]">
             {/* Floating Navigation */}
-            <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#EFEEEA]/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)]">
+            <nav
+                className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#EFEEEA]/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)]">
                 <div className="px-8 py-4 flex items-center justify-between w-[900px] max-w-[calc(100vw-48px)]">
                     {/* Logo */}
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
-                            <svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="16" height="16" viewBox="0 0 14 14" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
                                 <g clipPath="url(#clip0_1222_36625)">
-                                    <path d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M6 0.5H8M8 13.5H6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M0.500001 8L0.5 6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678"
+                                          stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678"
+                                          stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M6 0.5H8M8 13.5H6" stroke="white" strokeLinecap="round"
+                                          strokeLinejoin="round"/>
+                                    <path d="M0.500001 8L0.5 6" stroke="white" strokeLinecap="round"
+                                          strokeLinejoin="round"/>
                                     <path d="M13.5002 8V6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933"
+                                          stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933"
+                                          stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M7 10V4" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M5 6L7 4L9 6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
                                 </g>
@@ -268,7 +298,7 @@ export default function Home() {
                                        className="bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[13px] font-medium py-2 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer">
                                         Go to Dashboard
                                     </a>
-                                    <UserDropdown />
+                                    <UserDropdown/>
                                 </>
                             ) : (
                                 <button
@@ -286,13 +316,14 @@ export default function Home() {
                         className="md:hidden p-2 text-black/60 hover:text-black/85 transition-colors duration-200"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
-                        {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        {mobileMenuOpen ? <X className="w-5 h-5"/> : <Menu className="w-5 h-5"/>}
                     </button>
                 </div>
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
+                    <div
+                        className="md:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
                         <div className="py-4 px-6 space-y-4">
                             <a href="#pricing"
                                className="block text-black/60 hover:text-black/85 font-medium cursor-pointer text-[15px] transition-colors duration-200"
@@ -315,13 +346,14 @@ export default function Home() {
                                         </a>
                                         <div className="flex items-center space-x-3 px-2">
                                             <Image
-                                                src={user?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
+                                                src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
                                                 alt="Profile"
                                                 width={32}
                                                 height={32}
                                                 className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
                                             />
-                                            <span className="text-[15px] font-medium text-black/85">{user?.name || 'User'}</span>
+                                            <span
+                                                className="text-[15px] font-medium text-black/85">{user?.name || 'User'}</span>
                                         </div>
                                     </div>
                                 ) : (
@@ -329,7 +361,7 @@ export default function Home() {
                                         className="w-full bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white text-[15px] font-medium py-3 px-4 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 active:scale-[0.98] cursor-pointer"
                                         onClick={() => {
                                             setMobileMenuOpen(false)
-                                            setShowLoginModal(true)
+                                            setShowAuthDialog(true)
                                         }}>
                                         Get Started
                                     </button>
@@ -354,54 +386,58 @@ export default function Home() {
                     </h1>
 
 
-                      <p className="text-[16px] sm:text-[18px] lg:text-xl text-center text-gray-600 leading-relaxed max-w-2xl mx-auto px-4">
-      Send
-      <span
-        className="mx-1 sm:mx-2 inline-block bg-blue-400 rounded-sm"
-        style={{ transform: 'skew(-10deg)' }}
-      >
-        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]" style={{ transform: 'skew(10deg)' }}>
+                    <p className="text-[16px] sm:text-[18px] lg:text-xl text-center text-gray-600 leading-relaxed max-w-2xl mx-auto px-4">
+                        Send
+                        <span
+                            className="mx-1 sm:mx-2 inline-block bg-blue-400 rounded-sm"
+                            style={{transform: 'skew(-10deg)'}}
+                        >
+        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]"
+              style={{transform: 'skew(10deg)'}}>
           web pages
         </span>
       </span>,
-      <span
-        className="mx-1 sm:mx-2 inline-block bg-purple-500 rounded-sm"
-        style={{ transform: 'skew(-10deg)' }}
-      >
-        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]" style={{ transform: 'skew(10deg)' }}>
+                        <span
+                            className="mx-1 sm:mx-2 inline-block bg-purple-500 rounded-sm"
+                            style={{transform: 'skew(-10deg)'}}
+                        >
+        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]"
+              style={{transform: 'skew(10deg)'}}>
           newsletters
         </span>
       </span>
-      ,
-      <span
-        className="mx-1 sm:mx-2 inline-block bg-rose-500 rounded-sm"
-        style={{ transform: 'skew(-10deg)' }}
-      >
-        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]" style={{ transform: 'skew(10deg)' }}>
+                        ,
+                        <span
+                            className="mx-1 sm:mx-2 inline-block bg-rose-500 rounded-sm"
+                            style={{transform: 'skew(-10deg)'}}
+                        >
+        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]"
+              style={{transform: 'skew(10deg)'}}>
           podcasts
         </span>
       </span>
-      ,
-      <span
-        className="mx-1 sm:mx-2 inline-block bg-amber-500 rounded-sm"
-        style={{ transform: 'skew(-10deg)' }}
-      >
-        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]" style={{ transform: 'skew(10deg)' }}>
+                        ,
+                        <span
+                            className="mx-1 sm:mx-2 inline-block bg-amber-500 rounded-sm"
+                            style={{transform: 'skew(-10deg)'}}
+                        >
+        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]"
+              style={{transform: 'skew(10deg)'}}>
           videos
         </span>
       </span>
-      &
-      <span
-        className="mx-1 sm:mx-2 inline-block bg-emerald-400 rounded-sm"
-        style={{ transform: 'skew(-10deg)' }}
-      >
-        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]" style={{ transform: 'skew(10deg)' }}>
+                        &
+                        <span
+                            className="mx-1 sm:mx-2 inline-block bg-emerald-400 rounded-sm"
+                            style={{transform: 'skew(-10deg)'}}
+                        >
+        <span className="px-1.5 sm:px-2 inline-block text-white font-semibold text-[12px] sm:text-[14px]"
+              style={{transform: 'skew(10deg)'}}>
           threads
         </span>
       </span>
-      to the comfortable screen of your Kindle. No more eye strain.
-    </p>
-
+                        to the comfortable screen of your Kindle. No more eye strain.
+                    </p>
 
 
                     {/* macOS Native Input Box */}
@@ -426,81 +462,81 @@ export default function Home() {
                                         />
                                     </div>
 
-                                {/* Format Selection */}
-                                <div>
-                                    <label
-                                        className="text-[12px] sm:text-[13px] font-medium text-black/60 uppercase tracking-[0.4px] mb-2 sm:mb-3 block text-center">
-                                        Choose your format:
-                                    </label>
-                                    <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center">
-                                        {['Just PDF', 'Summarize', 'Learning Ready', 'Custom'].map((format) => (
-                                            <button
-                                                key={format}
-                                                type="button"
-                                                onClick={() => setSelectedFormat(format)}
-                                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] text-[12px] sm:text-[13px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
-                                                    selectedFormat === format
-                                                        ? 'bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]'
-                                                        : 'bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]'
-                                                }`}
-                                                disabled={isLoading}
-                                            >
-                                                {format}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Custom Description - Only show when Custom is selected */}
-                                {selectedFormat === 'Custom' && (
+                                    {/* Format Selection */}
                                     <div>
                                         <label
                                             className="text-[12px] sm:text-[13px] font-medium text-black/60 uppercase tracking-[0.4px] mb-2 sm:mb-3 block text-center">
-                                            Describe how you want it:
+                                            Choose your format:
                                         </label>
-                                        <textarea
-                                            value={customPrompt}
-                                            onChange={(e) => setCustomPrompt(e.target.value)}
-                                            placeholder="e.g., 'Make it a study guide with key points highlighted'"
-                                            className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 resize-none cursor-text ${
-                                                error && selectedFormat === 'Custom' && !customPrompt.trim()
-                                                    ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                                                    : 'border-black/[0.08] focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20'
-                                            }`}
-                                            rows={3}
-                                            disabled={isLoading}
-                                        />
+                                        <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center">
+                                            {['Just PDF', 'Summarize', 'Learning Ready', 'Custom'].map((format) => (
+                                                <button
+                                                    key={format}
+                                                    type="button"
+                                                    onClick={() => setSelectedFormat(format)}
+                                                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] text-[12px] sm:text-[13px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
+                                                        selectedFormat === format
+                                                            ? 'bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]'
+                                                            : 'bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]'
+                                                    }`}
+                                                    disabled={isLoading}
+                                                >
+                                                    {format}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
 
-                                {/* Primary Action */}
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className={`w-full text-white text-[12px] sm:text-[13px] font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 flex items-center justify-center ${
-                                        isLoading
-                                            ? 'bg-brand-primary/70 cursor-not-allowed'
-                                            : isSuccess
-                                                ? 'bg-green-500 hover:bg-green-600'
-                                                : 'bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 active:scale-[0.98] cursor-pointer'
-                                    }`}>
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 animate-spin"/>
-                                            Processing...
-                                        </>
-                                    ) : isSuccess ? (
-                                        <>
-                                            <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2"/>
-                                            Sent!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Cast className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2"/>
-                                            Send to My Kindle
-                                        </>
+                                    {/* Custom Description - Only show when Custom is selected */}
+                                    {selectedFormat === 'Custom' && (
+                                        <div>
+                                            <label
+                                                className="text-[12px] sm:text-[13px] font-medium text-black/60 uppercase tracking-[0.4px] mb-2 sm:mb-3 block text-center">
+                                                Describe how you want it:
+                                            </label>
+                                            <textarea
+                                                value={customPrompt}
+                                                onChange={(e) => setCustomPrompt(e.target.value)}
+                                                placeholder="e.g., 'Make it a study guide with key points highlighted'"
+                                                className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] border rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 resize-none cursor-text ${
+                                                    error && selectedFormat === 'Custom' && !customPrompt.trim()
+                                                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                                                        : 'border-black/[0.08] focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20'
+                                                }`}
+                                                rows={3}
+                                                disabled={isLoading}
+                                            />
+                                        </div>
                                     )}
-                                </button>
+
+                                    {/* Primary Action */}
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className={`w-full text-white text-[12px] sm:text-[13px] font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-[8px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-150 flex items-center justify-center ${
+                                            isLoading
+                                                ? 'bg-brand-primary/70 cursor-not-allowed'
+                                                : isSuccess
+                                                    ? 'bg-green-500 hover:bg-green-600'
+                                                    : 'bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 active:scale-[0.98] cursor-pointer'
+                                        }`}>
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 animate-spin"/>
+                                                Processing...
+                                            </>
+                                        ) : isSuccess ? (
+                                            <>
+                                                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2"/>
+                                                Sent!
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Cast className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2"/>
+                                                Send to My Kindle
+                                            </>
+                                        )}
+                                    </button>
 
 
                                 </div>
@@ -535,7 +571,8 @@ export default function Home() {
                                     Paste Any Link or Upload Content
                                 </h3>
                                 <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 leading-relaxed">
-                                    Simply paste a webpage URL, upload a document, or add text content. Our AI instantly extracts and cleans the content, removing ads, sidebars, and distractions.
+                                    Simply paste a webpage URL, upload a document, or add text content. Our AI instantly
+                                    extracts and cleans the content, removing ads, sidebars, and distractions.
                                 </p>
                                 <ul className="space-y-3">
                                     <li className="flex items-center space-x-3">
@@ -544,7 +581,8 @@ export default function Home() {
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">YouTube transcripts</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">YouTube transcripts</span>
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
@@ -553,7 +591,7 @@ export default function Home() {
                                 </ul>
                             </div>
                             <div className="mt-8 lg:mt-0">
-                                <FeatureImage color="bg-blue-500" />
+                                <FeatureImage color="bg-blue-500"/>
                             </div>
                         </div>
 
@@ -564,7 +602,8 @@ export default function Home() {
                                     AI-Powered Content Processing
                                 </h3>
                                 <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 leading-relaxed">
-                                    Our advanced AI engine analyzes your content, removes clutter, optimizes formatting, and structures it perfectly for comfortable Kindle reading.
+                                    Our advanced AI engine analyzes your content, removes clutter, optimizes formatting,
+                                    and structures it perfectly for comfortable Kindle reading.
                                 </p>
                                 <ul className="space-y-3">
                                     <li className="flex items-center space-x-3">
@@ -577,12 +616,13 @@ export default function Home() {
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-secondary rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">Kindle-specific layout</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">Kindle-specific layout</span>
                                     </li>
                                 </ul>
                             </div>
                             <div className="mt-8 lg:mt-0 lg:order-1">
-                                <FeatureImage color="bg-purple-500" />
+                                <FeatureImage color="bg-purple-500"/>
                             </div>
                         </div>
 
@@ -593,25 +633,29 @@ export default function Home() {
                                     Perfect Kindle Formatting
                                 </h3>
                                 <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 leading-relaxed">
-                                    Every document is optimized for your Kindle device with proper typography, spacing, and layout that makes reading comfortable and enjoyable.
+                                    Every document is optimized for your Kindle device with proper typography, spacing,
+                                    and layout that makes reading comfortable and enjoyable.
                                 </p>
                                 <ul className="space-y-3">
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">Optimized typography</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">Optimized typography</span>
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">Perfect line spacing</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">Perfect line spacing</span>
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">Chapter organization</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">Chapter organization</span>
                                     </li>
                                 </ul>
                             </div>
                             <div className="mt-8 lg:mt-0">
-                                <FeatureImage color="bg-pink-500" />
+                                <FeatureImage color="bg-pink-500"/>
                             </div>
                         </div>
 
@@ -622,7 +666,8 @@ export default function Home() {
                                     Instant Kindle Delivery
                                 </h3>
                                 <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 leading-relaxed">
-                                    Your perfectly formatted document is instantly sent to your Kindle device or app. Start reading immediately with zero setup required.
+                                    Your perfectly formatted document is instantly sent to your Kindle device or app.
+                                    Start reading immediately with zero setup required.
                                 </p>
                                 <ul className="space-y-3">
                                     <li className="flex items-center space-x-3">
@@ -635,12 +680,13 @@ export default function Home() {
                                     </li>
                                     <li className="flex items-center space-x-3">
                                         <div className="w-2 h-2 bg-brand-accent rounded-full"></div>
-                                        <span className="text-gray-600 text-[15px] sm:text-base">Instant synchronization</span>
+                                        <span
+                                            className="text-gray-600 text-[15px] sm:text-base">Instant synchronization</span>
                                     </li>
                                 </ul>
                             </div>
                             <div className="mt-8 lg:mt-0 lg:order-1">
-                                <FeatureImage color="bg-orange-500" />
+                                <FeatureImage color="bg-orange-500"/>
                             </div>
                         </div>
                     </div>
@@ -663,7 +709,8 @@ export default function Home() {
                         {plansLoading ? (
                             // Loading skeleton
                             <>
-                                <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
+                                <div
+                                    className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
                                     <div className="text-center">
                                         <div className="h-8 bg-gray-300 rounded mb-4"></div>
                                         <div className="h-12 bg-gray-300 rounded mb-6"></div>
@@ -675,7 +722,8 @@ export default function Home() {
                                         <div className="h-12 bg-gray-300 rounded"></div>
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
+                                <div
+                                    className="bg-gray-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-200 animate-pulse">
                                     <div className="text-center">
                                         <div className="h-8 bg-gray-300 rounded mb-4"></div>
                                         <div className="h-12 bg-gray-300 rounded mb-6"></div>
@@ -703,8 +751,10 @@ export default function Home() {
                                         }`}
                                     >
                                         {plan.is_most_popular && (
-                                            <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
-                                                <span className="bg-brand-accent text-brand-primary px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap">
+                                            <div
+                                                className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2">
+                                                <span
+                                                    className="bg-brand-accent text-brand-primary px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap">
                                                     Most Popular
                                                 </span>
                                             </div>
@@ -716,24 +766,29 @@ export default function Home() {
                                             <div className="mb-6">
                                                 {plan.original_price !== plan.discounted_price && plan.original_price > 0 ? (
                                                     <div className="flex flex-col items-center">
-                                                        <span className={`text-lg sm:text-xl font-bold line-through mb-1 ${isFree ? 'text-gray-500' : 'text-white/60'}`}>
+                                                        <span
+                                                            className={`text-lg sm:text-xl font-bold line-through mb-1 ${isFree ? 'text-gray-500' : 'text-white/60'}`}>
                                                             ${plan.original_price.toFixed(2)}
                                                         </span>
                                                         <div className="flex items-baseline">
-                                                            <span className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
+                                                            <span
+                                                                className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
                                                                 ${plan.discounted_price.toFixed(2)}
                                                             </span>
-                                                            <span className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
+                                                            <span
+                                                                className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
                                                                 /{plan.billing_cycle}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-baseline justify-center">
-                                                        <span className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
+                                                        <span
+                                                            className={`text-3xl sm:text-4xl font-bold ${isFree ? 'text-gray-900' : 'text-white'}`}>
                                                             ${plan.discounted_price.toFixed(2)}
                                                         </span>
-                                                        <span className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
+                                                        <span
+                                                            className={`text-sm sm:text-base ml-1 ${isFree ? 'text-gray-600' : 'text-white/80'}`}>
                                                             /{plan.billing_cycle}
                                                         </span>
                                                     </div>
@@ -742,8 +797,10 @@ export default function Home() {
                                             <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 text-left">
                                                 {plan.features.map((feature, index) => (
                                                     <li key={index} className="flex items-center space-x-3">
-                                                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isFree ? 'bg-gray-400' : 'bg-white'}`}></div>
-                                                        <span className={`text-sm sm:text-base ${isFree ? 'text-gray-600' : 'text-white/90'}`}>
+                                                        <div
+                                                            className={`w-2 h-2 rounded-full flex-shrink-0 ${isFree ? 'bg-gray-400' : 'bg-white'}`}></div>
+                                                        <span
+                                                            className={`text-sm sm:text-base ${isFree ? 'text-gray-600' : 'text-white/90'}`}>
                                                             {feature}
                                                         </span>
                                                     </li>
@@ -751,18 +808,18 @@ export default function Home() {
                                             </ul>
                                             <Button
                                                 className={`w-full cursor-pointer text-sm sm:text-base ${
-                                                    isCurrentPlan
+                                                    isCurrentPlan || getPricingButtonConfig(plan.name, isFree).disabled
                                                         ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                                         : isFree
                                                             ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                                             : 'bg-white text-brand-primary hover:bg-gray-100'
                                                 } ${paymentLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                onClick={isCurrentPlan ? undefined : getPricingButtonConfig(plan.name, isFree).action}
-                                                disabled={isCurrentPlan || paymentLoading}
+                                                onClick={isCurrentPlan || getPricingButtonConfig(plan.name, isFree).disabled ? undefined : getPricingButtonConfig(plan.name, isFree).action}
+                                                disabled={isCurrentPlan || paymentLoading || getPricingButtonConfig(plan.name, isFree).disabled}
                                             >
                                                 {paymentLoading ? (
                                                     <div className="flex items-center justify-center space-x-2">
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <Loader2 className="w-4 h-4 animate-spin"/>
                                                         <span>Processing...</span>
                                                     </div>
                                                 ) : isCurrentPlan ? (
@@ -839,13 +896,14 @@ export default function Home() {
                             Ready to Transform Your Reading?
                         </h2>
                         <p className="text-[18px] sm:text-[20px] lg:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                            Join thousands of readers who've already upgraded their digital reading experience. Start converting your content today.
+                            Join thousands of readers who've already upgraded their digital reading experience. Start
+                            converting your content today.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
                             <Button
                                 size="xl"
                                 className="bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-4 text-lg font-medium shadow-lg"
-                                onClick={() => setShowLoginModal(true)}
+                                onClick={() => setShowAuthDialog(true)}
                             >
                                 Start Free Trial
                             </Button>
@@ -874,18 +932,30 @@ export default function Home() {
                         {/* Brand Section */}
                         <div className="lg:col-span-5 space-y-8">
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center">
-                                    <svg width="24" height="24" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <div
+                                    className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center">
+                                    <svg width="56" height="56" viewBox="0 0 14 14" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
                                         <g clipPath="url(#clip0_footer)">
-                                            <path d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M6 0.5H8M8 13.5H6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M0.500001 8L0.5 6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M13.5002 8V6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M7 10V4" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M5 6L7 4L9 6" stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path
+                                                d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678"
+                                                stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678"
+                                                  stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M6 0.5H8M8 13.5H6" stroke="white" strokeLinecap="round"
+                                                  strokeLinejoin="round"/>
+                                            <path d="M0.500001 8L0.5 6" stroke="white" strokeLinecap="round"
+                                                  strokeLinejoin="round"/>
+                                            <path d="M13.5002 8V6" stroke="white" strokeLinecap="round"
+                                                  strokeLinejoin="round"/>
+                                            <path d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933"
+                                                  stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933"
+                                                  stroke="white" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M7 10V4" stroke="white" strokeLinecap="round"
+                                                  strokeLinejoin="round"/>
+                                            <path d="M5 6L7 4L9 6" stroke="white" strokeLinecap="round"
+                                                  strokeLinejoin="round"/>
                                         </g>
                                         <defs>
                                             <clipPath id="clip0_footer">
@@ -894,26 +964,19 @@ export default function Home() {
                                         </defs>
                                     </svg>
                                 </div>
-                                <span className="font-bold text-white text-2xl">Kinddy</span>
+                                <span className="font-bold text-white text-4xl">Kinddy</span>
                             </div>
                             <p className="text-white/70 text-lg leading-relaxed max-w-md">
                                 Transform any digital content into comfortable, eye-friendly Kindle reading experiences.
-                                Save your eyes, enhance your reading, and enjoy content the way it was meant to be consumed.
+                                Save your eyes, enhance your reading, and enjoy content the way it was meant to be
+                                consumed.
                             </p>
-                            <div className="space-y-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                                    <span className="text-white/60">2,847+ active readers</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-2 h-2 bg-brand-secondary rounded-full"></div>
-                                    <span className="text-white/60">50,000+ documents converted</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                                    <span className="text-white/60">99.9% uptime guarantee</span>
-                                </div>
-                            </div>
+                            {/*<div className="space-y-4">*/}
+                            {/*    <div className="flex items-center space-x-3">*/}
+                            {/*        <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>*/}
+                            {/*        <span className="text-white/60">99.9% uptime guarantee</span>*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
                         </div>
 
                         {/* Navigation Links */}
@@ -921,33 +984,76 @@ export default function Home() {
                             <div className="space-y-6">
                                 <h4 className="font-semibold text-white text-lg">Product</h4>
                                 <ul className="space-y-4 text-white/60">
-                                    <li><a href="#pricing" className="hover:text-white transition-colors cursor-pointer text-base">Pricing</a></li>
-                                    <li><a href="#faq" className="hover:text-white transition-colors cursor-pointer text-base">FAQ</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">API</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Integrations</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Chrome Extension</a></li>
+                                    <li><a href="#pricing"
+                                           className="hover:text-white transition-colors cursor-pointer text-base">Pricing</a>
+                                    </li>
+                                    <li><a href="#faq"
+                                           className="hover:text-white transition-colors cursor-pointer text-base">FAQ</a>
+                                    </li>
+                                    <li><a href="#"
+                                           className="hover:text-white transition-colors cursor-pointer text-base">Chrome
+                                        Extension (Coming Soon)</a></li>
                                 </ul>
                             </div>
 
                             <div className="space-y-6">
                                 <h4 className="font-semibold text-white text-lg">Support</h4>
                                 <ul className="space-y-4 text-white/60">
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Help Center</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Contact Us</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Status Page</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Bug Reports</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Feature Requests</a></li>
+                                    <li>
+                                        <a
+                                            href="mailto:support@kinddy.com?subject=Help%20Center%20Inquiry&body=Hi%20Kinddy%2C%0A%0AI%20need%20help%20with..."
+                                            className="hover:text-white transition-colors cursor-pointer text-base"
+                                        >
+                                            Help Center
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="mailto:support@kinddy.com?subject=Contact%20Us%20Inquiry&body=Hi%20Kinddy%2C%0A%0AI%20want%20to%20get%20in%20touch..."
+                                            className="hover:text-white transition-colors cursor-pointer text-base"
+                                        >
+                                            Contact Us
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="mailto:support@kinddy.com?subject=Status%20Page%20Inquiry&body=Hi%20Kinddy%2C%0A%0AI%20want%20to%20check%20the%20status..."
+                                            className="hover:text-white transition-colors cursor-pointer text-base"
+                                        >
+                                            Status Page
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="mailto:support@kinddy.com?subject=Bug%20Report&body=Hi%20Kinddy%2C%0A%0AI%20found%20a%20bug..."
+                                            className="hover:text-white transition-colors cursor-pointer text-base"
+                                        >
+                                            Bug Reports
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="mailto:support@kinddy.com?subject=Feature%20Request&body=Hi%20Kinddy%2C%0A%0AI%20would%20love%20to%20see..."
+                                            className="hover:text-white transition-colors cursor-pointer text-base"
+                                        >
+                                            Feature Requests
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
 
                             <div className="space-y-6">
                                 <h4 className="font-semibold text-white text-lg">Legal</h4>
                                 <ul className="space-y-4 text-white/60">
-                                    <li><a href="/privacy-policy" className="hover:text-white transition-colors cursor-pointer text-base">Privacy Policy</a></li>
-                                    <li><a href="/terms-of-service" className="hover:text-white transition-colors cursor-pointer text-base">Terms of Service</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Cookie Policy</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">GDPR</a></li>
-                                    <li><a href="#" className="hover:text-white transition-colors cursor-pointer text-base">Refund Policy</a></li>
+                                    <li><a href="/privacy-policy"
+                                           className="hover:text-white transition-colors cursor-pointer text-base">Privacy
+                                        Policy</a></li>
+                                    <li><a href="/terms-of-service"
+                                           className="hover:text-white transition-colors cursor-pointer text-base">Terms
+                                        of Service</a></li>
+                                    {/*<li><a href="/refund-policy"*/}
+                                    {/*       className="hover:text-white transition-colors cursor-pointer text-base">Refund*/}
+                                    {/*    Policy</a></li>*/}
                                 </ul>
                             </div>
                         </div>
@@ -956,11 +1062,12 @@ export default function Home() {
                     {/* Big Kinddy Text */}
                     <div className="text-center mb-8">
                         <h2 className="text-8xl sm:text-9xl lg:text-[12rem] font-bold text-white tracking-tight mb-6">
-                            <span className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent drop-shadow-2xl"
-                                  style={{
-                                      textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(255,255,255,0.4), 0 0 120px rgba(255,255,255,0.2)',
-                                      filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.5))'
-                                  }}>
+                            <span
+                                className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent drop-shadow-2xl"
+                                style={{
+                                    textShadow: '0 0 40px rgba(255,255,255,0.6), 0 0 80px rgba(255,255,255,0.4), 0 0 120px rgba(255,255,255,0.2)',
+                                    filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.5))'
+                                }}>
                                 Kinddy
                             </span>
                         </h2>
@@ -983,8 +1090,11 @@ export default function Home() {
             <AuthDialog
                 isOpen={showAuthDialog}
                 onClose={() => setShowAuthDialog(false)}
-                linkData={pendingLinkData || undefined}
+                linkData={getPendingLinkData() || undefined}
             />
+
+            {/* SEO Structured Data */}
+            <HomePageStructuredData />
         </div>
     )
 }

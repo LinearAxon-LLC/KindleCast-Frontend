@@ -1,14 +1,17 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TokenManager } from '@/lib/auth'
 import { AuthTokens } from '@/types/api'
+import { useAuth } from '@/contexts/AuthContext'
+import { usePaymentFlow } from '@/hooks/usePayment'
 
-
-export default function AuthSuccessPage() {
+function AuthSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { getRedirectIntent, clearRedirectIntent } = useAuth()
+  const { initiatePayment } = usePaymentFlow()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
@@ -61,9 +64,21 @@ export default function AuthSuccessPage() {
 
         setStatus('success')
 
-        // Redirect to dashboard after a brief delay
+        // Handle redirect intent after a brief delay
         setTimeout(() => {
-          router.push('/dashboard')
+          const redirectIntent = getRedirectIntent()
+
+          if (redirectIntent.intent === 'payment' && redirectIntent.planName) {
+            // Clear the intent and initiate payment
+            clearRedirectIntent()
+            initiatePayment(redirectIntent.planName, () => {
+              // Fallback to dashboard if payment fails
+              router.push('/dashboard')
+            })
+          } else {
+            // Default redirect to dashboard
+            router.push('/dashboard')
+          }
         }, 1500)
 
       } catch (error) {
@@ -132,5 +147,20 @@ export default function AuthSuccessPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#EFEEEA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#273F4F]/70">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AuthSuccessContent />
+    </Suspense>
   )
 }

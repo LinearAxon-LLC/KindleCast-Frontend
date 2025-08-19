@@ -69,7 +69,7 @@ export function ErrorDisplay({
         <div className="flex items-start gap-3">
           {showIcon && getErrorIcon()}
           <div className="flex-1">
-            <h3 className={`${text.small} font-semibold text-red-800 mb-1`}>
+            <h3 className={`${text.caption} font-semibold text-red-800 mb-1`}>
               {getErrorTitle()}
             </h3>
             <p className={`${text.caption} text-red-700`}>

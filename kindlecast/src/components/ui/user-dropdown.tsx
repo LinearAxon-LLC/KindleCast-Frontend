@@ -57,11 +57,11 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
         className="flex items-center space-x-2 p-1 rounded-full hover:bg-black/5 transition-colors duration-200"
       >
         <img
-          src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
+          src={user.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
           alt={user.name || 'User'}
           className="w-8 h-8 rounded-full border-2 border-brand-primary/20 object-cover"
           onError={(e) => {
-            e.currentTarget.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"
+            e.currentTarget.src = "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
           }}
         />
       </button>
@@ -73,11 +73,11 @@ export function UserDropdown({ className = '' }: UserDropdownProps) {
           <div className="px-4 py-3 border-b border-black/[0.08]">
             <div className="flex items-center space-x-3">
               <img
-                src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"}
+                src={user.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
                 alt={user.name || 'User'}
                 className="w-8 h-8 rounded-full border-2 border-brand-primary/20 object-cover"
                 onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format"
+                  e.currentTarget.src = "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
                 }}
               />
               <div className="flex-1 min-w-0">

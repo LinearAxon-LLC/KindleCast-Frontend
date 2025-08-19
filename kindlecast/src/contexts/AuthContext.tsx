@@ -14,6 +14,12 @@ interface AuthContextType {
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
+  setRedirectIntent: (intent: 'payment' | 'dashboard' | null, planName?: string) => void
+  getRedirectIntent: () => { intent: 'payment' | 'dashboard' | null; planName?: string }
+  clearRedirectIntent: () => void
+  setPendingLinkData: (data: { url: string; format: string; customPrompt?: string } | null) => void
+  getPendingLinkData: () => { url: string; format: string; customPrompt?: string } | null
+  clearPendingLinkData: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -22,6 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [redirectIntent, setRedirectIntentState] = useState<{ intent: 'payment' | 'dashboard' | null; planName?: string }>({ intent: null })
+  const [pendingLinkData, setPendingLinkDataState] = useState<{ url: string; format: string; customPrompt?: string } | null>(null)
   const toast = useToastHelpers()
 
   const fetchCurrentUser = useCallback(async () => {
@@ -150,6 +158,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, toast, fetchCurrentUser])
 
+  // Redirect intent management
+  const setRedirectIntent = useCallback((intent: 'payment' | 'dashboard' | null, planName?: string) => {
+    setRedirectIntentState({ intent, planName })
+  }, [])
+
+  const getRedirectIntent = useCallback(() => {
+    return redirectIntent
+  }, [redirectIntent])
+
+  const clearRedirectIntent = useCallback(() => {
+    setRedirectIntentState({ intent: null })
+  }, [])
+
+  // Pending link data management
+  const setPendingLinkData = useCallback((data: { url: string; format: string; customPrompt?: string } | null) => {
+    setPendingLinkDataState(data)
+  }, [])
+
+  const getPendingLinkData = useCallback(() => {
+    return pendingLinkData
+  }, [pendingLinkData])
+
+  const clearPendingLinkData = useCallback(() => {
+    setPendingLinkDataState(null)
+  }, [])
+
   const value = {
     user,
     isLoading,
@@ -157,7 +191,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     refreshUser,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    setRedirectIntent,
+    getRedirectIntent,
+    clearRedirectIntent,
+    setPendingLinkData,
+    getPendingLinkData,
+    clearPendingLinkData
   }
 
   return (

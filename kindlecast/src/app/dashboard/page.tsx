@@ -28,9 +28,9 @@ function DashboardContent() {
   // Cache all tab components to prevent re-rendering and flickering
   const cachedComponents = useMemo(() => ({
     home: <HomePage onSwitchTab={setActiveTab} />,
-    history: <HistoryPage />,
+    history: <HistoryPage isActive={activeTab === 'history'} />,
     settings: <SettingsPage />
-  }), [])
+  }), [activeTab])
 
   // Show loading state
   if (isLoading) {
@@ -58,8 +58,7 @@ function DashboardContent() {
               <div className="h-full flex flex-col">
                 {userProfile && (
                   <TrialStatusBanner
-                    userSubscribed={userProfile.user_subscribed}
-                    trialDaysRemaining={12}
+                    subscriptionType={userProfile.subscription_type}
                   />
                 )}
                 <div className="flex-1 overflow-hidden">

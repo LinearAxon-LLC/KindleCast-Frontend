@@ -56,7 +56,7 @@ export default function InternalServerError() {
             <AlertTriangle className="w-5 h-5 text-orange-500" />
             <h3 className={`${text.componentTitle}`}>Service Status</h3>
           </div>
-          <p className={`${text.small} text-[#273F4F]/70 mb-4`}>
+          <p className={`${text.caption} mb-4`}>
             If this problem persists, you can check our service status or contact support.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
