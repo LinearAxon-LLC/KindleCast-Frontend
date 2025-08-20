@@ -10,37 +10,40 @@ export interface LinkProcessRequest {
 export interface LinkProcessResponse {
   status: boolean;
   message: string;
+  preview_link: string | null;
 }
 
 // Frontend format mapping
 export const FORMAT_MAPPING: Record<string, string> = {
-  'Just PDF': 'epub',
-  'Summarize': 'summarize', 
-  'Learning Ready': 'learning',
-  'Custom': 'custom'
+  "Quick Send": "quick send",
+  Summarize: "summarize",
+  "Study Guide": "study guide",
+  Custom: "custom",
 };
 
 // API configuration
 export const API_CONFIG = {
+
   BASE_URL: process.env.NODE_ENV === 'production'
     ? 'https://api.kinddy.com'
     : 'http://localhost:8000',
   ENDPOINTS: {
     PROCESS_LINK: '/api/v1/link/process',
     LINK_HISTORY: '/api/v1/link/history',
+
     // Auth endpoints - matching your FastAPI routes
-    AUTH_GOOGLE: '/api/v1/auth/google',
-    AUTH_TWITTER: '/api/v1/auth/x',
-    AUTH_APPLE: '/api/v1/auth/apple',
-    AUTH_EMAIL: '/api/v1/auth/email',
-    AUTH_REFRESH: '/api/v1/auth/refresh',
-    AUTH_ME: '/api/v1/auth/me',
-    AUTH_STATUS: '/api/v1/auth/status',
-    AUTH_LOGOUT: '/api/v1/auth/logout',
+    AUTH_GOOGLE: "/api/v1/auth/google",
+    AUTH_TWITTER: "/api/v1/auth/x",
+    AUTH_APPLE: "/api/v1/auth/apple",
+    AUTH_EMAIL: "/api/v1/auth/email",
+    AUTH_REFRESH: "/api/v1/auth/refresh",
+    AUTH_ME: "/api/v1/auth/me",
+    AUTH_STATUS: "/api/v1/auth/status",
+    AUTH_LOGOUT: "/api/v1/auth/logout",
     // Subscription endpoints
-    SUBSCRIPTION_PLANS: '/api/v1/subscription/plans',
-    SUBSCRIPTION_PAYMENT: '/api/v1/subscription/payment',
-    SUBSCRIPTION_USAGE: '/api/v1/subscription/me',
+    SUBSCRIPTION_PLANS: "/api/v1/subscription/plans",
+    SUBSCRIPTION_PAYMENT: "/api/v1/subscription/payment",
+    SUBSCRIPTION_USAGE: "/api/v1/subscription/me",
     // User info update
     USER_INFO_UPDATE: '/api/v1/user/info-update',
     // Billing portal
@@ -60,7 +63,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  provider: 'google' | 'twitter' | 'apple' | 'email';
+  provider: "google" | "twitter" | "apple" | "email";
   avatar?: string;
   created_at: string;
   subscription_name?: string;
@@ -108,16 +111,26 @@ export interface RefreshTokenResponse {
 export interface APIError {
   detail: string;
   status_code: number;
-  error_type: 'validation' | 'authentication' | 'authorization' | 'rate_limit' | 'server_error' | 'network_error';
+  error_type:
+    | "validation"
+    | "authentication"
+    | "authorization"
+    | "rate_limit"
+    | "server_error"
+    | "network_error";
 }
 
 export class APIException extends Error {
   public statusCode: number;
-  public errorType: APIError['error_type'];
+  public errorType: APIError["error_type"];
 
-  constructor(message: string, statusCode: number, errorType: APIError['error_type']) {
+  constructor(
+    message: string,
+    statusCode: number,
+    errorType: APIError["error_type"]
+  ) {
     super(message);
-    this.name = 'APIException';
+    this.name = "APIException";
     this.statusCode = statusCode;
     this.errorType = errorType;
   }
@@ -128,10 +141,10 @@ export interface SubscriptionPlan {
   name: string;
   display_name: string;
   is_most_popular: boolean;
-  subscription_type: 'free' | 'premium';
+  subscription_type: "free" | "premium";
   original_price: number;
   discounted_price: number;
-  billing_cycle: 'monthly' | 'yearly';
+  billing_cycle: "monthly" | "yearly";
   features: string[];
 }
 
