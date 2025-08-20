@@ -93,11 +93,32 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       await submitLink(processUrl, selectedFormat, customPrompt);
       setPreviewGenerated(true);
     } else if (buttonName === "sendToKindle") {
-      console.log("Send to Kindle button was clicked: ", preview_path);
-      if (preview_path) {
-        console.log("Available:", preview_path);
-      } else {
-        await submitLink(processUrl, selectedFormat, customPrompt);
+      console.log("Send to Kindle button was clicked");
+
+      let filePath = preview_path;
+
+      if (!filePath) {
+        console.log("No preview found, generating first...");
+        filePath = await submitLink(processUrl, selectedFormat, customPrompt);
+        // make sure submitLink returns the path of the generated preview
+      }
+
+      if (filePath) {
+        console.log("Sending mail with:", filePath);
+
+        try {
+          const res = await fetch("/api/send-mail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filePath }),
+          });
+
+          if (!res.ok) throw new Error("Failed to send mail");
+          const data = await res.json();
+          console.log("Mail sent:", data);
+        } catch (err) {
+          console.error("Error sending mail:", err);
+        }
       }
     }
   };

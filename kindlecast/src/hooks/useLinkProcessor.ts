@@ -16,7 +16,7 @@ interface UseLinkProcessorReturn extends UseLinkProcessorState {
     url: string,
     format: string,
     customPrompt?: string
-  ) => Promise<void>;
+  ) => Promise<string | null>;
   resetState: () => void;
 }
 
@@ -63,7 +63,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           error: validationError,
           preview_path: null,
         });
-        return;
+        return null;
       }
 
       // Set loading state
@@ -102,6 +102,8 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
               isSuccess: false,
             }));
           }, 4000);
+
+          return response.preview_link;
         } else {
           // API returned error
           setState({
@@ -110,6 +112,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
             error: response.message || "Failed to process link",
             preview_path: null,
           });
+          return null;
         }
       } catch {
         // Network or other error
@@ -119,6 +122,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           error: "Network error. Please check your connection and try again.",
           preview_path: null,
         });
+        return null;
       }
     },
     []
