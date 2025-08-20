@@ -6,7 +6,7 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { HomePage } from '@/components/dashboard/pages/HomePage'
 import { HistoryPage } from '@/components/dashboard/pages/HistoryPage'
 import { SettingsPage } from '@/components/dashboard/pages/SettingsPage'
-import { TrialStatusBanner } from '@/components/ui/trial-status-banner'
+
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useSearchParams } from 'next/navigation'
@@ -54,16 +54,8 @@ function DashboardContent() {
                 activeTab === tabKey ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
             >
-              {/* Trial Status Banner - Now with singleton API calls */}
-              <div className="h-full flex flex-col">
-                {userProfile && (
-                  <TrialStatusBanner
-                    subscriptionType={userProfile.subscription_type}
-                  />
-                )}
-                <div className="flex-1 overflow-hidden">
-                  {component}
-                </div>
+              <div className="h-full overflow-hidden">
+                {component}
               </div>
             </div>
           ))}

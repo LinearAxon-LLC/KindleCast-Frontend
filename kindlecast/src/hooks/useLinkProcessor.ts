@@ -8,7 +8,7 @@ interface UseLinkProcessorState {
   isLoading: boolean;
   isSuccess: boolean;
   error: string | null;
-  preview_path: string | null;
+  preview_path: string;
 }
 
 interface UseLinkProcessorReturn extends UseLinkProcessorState {
@@ -25,7 +25,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
     isLoading: false,
     isSuccess: false,
     error: null,
-    preview_path: null,
+    preview_path: "",
   });
 
   const resetState = useCallback(() => {
@@ -33,7 +33,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
       isLoading: false,
       isSuccess: false,
       error: null,
-      preview_path: null,
+      preview_path: "",
     });
   }, []);
 
@@ -44,7 +44,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
         isLoading: false,
         isSuccess: false,
         error: null,
-        preview_path: null,
+        preview_path: "",
       });
 
       // Map frontend format to backend format
@@ -61,7 +61,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           isLoading: false,
           isSuccess: false,
           error: validationError,
-          preview_path: null,
+          preview_path: "",
         });
         return;
       }
@@ -71,7 +71,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
         isLoading: true,
         isSuccess: false,
         error: null,
-        preview_path: null,
+        preview_path: "",
       });
 
       try {
@@ -80,7 +80,8 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           url: url.trim(),
           format: backendFormat,
           custom_prompt: customPrompt?.trim() || undefined,
-          include_image: false, // Default to false for now
+          // get include image from state - the switch
+          include_image: false,
         };
 
         // Make the API call
@@ -101,6 +102,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
               ...prev,
               isSuccess: false,
             }));
+
           }, 4000);
         } else {
           // API returned error
@@ -108,7 +110,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
             isLoading: false,
             isSuccess: false,
             error: response.message || "Failed to process link",
-            preview_path: null,
+            preview_path: "",
           });
         }
       } catch {
@@ -117,7 +119,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           isLoading: false,
           isSuccess: false,
           error: "Network error. Please check your connection and try again.",
-          preview_path: null,
+          preview_path: "",
         });
       }
     },

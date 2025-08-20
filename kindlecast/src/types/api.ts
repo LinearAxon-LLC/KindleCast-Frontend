@@ -10,7 +10,7 @@ export interface LinkProcessRequest {
 export interface LinkProcessResponse {
   status: boolean;
   message: string;
-  preview_link: string | null;
+  preview_link: string;
 }
 
 // Frontend format mapping
@@ -177,12 +177,15 @@ export enum ProcessingStatus {
 }
 
 export interface Conversion {
+  uuid: string;
+  thumbnail_url:string;
+  title: string;
+  domain: string;
   source_url: string;
   format_type: string;
-  secondary_format_type: string;
   processing_status: ProcessingStatus;
   processing_time: number;
-  file_id: string;
+  file_download_url: string;
   created_at: string;
 }
 

@@ -5,6 +5,7 @@ import { User } from '@/types/api'
 import { TokenManager, AuthenticatedAPI, OAuthManager, getErrorMessage } from '@/lib/auth'
 import { resilientApiCall } from '@/lib/retry'
 import { useToastHelpers } from '@/components/ui/toast'
+import { trackEvent, identifyUser, resetUser } from '@/lib/analytics'
 
 interface AuthContextType {
   user: User | null
@@ -51,6 +52,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       )
       setUser(userData)
+
+      // Identify user in analytics
+      if (userData) {
+        identifyUser(userData.id, {
+          email: userData.email,
+          name: userData.name,
+          provider: userData.provider,
+          subscription_type: userData.subscription_type,
+          subscription_name: userData.subscription_name,
+        })
+
+        trackEvent('user_authenticated', {
+          user_id: userData.id,
+          provider: userData.provider,
+          subscription_type: userData.subscription_type,
+          subscription_name: userData.subscription_name,
+        })
+      }
     } catch (error) {
       console.error('Failed to fetch user:', error)
       TokenManager.clearTokens()
@@ -115,6 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback((provider: 'google' | 'twitter' | 'apple' | 'email') => {
     try {
+      // Track login attempt
+      trackEvent('login_attempt', { provider })
+
       if (provider === 'google') {
         OAuthManager.initiateGoogleLogin()
       } else if (provider === 'twitter') {
@@ -126,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Login initiation failed:', error)
+      trackEvent('login_failed', { provider, error: error instanceof Error ? error.message : 'Unknown error' })
       toast.error('Login Failed', getErrorMessage(error))
     }
   }, [toast])
@@ -133,8 +156,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       setIsLoading(true)
+
+      // Track logout
+      trackEvent('logout_attempt')
+
       await resilientApiCall(() => AuthenticatedAPI.logout())
       setUser(null)
+
+      // Reset analytics user
+      resetUser()
+
       toast.success('Successfully signed out')
     } catch (error) {
       console.error('Logout failed:', error)

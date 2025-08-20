@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
+import {X, Loader2, CheckCircle, AlertTriangle, MonitorCog} from 'lucide-react'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { text } from '@/lib/typography'
 
@@ -84,7 +84,7 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
         // Success! Close modal and call success callback
         onClose()
         if (onSuccess) {
-          onSuccess()
+          window.location.reload()
         }
       } else {
         setError(result.error || 'Failed to configure device')
@@ -128,7 +128,7 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-brand-primary rounded-[12px] flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-white"/>
+              <MonitorCog className="w-8 h-8 text-white"/>
             </div>
           </div>
 
@@ -201,16 +201,16 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
           {step === 2 && !isConfigured && (
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-[12px]">
-                <h4 className="text-[13px] font-semibold text-blue-800 mb-2">
+                <h4 className="text-[15px] font-semibold text-blue-800 mb-2">
                   Important: Whitelist Our Email
                 </h4>
                 <p className="text-[12px] text-blue-700 mb-3">
-                  To receive content on your Kindle, you must add <strong>{KINDDY_SENDER_EMAIL}</strong> to your approved email list in your Amazon account.
+                  To receive content on your Kindle, you must add <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong> to your approved email list in your Amazon account.
                 </p>
                 <div className="text-[11px] text-blue-600">
                   <p className="mb-1">1. Go to Amazon → Manage Your Content and Devices</p>
                   <p className="mb-1">2. Click "Preferences" → "Personal Document Settings"</p>
-                  <p>3. Add <strong>{KINDDY_SENDER_EMAIL}</strong> to approved email list</p>
+                  <p>3. Add <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong> to approved email list</p>
                 </div>
               </div>
 

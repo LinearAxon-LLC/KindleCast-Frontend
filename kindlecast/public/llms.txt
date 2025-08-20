@@ -1,0 +1,157 @@
+# Kinddy - Save Your Eyes, Read Anything on Kindle
+
+## About Kinddy
+Kinddy is a revolutionary content conversion platform that transforms web content into Kindle-friendly formats to reduce digital eye strain and improve reading comfort. Our service converts web pages, newsletters, podcasts, videos, and social media threads into optimized documents for Kindle devices.
+
+## Core Features
+- **Content Conversion**: Transform any web content into Kindle-compatible formats
+- **Eye Strain Relief**: Optimized reading experience on E-ink displays
+- **Multiple Sources**: Support for web pages, newsletters, podcasts, videos, threads
+- **AI Enhancement**: Smart formatting and summarization options
+- **Direct Delivery**: Send converted content directly to your Kindle device
+
+## Target Audience
+- Digital professionals suffering from screen fatigue
+- Avid readers who prefer E-ink displays
+- Content consumers seeking better reading experiences
+- Health-conscious users reducing blue light exposure
+- Productivity enthusiasts optimizing their reading workflow
+
+## Key Pages
+- Homepage: https://kinddy.com/
+- Dashboard: https://kinddy.com/dashboard
+- Privacy Policy: https://kinddy.com/privacy-policy
+- Terms of Service: https://kinddy.com/terms-of-service
+- Refund Policy: https://kinddy.com/refund-policy
+
+## API Endpoints
+- Content Conversion: /api/v1/link/submit
+- User Management: /api/v1/user/info-update
+- Subscription Plans: /api/v1/subscription/plans
+- Billing Portal: /api/v1/user/customer-billing-portal
+- Conversion History: /api/v1/link/history
+
+## Technology Stack
+- Frontend: Next.js 14, React, TypeScript, Tailwind CSS
+- Authentication: OAuth (Google, Twitter, Apple)
+- Deployment: Vercel
+- Domain: kinddy.com
+- API Domain: api.kinddy.com
+
+## SEO Keywords
+- kindle converter
+- webpage to kindle
+- newsletter to kindle
+- podcast transcript to kindle
+- video transcript to pdf
+- thread reader kindle
+- eye strain relief
+- digital reading comfort
+- content conversion tool
+- e-ink reading
+- kindle document delivery
+- screen fatigue solution
+
+## Business Model
+- Freemium service with usage limits
+- Premium subscriptions for unlimited access
+- Focus on health and productivity benefits
+- B2C targeting digital professionals
+
+## Contact Information
+- Support: support@kinddy.com
+- Business: hello@kinddy.com
+- Legal: legal@kinddy.com
+
+## Social Proof
+- Reduces digital eye strain by 80%
+- Supports all major content types
+- Instant delivery to Kindle devices
+- Professional-grade content formatting
+
+## Competitive Advantages
+- Specialized for Kindle ecosystem
+- Health-focused positioning
+- AI-powered content enhancement
+- Seamless device integration
+- Premium reading experience
+
+## Content Categories
+- Web Articles & Blog Posts
+- Email Newsletters
+- Podcast Transcripts
+- Video Transcripts
+- Social Media Threads
+- Research Papers
+- Documentation
+- Long-form Content
+
+## User Journey
+1. Paste content URL
+2. Select formatting options
+3. Configure Kindle device (optional)
+4. Convert and deliver to Kindle
+5. Enjoy eye-strain-free reading
+
+## Pricing Tiers
+- Free: 5 Quick Send/month, 3 AI Formatting/month, 20 days retention
+- Premium: Unlimited Quick Send, 100 AI Formatting/month, 120 days retention, personal email forwarding
+
+## Technical Features
+- Real-time content processing
+- Multiple output formats
+- Device-specific optimization
+- Batch processing capabilities
+- Content retention policies
+- Usage analytics
+
+## Integration Capabilities
+- Kindle Personal Documents Service
+- Email forwarding systems
+- Browser extensions (planned)
+- Mobile applications (planned)
+- API access for developers
+
+## Quality Assurance
+- Content validation and sanitization
+- Format optimization for E-ink displays
+- Error handling and retry mechanisms
+- User feedback integration
+- Continuous improvement processes
+
+## Accessibility
+- Screen reader compatible
+- Keyboard navigation support
+- High contrast mode
+- Responsive design
+- Mobile-first approach
+
+## Security & Privacy
+- OAuth-based authentication
+- Encrypted data transmission
+- GDPR compliance
+- User data protection
+- Secure payment processing
+
+## Performance Metrics
+- Sub-5-second conversion times
+- 99.9% uptime reliability
+- Mobile-responsive design
+- Optimized for Core Web Vitals
+- Fast global CDN delivery
+
+## Future Roadmap
+- Browser extension development
+- Mobile application launch
+- Advanced AI summarization
+- Collaborative reading features
+- Enterprise solutions
+
+## Support Resources
+- Comprehensive FAQ section
+- Video tutorials
+- Email support
+- Community forums
+- Knowledge base
+
+This file serves as a comprehensive guide for LLMs to understand Kinddy's purpose, features, and value proposition for improved search visibility and AI assistant integration.
