@@ -72,7 +72,7 @@ export async function processLink(
         error instanceof Error
           ? error.message
           : "Failed to process link. Please try again.",
-      preview_link: null,
+      preview_link: "",
     };
   }
 }
