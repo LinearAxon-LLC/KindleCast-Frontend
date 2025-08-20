@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css"
+import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ToastProvider } from "@/components/ui/toast"
 import { ErrorBoundary } from "@/components/auth/ErrorBoundary"
+import { OrganizationSchema } from "@/components/seo/OrganizationSchema"
+import { WebApplicationSchema } from "@/components/seo/WebApplicationSchema"
+import { PostHogProvider } from "@/components/analytics/PostHogProvider"
 
 
 const rubik = Rubik({
@@ -98,48 +102,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'Kinddy',
-    alternateName: 'Kinddy - Kindle Content Converter',
-    description: 'Transform web pages, newsletters, podcasts, videos and threads into perfectly formatted Kindle reading. Reduce eye strain with smart content conversion.',
-    url: 'https://kinddy.com',
-    applicationCategory: 'ProductivityApplication',
-    operatingSystem: 'Web Browser',
-    browserRequirements: 'Requires JavaScript. Requires HTML5.',
-    offers: [
-      {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-        name: 'Free Plan',
-        description: 'Free tier with 5 Quick Send per month and 3 AI Formatting per month'
-      },
-      {
-        '@type': 'Offer',
-        price: '9.99',
-        priceCurrency: 'USD',
-        name: 'Premium Plan',
-        description: 'Unlimited Quick Send, 100 AI Formatting per month, 120 days retention, personal email forwarding'
-      }
-    ],
-    creator: {
-      '@type': 'Organization',
-      name: 'Kinddy Team',
-      url: 'https://kinddy.com'
-    },
-    featureList: [
-      'Convert web pages to Kindle format',
-      'Newsletter to Kindle conversion',
-      'Podcast transcript extraction',
-      'Video transcript to PDF',
-      'Thread reader for Kindle',
-      'AI-powered content summarization',
-      'Custom formatting options',
-      'Direct Kindle delivery'
-    ]
-  };
+
 
   return (
     <html lang="en">
@@ -160,8 +123,8 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/logo_send.svg" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
 
         {/* Preconnect to external domains */}
@@ -172,19 +135,27 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <OrganizationSchema />
+        <WebApplicationSchema />
       </head>
       <body className={`${rubik.variable} font-sans antialiased bg-[#EFEEEA]`}>
         <ErrorBoundary>
-          <ToastProvider>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          </ToastProvider>
+          <PostHogProvider>
+            <ToastProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </ToastProvider>
+          </PostHogProvider>
         </ErrorBoundary>
+          {/* ✅ Umami Analytics Script */}
+        {process.env.NODE_ENV === "production" && (
+    <Script
+      src="https://cloud.umami.is/script.js"
+      data-website-id="c3d85e7a-1e9a-44fb-8d49-f01b2ccdf879"
+      strategy="afterInteractive"
+    />
+  )}
       </body>
     </html>
   );

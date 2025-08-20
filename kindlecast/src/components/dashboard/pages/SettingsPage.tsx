@@ -27,6 +27,7 @@ export function SettingsPage() {
   const currentPlan = getUserCurrentPlan(user?.subscription_name)
   const premiumPlan = plans.find(plan => plan.subscription_type.toLowerCase() === 'premium')
   const isFreePlan =  currentPlan?.subscription_type.toLowerCase() === 'free'
+  const isPremiumPlan =  currentPlan?.subscription_type.toLowerCase() === 'premium'
 
   const handleUpgrade = () => {
     setShowUpgradeModal(true)
@@ -38,7 +39,7 @@ export function SettingsPage() {
 
   const handleDeviceConfigured = () => {
     // Refresh user profile to get updated data
-    // The modal will close itself on success
+    window.location.reload()
   }
 
   return (
@@ -201,7 +202,8 @@ export function SettingsPage() {
               </div>
             )}
 
-            <div className="flex gap-3 mt-4">
+            {isPremiumPlan && (
+                <div className="flex gap-3 mt-4">
               <button
                 onClick={openBillingPortal}
                 disabled={billingLoading}
@@ -219,6 +221,7 @@ export function SettingsPage() {
                 Update Payment Method
               </button>
             </div>
+            )}
           </div>
 
           {/* Danger Zone */}

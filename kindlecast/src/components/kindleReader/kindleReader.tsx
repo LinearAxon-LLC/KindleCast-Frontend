@@ -16,7 +16,7 @@ interface KindleReaderProps {
   isLoading: boolean;
   isSuccess: boolean;
   error: string | null;
-  preview_path: string | null;
+  preview_path: string;
 }
 
 export default function KindleReader({
@@ -43,9 +43,7 @@ export default function KindleReader({
         }
         bookRef.current = null;
 
-        const res = await fetch(
-          `http://127.0.0.1:8000/api/v1/link/preview/${preview_path}`
-        );
+        const res = await fetch(preview_path);
 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const blob = await res.blob();

@@ -1,14 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Download, ExternalLink, Clock, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
-import { text } from '@/lib/typography'
-import { useConversionHistory } from '@/hooks/useConversionHistory'
-import { ConversionHistoryShimmer } from '@/components/ui/shimmer'
-import { ProcessingStatus, Conversion } from '@/types/api'
+import React, {useEffect, useState} from 'react'
+import {AlertCircle, ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, Clock, Download, Filter} from 'lucide-react'
+import {text} from '@/lib/typography'
+import {useConversionHistory} from '@/hooks/useConversionHistory'
+import {ConversionHistoryShimmer} from '@/components/ui/shimmer'
+import {ProcessingStatus} from '@/types/api'
 
 interface HistoryPageProps {
   isActive?: boolean
+}
+
+function handleDownload(file_download_url: string) {
+  // this function will make user download this file using GET request with proper user auth, otherwise file won't be downloaded
+  window.open(file_download_url, '_blank');
+  return
 }
 
 export function HistoryPage({ isActive = false }: HistoryPageProps) {
@@ -32,7 +38,7 @@ export function HistoryPage({ isActive = false }: HistoryPageProps) {
     // Only fetch if tab is active, no data exists, not currently loading, and no error
     if (isActive && conversions.length === 0 && !isLoading && !error) {
       console.log('History tab became active, fetching data...')
-      fetchHistory(1)
+      fetchHistory(1).then(r => console.log('History fetch result:', r));
     }
   }, [isActive]) // Only depend on isActive to prevent re-renders
 
@@ -72,21 +78,6 @@ export function HistoryPage({ isActive = false }: HistoryPageProps) {
     })
   }
 
-  const extractTitleFromUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url)
-      return urlObj.hostname.replace('www.', '') + urlObj.pathname
-    } catch {
-      return url
-    }
-  }
-
-  const formatType = (formatType: string, secondaryFormatType: string) => {
-    if (secondaryFormatType && secondaryFormatType !== formatType) {
-      return `${formatType} + ${secondaryFormatType}`
-    }
-    return formatType
-  }
 
   // Apply filter to conversions
   const filteredConversions = filterByStatus(filter)
@@ -170,28 +161,33 @@ export function HistoryPage({ isActive = false }: HistoryPageProps) {
             ) : (
               <div className="divide-y divide-black/[0.06]">
                 {paginatedConversions.map((conversion, index) => (
-                  <div key={`${conversion.file_id}-${index}`} className="p-4 hover:bg-black/[0.02] transition-colors duration-150">
+                  <div key={`${conversion.uuid}-${index}`} className="p-4 hover:bg-black/[0.02] transition-colors duration-150">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
-                        {getStatusIcon(conversion.processing_status)}
+                        <img src={conversion.thumbnail_url} alt="Thumbnail" className="w-12 h-12 rounded-lg object-cover" />
 
                         <div className="flex-1 min-w-0">
-                          <h3 className={`${text.body} font-medium truncate mb-1`}>
-                            {extractTitleFromUrl(conversion.source_url)}
+                          <h3 className={`${text.body} text-lg font-medium truncate mb-1 p-1`}>
+                            <a href={conversion.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                              {conversion.title} <ArrowUpRight className="inline-block mb-1" />
+                            </a>
                           </h3>
 
-                          <div className="flex items-center gap-3">
-                            <span className={`${text.footnote} text-[#273F4F]/50`}>
+                          <div className="flex items-center gap-3 ml-1">
+                            <span className={`${text.footnote} px-1.5 py-0.5 bg-fuchsia-500 text-white rounded`}>
                               {formatDate(conversion.created_at)}
                             </span>
-                            <span className={`${text.footnote} px-1.5 py-0.5 bg-gray-100 rounded`}>
-                              {formatType(conversion.format_type, conversion.secondary_format_type)}
+                            <span className={`${text.footnote} px-1.5 py-0.5 bg-blue-500 text-white rounded`}>
+                              {conversion.domain}
                             </span>
-                            {conversion.processing_time > 0 && (
-                              <span className={`${text.footnote} text-[#273F4F]/50`}>
-                                {conversion.processing_time}s
-                              </span>
-                            )}
+                            <span className={`${text.footnote} px-1.5 py-0.5 ${conversion.format_type.trim().toLowerCase() === "quick send" ? 'bg-gray-100 text-gray-500' : 'bg-brand-primary text-white'} rounded`}>
+                              {conversion.format_type}
+                            </span>
+                            {/*{conversion.processing_time > 0 && (*/}
+                            {/*  <span className={`${text.footnote} text-white bg-green-500 px-1.5 py-0.5 rounded`}>*/}
+                            {/*    {conversion.processing_time}s*/}
+                            {/*  </span>*/}
+                            {/*)}*/}
                           </div>
                         </div>
                       </div>
@@ -202,8 +198,8 @@ export function HistoryPage({ isActive = false }: HistoryPageProps) {
                         </span>
 
                         {conversion.processing_status === ProcessingStatus.OK && (
-                          <button className="p-2 hover:bg-black/[0.06] rounded-[6px] transition-colors duration-150">
-                            <Download className="w-4 h-4 text-[#273F4F]/60" />
+                          <button className="p-2 hover:bg-black/[0.06] rounded-[6px] transition-colors duration-150" onClick={() => handleDownload(conversion.file_download_url)}>
+                            <Download className="w-6 h-6 text-[#273F4F]/60" />
                           </button>
                         )}
                       </div>

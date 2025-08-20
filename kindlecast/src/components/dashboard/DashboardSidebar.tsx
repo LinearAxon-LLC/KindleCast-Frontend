@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, FileText, Settings, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, Menu, X, Crown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUsageDisplay } from "@/hooks/useUserUsage";
 import { text } from "@/lib/typography";
 import { useState, useEffect } from "react";
+import { UpgradePlansModal } from "@/components/ui/upgrade-plans-modal";
 // Using regular img tag instead of Next/Image for better compatibility
 
 interface DashboardSidebarProps {
@@ -44,6 +45,7 @@ export function DashboardSidebar({
   const { userProfile } = useUserProfile();
   const { usage, formatUsageText, isUnlimited } = useUsageDisplay();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Close mobile menu when tab changes
   useEffect(() => {
@@ -249,10 +251,27 @@ export function DashboardSidebar({
                   )}
                 </div>
               </div>
+
+              {/* Upgrade Button - Only show for free users */}
+              {userProfile?.subscription_type === 'free' && (
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-[8px] hover:bg-brand-primary/90 active:bg-brand-primary/80 transition-all duration-150 active:scale-[0.98]"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span className="text-[13px] font-medium">Upgrade Now</span>
+                </button>
+              )}
             </div>
           )}
         </div>
       </aside>
+
+      {/* Upgrade Plans Modal - Outside sidebar for proper positioning */}
+      <UpgradePlansModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
     </>
   );
 }

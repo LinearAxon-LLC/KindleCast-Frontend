@@ -1,14 +1,18 @@
 "use client";
 
 import React, { use, useState } from "react";
-import { Plus, FileText, Upload } from "lucide-react";
+import { Plus, FileText, Upload, Info } from "lucide-react";
 import { useLinkProcessor } from "@/hooks/useLinkProcessor";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { getTimeBasedGreeting } from "@/lib/time-utils";
-import { DeviceSetup } from "@/components/dashboard/DeviceSetup";
-import { InfoUpdateBox } from "@/components/dashboard/InfoUpdateBox";
+
+import { ConfigureDeviceModal } from "@/components/ui/configure-device-modal";
+import { UpgradePlansModal } from "@/components/ui/upgrade-plans-modal";
+import { FormatInfoModal } from "@/components/ui/format-info-modal";
 import { text } from "@/lib/typography";
 import { isValidUrl } from "@/lib/api";
+import { useUserUsage } from "@/hooks/useUserUsage";
+import { useAuth } from "@/contexts/AuthContext";
 import KindleReader from "@/components/kindleReader/kindleReader";
 
 interface HomePageProps {
@@ -20,15 +24,35 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [selectedFormat, setSelectedFormat] = useState("Quick Send");
   const [previewGenerated, setPreviewGenerated] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
-  const [showInfoUpdate, setShowInfoUpdate] = useState(true);
+
   const [urlError, setUrlError] = useState<string | null>(null);
   const { isLoading, isSuccess, error, preview_path, submitLink } =
     useLinkProcessor();
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
+  const { getRemainingUsage, isUnlimited } = useUserUsage();
+  const { getPendingLinkData, clearPendingLinkData } = useAuth();
   const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
   const [includeImage, setIncludeImage] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] = useState(false);
+  const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
 
   const { greeting, emoji } = getTimeBasedGreeting();
+
+  // Prefill form with pending link data after login
+  React.useEffect(() => {
+    const pendingData = getPendingLinkData();
+    if (pendingData) {
+      console.log("Prefilling form with pending link data:", pendingData);
+      setUrl(pendingData.url);
+      setSelectedFormat(pendingData.format);
+      if (pendingData.customPrompt) {
+        setCustomPrompt(pendingData.customPrompt);
+      }
+      // Clear the pending data after prefilling
+      clearPendingLinkData();
+    }
+  }, [getPendingLinkData, clearPendingLinkData]);
 
   // URL validation function
   const validateUrl = (inputUrl: string): string | null => {
@@ -64,6 +88,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // If user has exceeded limit, show upgrade modal instead
+    if (hasExceededLimit) {
+      handleUpgradeClick();
+      return;
+    }
 
     // Validate URL
     const validationError = validateUrl(url);
@@ -123,20 +153,30 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     }
   };
 
-  const handleDeviceSetupComplete = () => {
-    refetch(); // Refresh user profile
+
+  // Check if user has exceeded limits
+  const getUsageType = (format: string): "basic" | "ai" => {
+    return format === "Quick Send" ? "basic" : "ai";
   };
 
-  const handleInfoUpdateComplete = () => {
-    console.log(
-      "🔍 HomePage: handleInfoUpdateComplete called, setting showInfoUpdate to false"
-    );
-    setShowInfoUpdate(false);
-    refetch(); // Refresh user profile
+  const usageType = getUsageType(selectedFormat);
+  const remainingUsage = getRemainingUsage(usageType);
+  const hasUnlimitedUsage = isUnlimited(usageType);
+  const hasExceededLimit = !hasUnlimitedUsage && remainingUsage <= 0;
+
+  // Handle upgrade button click
+  const handleUpgradeClick = () => {
+    setShowUpgradeModal(true);
   };
 
-  const handleInfoUpdateDismiss = () => {
-    setShowInfoUpdate(false);
+  // Handle configure device button click
+  const handleConfigureDeviceClick = () => {
+    setShowConfigureDeviceModal(true);
+  };
+
+  const handleDeviceConfigured = () => {
+    // The modal will close itself and user profile will be refreshed
+    refetch();
   };
 
   // Check if user has completed Kindle setup
@@ -146,21 +186,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === "yes"
   );
 
-  // Only show onboarding if user doesn't have a complete setup
-  const shouldShowInfoUpdate = userProfile && showInfoUpdate && !hasKindleSetup;
 
-  // Debug what we're getting from API
-  // React.useEffect(() => {
-  //   if (userProfile) {
-  //     console.log('🔍 HomePage Debug:', {
-  //       kindle_email: userProfile.kindle_email,
-  //       acknowledged_mail_whitelisting: userProfile.acknowledged_mail_whitelisting,
-  //       hasKindleSetup,
-  //       shouldShowInfoUpdate,
-  //       showInfoUpdate
-  //     })
-  //   }
-  // }, [userProfile, hasKindleSetup, shouldShowInfoUpdate])
 
   if (profileLoading) {
     return (
@@ -186,16 +212,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     );
   }
 
-  // Show device setup if user hasn't set up their device
-  if (!hasKindleSetup) {
-    return (
-      <div className="h-full overflow-y-auto">
-        <div className="p-8">
-          <DeviceSetup onComplete={handleDeviceSetupComplete} />
-        </div>
-      </div>
-    );
-  }
+  // Device setup is now optional - no blocking
 
   const handleLinkClick = () => {
     // This function will be called by onClick
@@ -220,13 +237,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           </h1>
         </div>
 
-        {/* Info Update Box */}
-        {shouldShowInfoUpdate && (
-          <InfoUpdateBox
-            onComplete={handleInfoUpdateComplete}
-            onDismiss={handleInfoUpdateDismiss}
-          />
-        )}
+
 
         <div
           data-testid="conversion-screen"
@@ -293,20 +304,18 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
               {/* Quick Convert & Send */}
               {activeTab === "convert" && (
                 <>
-                  <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-4 sm:p-6">
-                    {/* Tab Panels */}
-
-                    <h2 className={`${text.componentTitle} mb-4 lg:mb-6`}>
-                      Link Converter
-                    </h2>
+                  <div className="bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_8px_24px_rgba(0,0,0,0.08)]">
+                    {/*<h2 className="text-[17px] font-semibold text-brand-primary mb-5 leading-tight">*/}
+                    {/*  Generate Kindly Ready EPUB from URL*/}
+                    {/*</h2>*/}
 
                     <form
                       onSubmit={handleSubmit}
-                      className="space-y-4 lg:space-y-6"
+                      className="space-y-5"
                     >
                       {/* URL Input */}
                       <div>
-                        <label className={`block ${text.label} mb-3`}>
+                        <label className="block text-[15px] font-medium text-black mb-2">
                           Enter an URL
                         </label>
                         <input
@@ -314,41 +323,46 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           value={url}
                           onChange={handleUrlChange}
                           placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
-                          className={`w-full px-4 py-3 border rounded-[8px] ${
-                            text.body
-                          } focus:outline-none focus:ring-2 transition-all duration-200 ${
+                          className={`w-full px-3 py-2.5 border rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 transition-all duration-200 ${
                             urlError
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                              : "border-gray-200 focus:ring-brand-primary/20 focus:border-brand-primary"
+                              ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                              : "border-black/[0.15] focus:ring-brand-primary/20 focus:border-brand-primary"
                           }`}
                         />
                         {urlError && (
-                          <p className={`${text.caption} mt-2 text-red-600`}>
+                          <p className="text-[13px] mt-1.5 text-red-600">
                             {urlError}
                           </p>
                         )}
                         {!urlError && (
-                          <p className={`${text.caption} mt-2`}>
+                          <p className="text-[13px] mt-1.5 text-black/60">
                             Try an example:{" "}
-                            <a
-                              href="#"
+                            <button
+                              type="button"
                               onClick={handleLinkClick}
-                              // The CSS class from your original code
+                              className="text-brand-primary hover:text-brand-primary/80 transition-colors"
                             >
-                              <span className={text.link}>
-                                How to build Startups that get in YC
-                              </span>
-                            </a>
+                              How to build Startups that get in YC
+                            </button>
                           </p>
                         )}
                       </div>
 
                       {/* Format Selection */}
                       <div>
-                        <label className={`block ${text.label} mb-3`}>
-                          Choose your format:
-                        </label>
-                        <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 mb-2">
+                          <label className="text-[15px] font-medium text-black">
+                            Choose your format:
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setShowFormatInfoModal(true)}
+                            className="w-4 h-4 rounded-full bg-black/[0.08] hover:bg-black/[0.12] active:bg-black/[0.16] flex items-center justify-center transition-colors duration-150"
+                          >
+                            <Info className="w-4 h-4 text-purple-500" />
+                          </button>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
                           {[
                             "Quick Send",
                             "Summarize",
@@ -359,7 +373,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                               key={format}
                               type="button"
                               onClick={() => setSelectedFormat(format)}
-                              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] text-[12px] sm:text-[13px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
+                              className={`px-3 py-1.5 rounded-[6px] text-[13px] font-medium transition-all duration-150 active:scale-[0.98] ${
                                 selectedFormat === format
                                   ? "bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
                                   : "bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]"
@@ -372,7 +386,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 50 50"
-                                  className={`inline-block h-4 w-4 ml-1.5 ${
+                                  className={`inline-block h-3 w-3 ml-1 ${
                                     selectedFormat === format
                                       ? "text-white"
                                       : "text-black/70"
@@ -390,14 +404,14 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       {/* Custom Description - Only show when Custom is selected */}
                       {selectedFormat === "Custom" && (
                         <div>
-                          <label className={`block ${text.label} mb-3`}>
+                          <label className="block text-[15px] font-medium text-black mb-2">
                             Describe how you want it:
                           </label>
                           <textarea
                             value={customPrompt}
                             onChange={(e) => setCustomPrompt(e.target.value)}
                             placeholder="e.g., 'Make it a study guide with key points highlighted'"
-                            className={`w-full px-4 py-3 border border-gray-200 rounded-[8px] ${text.body} focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none`}
+                            className="w-full px-3 py-2.5 border border-black/[0.15] rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
                             rows={3}
                           />
                         </div>
@@ -424,34 +438,64 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                         </div>
                       </div>
 
-                      {/* Submit Button */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="submit"
-                          name="preview"
-                          disabled={
-                            isLoading ||
-                            !url.trim() ||
-                            (selectedFormat === "Custom" &&
-                              !customPrompt.trim())
-                          }
-                          className="w-full px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                        >
-                          <span>Preview</span>
-                        </button>{" "}
-                        <button
-                          type="submit"
-                          name="sendToKindle"
-                          disabled={
-                            isLoading ||
-                            !url.trim() ||
-                            (selectedFormat === "Custom" &&
-                              !customPrompt.trim())
-                          }
-                          className="w-full px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                        >
-                          <span>Send to Kindle</span>
-                        </button>
+                      {/* Action Buttons */}
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="submit"
+                            name="preview"
+                            disabled={
+                              isLoading ||
+                              !url.trim() ||
+                              (selectedFormat === "Custom" &&
+                                !customPrompt.trim())
+                            }
+                            className="px-1 py-1.5 bg-brand-secondary hover:bg-purple-500 active:bg-purple-600 text-white text-[15px] font-medium rounded-[8px] cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                          >
+                            Preview
+                          </button>
+                          <button
+                            type="submit"
+                            name="sendToKindle"
+                            disabled={
+                              isLoading ||
+                              !url.trim() ||
+                              (selectedFormat === "Custom" &&
+                                !customPrompt.trim()) ||
+                              (!hasKindleSetup && !hasExceededLimit)
+                            }
+                            className={`px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                              hasExceededLimit
+                                ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700'
+                                : !hasKindleSetup
+                                ? 'bg-gray-400 hover:bg-gray-500 active:bg-gray-600'
+                                : 'bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80'
+                            }`}
+                            onClick={!hasKindleSetup && !hasExceededLimit ? handleConfigureDeviceClick : undefined}
+                          >
+                            {hasExceededLimit
+                              ? 'Upgrade to Send'
+                              : !hasKindleSetup
+                              ? 'Send to Kindle'
+                              : 'Send to Kindle'
+                            }
+                          </button>
+                        </div>
+
+                        {/* Device Configuration Message - Below buttons */}
+                        {!hasKindleSetup && !hasExceededLimit && (
+                          <div className="text-center pt-1 space-y-0.5">
+                            <p className="text-[13px] text-black/50 leading-tight">
+                              Please configure your Kindle to send content.<button
+                              type="button"
+                              onClick={handleConfigureDeviceClick}
+                              className="ml-2 text-[13px] text-brand-primary underline hover:text-brand-primary/80 transition-colors duration-150 font-medium"
+                            >Click to setup now
+                            </button>
+                            </p>
+
+                          </div>
+                        )}
                       </div>
                       {isLoading ? (
                         <>
@@ -467,9 +511,9 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
                       {/* Status Messages */}
                       {isSuccess && (
-                        <div className="p-3 bg-green-50 border border-green-200 rounded-[8px]">
-                          <p className="text-sm text-green-500">
-                            ✓ Successfully sent to your Kindle!
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-[2px]">
+                          <p className="text-lg text-green-500">
+                            Successfully sent to your Kindle!
                           </p>
                         </div>
                       )}
@@ -536,6 +580,25 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Plans Modal */}
+      <UpgradePlansModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+      />
+
+      {/* Configure Device Modal */}
+      <ConfigureDeviceModal
+        isOpen={showConfigureDeviceModal}
+        onClose={() => setShowConfigureDeviceModal(false)}
+        onSuccess={handleDeviceConfigured}
+      />
+
+      {/* Format Info Modal */}
+      <FormatInfoModal
+        isOpen={showFormatInfoModal}
+        onClose={() => setShowFormatInfoModal(false)}
+      />
     </div>
   );
 }
