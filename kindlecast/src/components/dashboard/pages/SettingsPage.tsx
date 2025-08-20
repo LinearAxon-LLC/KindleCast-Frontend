@@ -10,6 +10,7 @@ import Image from "next/image"
 import { useBillingPortal } from '@/hooks/useBillingPortal'
 import { text } from '@/lib/typography'
 import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
+import { ConfigureDeviceModal } from '@/components/ui/configure-device-modal'
 import {useUserUsage} from "@/hooks/useUserUsage";
 
 export function SettingsPage() {
@@ -20,6 +21,7 @@ export function SettingsPage() {
   const { openBillingPortal, isLoading: billingLoading } = useBillingPortal()
   const {usage} = useUserUsage()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] = useState(false)
 
   // Get user's current plan and premium plan for upgrade
   const currentPlan = getUserCurrentPlan(user?.subscription_name)
@@ -28,6 +30,15 @@ export function SettingsPage() {
 
   const handleUpgrade = () => {
     setShowUpgradeModal(true)
+  }
+
+  const handleConfigureDevice = () => {
+    setShowConfigureDeviceModal(true)
+  }
+
+  const handleDeviceConfigured = () => {
+    // Refresh user profile to get updated data
+    // The modal will close itself on success
   }
 
   return (
@@ -119,7 +130,10 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <button className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">
+              <button
+                onClick={handleConfigureDevice}
+                className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
+              >
                 {userProfile?.kindle_email ?  'Change Kindle Email' : 'Configure Device'}
               </button>
             </div>
@@ -230,6 +244,13 @@ export function SettingsPage() {
       <UpgradePlansModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
+      />
+
+      {/* Configure Device Modal */}
+      <ConfigureDeviceModal
+        isOpen={showConfigureDeviceModal}
+        onClose={() => setShowConfigureDeviceModal(false)}
+        onSuccess={handleDeviceConfigured}
       />
     </div>
   )

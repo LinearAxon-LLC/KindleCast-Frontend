@@ -10,6 +10,7 @@ import { getTimeBasedGreeting } from '@/lib/time-utils'
 import { DeviceSetup } from '@/components/dashboard/DeviceSetup'
 import { InfoUpdateBox } from '@/components/dashboard/InfoUpdateBox'
 import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
+import { ConfigureDeviceModal } from '@/components/ui/configure-device-modal'
 import { text } from '@/lib/typography'
 import { isValidUrl } from '@/lib/api'
 
@@ -24,6 +25,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [showInfoUpdate, setShowInfoUpdate] = useState(true)
   const [urlError, setUrlError] = useState<string | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] = useState(false)
   const { isLoading, isSuccess, error, submitLink } = useLinkProcessor()
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile()
   const { getRemainingUsage, isUnlimited } = useUserUsage()
@@ -139,6 +141,16 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     setShowUpgradeModal(true)
   }
 
+  // Handle configure device button click
+  const handleConfigureDeviceClick = () => {
+    setShowConfigureDeviceModal(true)
+  }
+
+  const handleDeviceConfigured = () => {
+    // The modal will close itself and user profile will be refreshed
+    // No additional action needed here
+  }
+
   // Debug what we're getting from API
   // React.useEffect(() => {
   //   if (userProfile) {
@@ -167,17 +179,6 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         <div className="text-center">
           <div className="text-[15px] text-red-600 mb-2">Failed to load profile</div>
           <div className="text-[13px] text-[#273F4F]/70">Please check your connection and try again</div>
-        </div>
-      </div>
-    )
-  }
-
-  // Show device setup if user hasn't set up their device
-  if (!hasKindleSetup) {
-    return (
-      <div className="h-full overflow-y-auto">
-        <div className="p-8">
-          <DeviceSetup onComplete={handleDeviceSetupComplete} />
         </div>
       </div>
     )
@@ -280,7 +281,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isLoading || !url.trim() || (selectedFormat === 'Custom' && !customPrompt.trim())}
+                  disabled={isLoading || !url.trim() || (selectedFormat === 'Custom' && !customPrompt.trim()) || !hasKindleSetup}
                   className={`w-full px-6 py-3 text-white text-base font-medium rounded-[8px] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
                     hasExceededLimit
                       ? 'bg-orange-500 hover:bg-orange-600'
@@ -298,6 +299,22 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     </span>
                   )}
                 </button>
+
+                {/* Configure Device Link - shown when device not configured */}
+                {!hasKindleSetup && (
+                  <div className="mt-2 text-center">
+                    <p className="text-[13px] text-red-600 mb-1">
+                      Device not configured
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleConfigureDeviceClick}
+                      className="text-[13px] text-red-600 underline hover:text-red-700 transition-colors duration-150"
+                    >
+                      Configure device to send to Kindle
+                    </button>
+                  </div>
+                )}
 
                 {/* Status Messages */}
                 {isSuccess && (
@@ -371,6 +388,13 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       <UpgradePlansModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
+      />
+
+      {/* Configure Device Modal */}
+      <ConfigureDeviceModal
+        isOpen={showConfigureDeviceModal}
+        onClose={() => setShowConfigureDeviceModal(false)}
+        onSuccess={handleDeviceConfigured}
       />
     </div>
   )
