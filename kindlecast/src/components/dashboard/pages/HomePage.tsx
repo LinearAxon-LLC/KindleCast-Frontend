@@ -277,10 +277,10 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <h1
-            className={`${text.sectionTitle} mb-2 flex items-center space-x-2 text-xl sm:text-2xl lg:text-3xl`}
+            className={`${text.sectionTitle} mb-2 flex items-center space-x-2 text-lg sm:text-xl lg:text-2xl font-normal`}
           >
             <span>
-              {greeting}, {userProfile?.name?.split(" ")[0] || "there"}
+              {greeting}, {userProfile?.name?.split(" ")[0] || "Stranger"}
             </span>
             <span className="text-lg sm:text-xl">{emoji}</span>
           </h1>
