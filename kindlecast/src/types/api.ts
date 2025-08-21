@@ -3,8 +3,9 @@
 export interface LinkProcessRequest {
   url: string;
   format: string; // "epub", "summarize", "learning", "custom"
+  include_image: boolean;
+  email_content: boolean;
   custom_prompt?: string;
-  include_image?: boolean;
 }
 
 export interface LinkProcessResponse {
@@ -23,13 +24,14 @@ export const FORMAT_MAPPING: Record<string, string> = {
 
 // API configuration
 export const API_CONFIG = {
-
-  BASE_URL: process.env.NODE_ENV === 'production'
-    ? 'https://api.kinddy.com'
-    : 'http://localhost:8000',
+  BASE_URL:
+    process.env.NODE_ENV === "production"
+      ? "https://api.kinddy.com"
+      : "http://localhost:8000",
   ENDPOINTS: {
-    PROCESS_LINK: '/api/v1/link/process',
-    LINK_HISTORY: '/api/v1/link/history',
+    PROCESS_LINK: "/api/v1/link/process",
+    LINK_HISTORY: "/api/v1/link/history",
+    PREVIEW_PATH: "/api/v1/link/preview",
 
     // Auth endpoints - matching your FastAPI routes
     AUTH_GOOGLE: "/api/v1/auth/google",
@@ -45,10 +47,10 @@ export const API_CONFIG = {
     SUBSCRIPTION_PAYMENT: "/api/v1/subscription/payment",
     SUBSCRIPTION_USAGE: "/api/v1/subscription/me",
     // User info update
-    USER_INFO_UPDATE: '/api/v1/user/info-update',
+    USER_INFO_UPDATE: "/api/v1/user/info-update",
     // Billing portal
-    CUSTOMER_BILLING_PORTAL: '/api/v1/user/customer-billing-portal'
-  }
+    CUSTOMER_BILLING_PORTAL: "/api/v1/user/customer-billing-portal",
+  },
 } as const;
 
 // Authentication types
@@ -173,12 +175,12 @@ export interface UserUsageResponse {
 export enum ProcessingStatus {
   OK = "ok",
   FAILED = "failed",
-  PROCESSING = "processing"
+  PROCESSING = "processing",
 }
 
 export interface Conversion {
   uuid: string;
-  thumbnail_url:string;
+  thumbnail_url: string;
   title: string;
   domain: string;
   source_url: string;

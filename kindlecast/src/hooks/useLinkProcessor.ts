@@ -15,8 +15,10 @@ interface UseLinkProcessorReturn extends UseLinkProcessorState {
   submitLink: (
     url: string,
     format: string,
+    includeImage: boolean,
+    emailContent: boolean,
     customPrompt?: string
-  ) => Promise<string | null>;
+  ) => Promise<string>;
   resetState: () => void;
 }
 
@@ -38,7 +40,13 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
   }, []);
 
   const submitLink = useCallback(
-    async (url: string, format: string, customPrompt?: string) => {
+    async (
+      url: string,
+      format: string,
+      includeImage: boolean,
+      emailContent: boolean,
+      customPrompt?: string
+    ) => {
       // Reset previous state
       setState({
         isLoading: false,
@@ -63,7 +71,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           error: validationError,
           preview_path: "",
         });
-        return null;
+        return "";
       }
 
       // Set loading state
@@ -76,12 +84,13 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
 
       try {
         // Prepare the request
+        console.log(emailContent);
         const request: LinkProcessRequest = {
           url: url.trim(),
           format: backendFormat,
+          include_image: includeImage,
+          email_content: emailContent,
           custom_prompt: customPrompt?.trim() || undefined,
-          // get include image from state - the switch
-          include_image: false,
         };
 
         // Make the API call
@@ -102,7 +111,6 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
               ...prev,
               isSuccess: false,
             }));
-
           }, 4000);
 
           return response.preview_link;
@@ -114,7 +122,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
             error: response.message || "Failed to process link",
             preview_path: "",
           });
-          return null;
+          return "";
         }
       } catch {
         // Network or other error
@@ -124,7 +132,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           error: "Network error. Please check your connection and try again.",
           preview_path: "",
         });
-        return null;
+        return "";
       }
     },
     []

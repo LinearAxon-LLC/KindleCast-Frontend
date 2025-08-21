@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import ePub, { Rendition, Book, Contents } from "epubjs";
 import { Libre_Baskerville } from "next/font/google";
+import { API_CONFIG } from "@/types/api";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
@@ -104,6 +105,9 @@ export default function KindleReader({
           h2: {
             "font-size": "16px",
           },
+          h3: {
+            "font-size": "14px",
+          },
           li: {
             "font-size": "14px",
           },
@@ -156,7 +160,7 @@ export default function KindleReader({
   }, [preview_path]);
 
   return (
-    <div className="relative flex items-center w-full h-[80vh] gap-3">
+    <div className="flex items-center justify-center w-full h-[70vh] gap-3">
       <button
         className="px-6 py-3 bg-brand-primary/10 text-brand-primary font-medium rounded-[8px] hover:bg-brand-primary hover:text-white transition-colors duration-150"
         onClick={() => renditionRef.current?.prev()}
@@ -174,8 +178,8 @@ export default function KindleReader({
           <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
-      <div>
-        <div
+
+      {/* <div
           className="relative w-[400px] h-[724px] mt-[-30px] mb-8 flex justify-center items-center"
           style={{
             backgroundImage: "url('/kindle_mockup.png')",
@@ -183,34 +187,54 @@ export default function KindleReader({
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
           }}
-        ></div>
-        <div
-          ref={viewerRef}
-          style={{
-            position: "absolute",
-            top: "8%",
-            left: "23%",
-            width: "56%",
-            height: "70%",
-            border: "3px solid #373737ff",
-            margin: "auto",
-            overflowY: "auto",
-            WebkitOverflowScrolling: "touch",
-            backgroundColor: "#fbf9f1ff",
-          }}
-        >
-          {!url || !isSuccess ? (
-            // If URL is missing, display the placeholder text
-            <div className="flex items-center justify-center h-full text-center p-4">
-              <p className="text-gray-500 text-sm">
-                Paste a link and press "Preview" to get started.
-              </p>
+        ></div> */}
+      <div className="flex w-full justify-center items-center py-5">
+        <div className="relative bg-[#222] rounded-[30px] border-[8px] border-[#333] h-[75vh] min-w-[400px] max-w-[100px] flex flex-col items-center shadow-xl">
+          {/* Screen */}
+          <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
+            {/* The viewerRef div is given a lower z-index */}
+
+            <div className="w-full overflow-y-auto">
+              <div
+                ref={viewerRef}
+                style={{
+                  position: "absolute",
+                  top: "0%",
+                  left: "0%",
+                  width: "100%",
+                  height: "100%",
+                  border: "3px solid #373737ff",
+                  margin: "auto",
+                  overflowY: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  backgroundColor: "#fbf9f1ff",
+                  zIndex: 1, // Set a lower z-index
+                }}
+              ></div>
             </div>
-          ) : (
-            <></>
-          )}
+
+            {/* This div will now appear on top because of the higher z-index */}
+            {!url || !isSuccess ? (
+              // If URL is missing, display the placeholder text
+              <div
+                className="flex items-center justify-center w-full h-full bg-white text-center p-4"
+                style={{ zIndex: 999 }} // Give it a higher z-index
+              >
+                <p className="text-gray-500 text-sm">
+                  Paste a link and press "Preview" to get started.
+                </p>
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+          {/* Kindle Logo */}
+          <div className="absolute bottom-8 text-white/30 font-light text-2xl">
+            Preview
+          </div>
         </div>
       </div>
+
       <button
         className="px-6 py-3 bg-brand-primary/10 text-brand-primary font-medium rounded-[8px] hover:bg-brand-primary hover:text-white transition-colors duration-150"
         onClick={() => renditionRef.current?.next()}

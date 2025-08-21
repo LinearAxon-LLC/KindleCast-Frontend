@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState } from "react";
+import React, { use, useState, useRef } from "react";
 import { Plus, FileText, Upload, Info } from "lucide-react";
 import { useLinkProcessor } from "@/hooks/useLinkProcessor";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -24,7 +24,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [selectedFormat, setSelectedFormat] = useState("Quick Send");
   const [previewGenerated, setPreviewGenerated] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
-
+  const [emailContent, setEmailContent] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
   const { isLoading, isSuccess, error, preview_path, submitLink } =
     useLinkProcessor();
@@ -34,8 +34,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
   const [includeImage, setIncludeImage] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showConfigureDeviceModal, setShowConfigureDeviceModal] = useState(false);
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
+    useState(false);
   const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileError, setFileError] = useState("");
 
   const { greeting, emoji } = getTimeBasedGreeting();
 
@@ -74,6 +78,66 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     }
 
     return null;
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+
+    // Example: using FormData for an API call
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch("/api/upload-to-kindle", {
+        method: "POST",
+        body: formData,
+        // Note: Do not set Content-Type header manually, the browser does it for FormData
+      });
+
+      if (response.ok) {
+        console.log("File uploaded successfully!");
+        // Handle success, e.g., show a success message
+      } else {
+        console.error("Upload failed.");
+        // Handle error
+      }
+    } catch (error) {
+      console.error("Error during upload:", error);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Perform file validation (e.g., size, type)
+      if (file.size > 20 * 1024 * 1024) {
+        // 20 MB limit
+        setFileError("File size exceeds 20MB.");
+        setSelectedFile(null);
+      } else {
+        setFileError("");
+        setSelectedFile(file);
+      }
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        setFileError("File size exceeds 20MB.");
+        setSelectedFile(null);
+      } else {
+        setFileError("");
+        setSelectedFile(file);
+      }
+    }
+  };
+
+  // You'll also need to handle drag events to prevent default behavior
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,39 +184,26 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
     if (buttonName === "preview") {
       console.log("Preview button was clicked");
-      await submitLink(processUrl, selectedFormat, customPrompt);
+      await submitLink(
+        processUrl,
+        selectedFormat,
+        includeImage,
+        emailContent,
+        customPrompt
+      );
       setPreviewGenerated(true);
     } else if (buttonName === "sendToKindle") {
-      console.log("Send to Kindle button was clicked");
+      setPreviewGenerated(false);
 
-      let filePath = preview_path;
-
-      if (!filePath) {
-        console.log("No preview found, generating first...");
-        filePath = await submitLink(processUrl, selectedFormat, customPrompt);
-        // make sure submitLink returns the path of the generated preview
-      }
-
-      if (filePath) {
-        console.log("Sending mail with:", filePath);
-
-        try {
-          const res = await fetch("/api/send-mail", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filePath }),
-          });
-
-          if (!res.ok) throw new Error("Failed to send mail");
-          const data = await res.json();
-          console.log("Mail sent:", data);
-        } catch (err) {
-          console.error("Error sending mail:", err);
-        }
-      }
+      await submitLink(
+        processUrl,
+        selectedFormat,
+        includeImage,
+        true,
+        customPrompt
+      );
     }
   };
-
 
   // Check if user has exceeded limits
   const getUsageType = (format: string): "basic" | "ai" => {
@@ -185,8 +236,6 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     userProfile?.kindle_email &&
       userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === "yes"
   );
-
-
 
   if (profileLoading) {
     return (
@@ -236,8 +285,6 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
             <span className="text-lg sm:text-xl">{emoji}</span>
           </h1>
         </div>
-
-
 
         <div
           data-testid="conversion-screen"
@@ -309,10 +356,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     {/*  Generate Kindly Ready EPUB from URL*/}
                     {/*</h2>*/}
 
-                    <form
-                      onSubmit={handleSubmit}
-                      className="space-y-5"
-                    >
+                    <form onSubmit={handleSubmit} className="space-y-5">
                       {/* URL Input */}
                       <div>
                         <label className="block text-[15px] font-medium text-black mb-2">
@@ -372,7 +416,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             <button
                               key={format}
                               type="button"
-                              onClick={() => setSelectedFormat(format)}
+                              onClick={() => {
+                                setSelectedFormat(format);
+                                if (format !== "Quick Send") {
+                                  setIncludeImage(false);
+                                }
+                              }}
                               className={`px-3 py-1.5 rounded-[6px] text-[13px] font-medium transition-all duration-150 active:scale-[0.98] ${
                                 selectedFormat === format
                                   ? "bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
@@ -410,33 +459,35 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           <textarea
                             value={customPrompt}
                             onChange={(e) => setCustomPrompt(e.target.value)}
-                            placeholder="e.g., 'Make it a study guide with key points highlighted'"
+                            placeholder="e.g., 'make me a business playbook from this link'"
                             className="w-full px-3 py-2.5 border border-black/[0.15] rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
                             rows={3}
                           />
                         </div>
                       )}
 
-                      <div className="flex flex-col items-start max-w-sm ">
-                        <div className="flex items-center space-x-4">
-                          <span className="text-sm font-medium text-gray-900">
-                            Include Images?
-                          </span>
-                          <label
-                            htmlFor="image-toggle"
-                            className="relative inline-flex items-center cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              id="image-toggle"
-                              checked={includeImage}
-                              onChange={() => setIncludeImage(!includeImage)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
-                          </label>
+                      {selectedFormat == "Quick Send" && (
+                        <div className="flex flex-col items-start max-w-sm ">
+                          <div className="flex items-center space-x-4">
+                            <span className="text-sm font-medium text-gray-900">
+                              Include Images?
+                            </span>
+                            <label
+                              htmlFor="image-toggle"
+                              className="relative inline-flex items-center cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                id="image-toggle"
+                                checked={includeImage}
+                                onChange={() => setIncludeImage(!includeImage)}
+                                className="sr-only peer"
+                              />
+                              <div className="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
+                            </label>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Action Buttons */}
                       <div className="space-y-3">
@@ -450,7 +501,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                               (selectedFormat === "Custom" &&
                                 !customPrompt.trim())
                             }
-                            className="px-1 py-1.5 bg-brand-secondary hover:bg-purple-500 active:bg-purple-600 text-white text-[15px] font-medium rounded-[8px] cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                            className="px-1 py-1.5 bg-gray-400 hover:bg-violet-500 active:bg-violet-500/80 text-white text-[15px] font-medium rounded-[8px] cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                           >
                             Preview
                           </button>
@@ -466,19 +517,22 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             }
                             className={`px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
                               hasExceededLimit
-                                ? 'bg-orange-500 hover:bg-orange-600 active:bg-orange-700'
+                                ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
                                 : !hasKindleSetup
-                                ? 'bg-gray-400 hover:bg-gray-500 active:bg-gray-600'
-                                : 'bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80'
+                                ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                                : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
                             }`}
-                            onClick={!hasKindleSetup && !hasExceededLimit ? handleConfigureDeviceClick : undefined}
+                            onClick={
+                              !hasKindleSetup && !hasExceededLimit
+                                ? handleConfigureDeviceClick
+                                : undefined
+                            }
                           >
                             {hasExceededLimit
-                              ? 'Upgrade to Send'
+                              ? "Upgrade to Send"
                               : !hasKindleSetup
-                              ? 'Send to Kindle'
-                              : 'Send to Kindle'
-                            }
+                              ? "Send to Kindle"
+                              : "Send to Kindle"}
                           </button>
                         </div>
 
@@ -486,14 +540,15 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                         {!hasKindleSetup && !hasExceededLimit && (
                           <div className="text-center pt-1 space-y-0.5">
                             <p className="text-[13px] text-black/50 leading-tight">
-                              Please configure your Kindle to send content.<button
-                              type="button"
-                              onClick={handleConfigureDeviceClick}
-                              className="ml-2 text-[13px] text-brand-primary underline hover:text-brand-primary/80 transition-colors duration-150 font-medium"
-                            >Click to setup now
-                            </button>
+                              Please configure your Kindle to send content.
+                              <button
+                                type="button"
+                                onClick={handleConfigureDeviceClick}
+                                className="ml-2 text-[13px] text-brand-primary underline hover:text-brand-primary/80 transition-colors duration-150 font-medium"
+                              >
+                                Click to setup now
+                              </button>
                             </p>
-
                           </div>
                         )}
                       </div>
@@ -510,12 +565,24 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       )}
 
                       {/* Status Messages */}
-                      {isSuccess && (
+                      {isSuccess && previewGenerated ? (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-[2px]">
+                          <p className="text-sm text-blue-500">
+                            Successfully generated preview!
+                          </p>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+
+                      {isSuccess && !previewGenerated ? (
                         <div className="p-3 bg-green-50 border border-green-200 rounded-[2px]">
-                          <p className="text-lg text-green-500">
+                          <p className="text-sm text-green-500">
                             Successfully sent to your Kindle!
                           </p>
                         </div>
+                      ) : (
+                        <></>
                       )}
 
                       {error && (
@@ -540,15 +607,51 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                 <>
                   <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-4 sm:p-6">
                     <div className="border-2 border-dashed border-gray-300 rounded-[12px] p-6 sm:p-8 text-center hover:border-brand-primary/50 transition-colors duration-150 cursor-pointer">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div
+                        onClick={() => {
+                          if (fileInputRef.current) {
+                            fileInputRef.current.click();
+                          }
+                        }}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                      >
                         <Upload className="w-6 h-6 text-gray-500" />
+                        <input
+                          id="file-upload"
+                          type="file"
+                          ref={fileInputRef} // Connect the ref
+                          className="hidden"
+                          accept=".md, .docx, .epub, .pdf"
+                          onChange={handleFileChange}
+                        />
                       </div>
-                      <p className={`${text.body} mb-2`}>
-                        Click to upload or drag and drop
-                      </p>
-                      <p className={text.caption}>
-                        MD, DOCX, EPUB, PDF* (max 20MB)
-                      </p>
+                      {selectedFile ? (
+                        <div>
+                          <p className={`${text.body} mb-2`}>
+                            {selectedFile
+                              ? `File selected: ${selectedFile.name}`
+                              : "No file selected"}
+                          </p>
+                          <button
+                            onClick={() => setSelectedFile(null)}
+                            className="p-1 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors duration-150"
+                            aria-label="Remove selected file"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className={`${text.body} mb-2`}>
+                            Click to upload or drag and drop
+                          </p>
+                          <p className={text.caption}>
+                            MD, DOCX, EPUB, PDF* (max 20MB)
+                          </p>
+                        </div>
+                      )}
                       <p className={`${text.footnote} mt-2`}>
                         * Only available for legacy paying customers
                       </p>
@@ -558,7 +661,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       </p>
                     </div>
 
-                    <button className="w-full mt-4 px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150">
+                    <button
+                      onClick={handleFileUpload}
+                      disabled={!selectedFile}
+                      className="w-full mt-4 px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
+                    >
                       Send to Kindle
                     </button>
                   </div>
@@ -568,7 +675,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           </div>
 
           {/* Right Column - Kindle Preview */}
-          <div className="hidden lg:flex items-start justify-center">
+          <div className="flex items-center justify-center w-full">
             <KindleReader
               url={url}
               urlError={urlError}
