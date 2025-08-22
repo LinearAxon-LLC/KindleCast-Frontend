@@ -2,7 +2,7 @@
 
 import React, { use, useState, useRef } from "react";
 import { Plus, FileText, Upload, Info } from "lucide-react";
-import { useLinkProcessor } from "@/hooks/useLinkProcessor";
+import { useFileProcessor, useLinkProcessor } from "@/hooks/useLinkProcessor";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { getTimeBasedGreeting } from "@/lib/time-utils";
 
@@ -28,6 +28,13 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [urlError, setUrlError] = useState<string | null>(null);
   const { isLoading, isSuccess, error, preview_path, submitLink } =
     useLinkProcessor();
+  const {
+    isFileLoading,
+    isFileSuccess,
+    fileUploadError,
+    file_url,
+    submitFile,
+  } = useFileProcessor();
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
   const { getRemainingUsage, isUnlimited } = useUserUsage();
   const { getPendingLinkData, clearPendingLinkData } = useAuth();
@@ -80,29 +87,47 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     return null;
   };
 
-  const handleFileUpload = async () => {
-    if (!selectedFile) return;
+  const handleFileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    // Example: using FormData for an API call
-    const formData = new FormData();
-    formData.append("file", selectedFile);
+    // If user has exceeded limit, show upgrade modal instead
+    if (hasExceededLimit) {
+      handleUpgradeClick();
+      return;
+    }
 
-    try {
-      const response = await fetch("/api/upload-to-kindle", {
-        method: "POST",
-        body: formData,
-        // Note: Do not set Content-Type header manually, the browser does it for FormData
-      });
+    // Validate that a file is selected
+    if (!selectedFile) {
+      setFileError("Please select a file to upload.");
+      return;
+    }
 
-      if (response.ok) {
-        console.log("File uploaded successfully!");
-        // Handle success, e.g., show a success message
+    // Get the name of the button that was clicked
+    const submitter = (e.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement;
+    const buttonName = submitter?.name;
+
+    // Determine if content should be emailed
+    const sendEmail = buttonName === "sendToKindle" || emailContent;
+
+    // Use a placeholder for the preview/send logic
+    if (buttonName === "preview" || buttonName === "sendToKindle") {
+      const fileUrl = await submitFile(
+        selectedFile,
+        selectedFormat,
+        includeImage,
+        sendEmail,
+        customPrompt
+      );
+
+      // Handle success/error based on the return value of submitFile
+      if (fileUrl) {
+        console.log(`File processing successful. Preview link: ${fileUrl}`);
+        // You can add logic here to display the preview or a success message
       } else {
-        console.error("Upload failed.");
-        // Handle error
+        console.error("File processing failed.");
+        // The useFileProcessor hook handles the error state internally
       }
-    } catch (error) {
-      console.error("Error during upload:", error);
     }
   };
 
@@ -604,42 +629,62 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
               {/* Quick Send File Upload */}
               {activeTab === "upload" && (
-                <>
+                <form onSubmit={handleFileSubmit}>
                   <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-4 sm:p-6">
-                    <div className="border-2 border-dashed border-gray-300 rounded-[12px] p-6 sm:p-8 text-center hover:border-brand-primary/50 transition-colors duration-150 cursor-pointer">
-                      <div
-                        onClick={() => {
-                          if (fileInputRef.current) {
-                            fileInputRef.current.click();
-                          }
-                        }}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                      >
+                    <div
+                      onClick={() => {
+                        if (fileInputRef.current) {
+                          fileInputRef.current.click();
+                        }
+                      }}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      className="border-2 border-dashed border-gray-300 rounded-[12px] p-6 sm:p-8 text-center hover:border-brand-primary/50 transition-colors duration-150 cursor-pointer"
+                    >
+                      <input
+                        id="file-upload"
+                        type="file"
+                        ref={fileInputRef} // Connect the ref
+                        className="hidden"
+                        accept=".md, .docx, .epub, .pdf"
+                        onChange={handleFileChange}
+                      />
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Upload className="w-6 h-6 text-gray-500" />
-                        <input
-                          id="file-upload"
-                          type="file"
-                          ref={fileInputRef} // Connect the ref
-                          className="hidden"
-                          accept=".md, .docx, .epub, .pdf"
-                          onChange={handleFileChange}
-                        />
                       </div>
                       {selectedFile ? (
                         <div>
-                          <p className={`${text.body} mb-2`}>
-                            {selectedFile
-                              ? `File selected: ${selectedFile.name}`
-                              : "No file selected"}
-                          </p>
+                          {selectedFile ? (
+                            <div>
+                              <p className={`${text.body} mb-2`}>
+                                {selectedFile.name}
+                              </p>
+                            </div>
+                          ) : (
+                            "No file selected"
+                          )}
+
                           <button
                             onClick={() => setSelectedFile(null)}
-                            className="p-1 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors duration-150"
+                            className="p-2 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors duration-150"
                             aria-label="Remove selected file"
                           >
-                            Delete
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="lucide lucide-trash-icon lucide-trash"
+                            >
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
                           </button>
                         </div>
                       ) : (
@@ -662,14 +707,15 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     </div>
 
                     <button
-                      onClick={handleFileUpload}
-                      disabled={!selectedFile}
+                      type="submit"
+                      name="sendToKindle"
+                      disabled={isFileLoading}
                       className="w-full mt-4 px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
                     >
                       Send to Kindle
                     </button>
                   </div>
-                </>
+                </form>
               )}
             </div>
           </div>

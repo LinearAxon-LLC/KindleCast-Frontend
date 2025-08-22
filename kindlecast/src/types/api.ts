@@ -8,10 +8,20 @@ export interface LinkProcessRequest {
   custom_prompt?: string;
 }
 
+export interface FileProcessRequest {
+  file: File;
+}
+
 export interface LinkProcessResponse {
   status: boolean;
   message: string;
   preview_link: string;
+}
+
+export interface FileProcessResponse {
+  status: boolean;
+  message: string;
+  file_url?: string;
 }
 
 // Frontend format mapping
@@ -30,6 +40,7 @@ export const API_CONFIG = {
       : "http://localhost:8000",
   ENDPOINTS: {
     PROCESS_LINK: "/api/v1/link/process",
+    PROCESS_FILE: "/api/v1/file/process",
     LINK_HISTORY: "/api/v1/link/history",
     PREVIEW_PATH: "/api/v1/link/preview",
 
