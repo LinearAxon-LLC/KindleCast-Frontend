@@ -10,6 +10,10 @@ export interface LinkProcessRequest {
 
 export interface FileProcessRequest {
   file: File;
+  format?: string;
+  include_image?: boolean;
+  email_content?: boolean;
+  custom_prompt?: string;
 }
 
 export interface LinkProcessResponse {

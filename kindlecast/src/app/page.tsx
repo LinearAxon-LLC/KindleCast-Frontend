@@ -234,7 +234,7 @@ export default function Home() {
         }
 
         // If authenticated, proceed with submission
-        await submitLink(url, selectedFormat, customPrompt)
+        await submitLink(url, selectedFormat, false, false, customPrompt)
     }
 
 

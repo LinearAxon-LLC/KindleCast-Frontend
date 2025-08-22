@@ -229,12 +229,12 @@ export function useFileProcessor(): UseFileProcessorReturn {
 
       try {
         // Prepare the request object for the API call.
-        const request = {
+        const request: FileProcessRequest = {
           file: file,
-          // format: format,
-          // include_image: includeImage,
-          // email_content: emailContent,
-          // custom_prompt: customPrompt?.trim() || undefined,
+          format: format ? FORMAT_MAPPING[format] || format.toLowerCase() : undefined,
+          include_image: includeImage,
+          email_content: emailContent,
+          custom_prompt: customPrompt?.trim() || undefined,
         };
 
         // Make the API call using the processFile function.

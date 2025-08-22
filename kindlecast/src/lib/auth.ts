@@ -117,10 +117,14 @@ export class AuthenticatedAPI {
     }
 
     // Add default headers
-    options.headers = {
-      "Content-Type": isFile ? "multipart/form-data" : "application/json",
-      ...options.headers,
-    };
+    if (!isFile) {
+      // Only set Content-Type for non-file requests
+      // For file uploads, let the browser set the Content-Type with proper boundary
+      options.headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+      };
+    }
 
     try {
       const response = await fetch(url, options);

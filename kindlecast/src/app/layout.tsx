@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css"
-import Script from "next/script";
+// import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ToastProvider } from "@/components/ui/toast"
 import { ErrorBoundary } from "@/components/auth/ErrorBoundary"
@@ -148,14 +148,7 @@ export default function RootLayout({
             </ToastProvider>
           </PostHogProvider>
         </ErrorBoundary>
-          {/* ✅ Umami Analytics Script */}
-        {process.env.NODE_ENV === "production" && (
-    <Script
-      src="https://cloud.umami.is/script.js"
-      data-website-id="c3d85e7a-1e9a-44fb-8d49-f01b2ccdf879"
-      strategy="afterInteractive"
-    />
-  )}
+
       </body>
     </html>
   );

@@ -83,19 +83,32 @@ export async function processFile(
   request: FileProcessRequest
 ): Promise<FileProcessResponse> {
   const formData = new FormData();
-  // Append all required form fields to the FormData object
   const { AuthenticatedAPI } = await import("./auth");
+
+  // Append the file
   formData.append("file", request.file, request.file.name);
-  // formData.append("format", request.format);
-  // formData.append("include_image", String(request.includeImage));
-  // formData.append("email_content", String(request.emailContent));
-  // if (request.customPrompt) {
-  //   formData.append("custom_prompt", request.customPrompt);
-  // }
+
+  // Append additional form fields if provided
+  if (request.format) {
+    formData.append("format", request.format);
+  }
+  if (request.include_image !== undefined) {
+    formData.append("include_image", String(request.include_image));
+  }
+  if (request.email_content !== undefined) {
+    formData.append("email_content", String(request.email_content));
+  }
+  if (request.custom_prompt) {
+    formData.append("custom_prompt", request.custom_prompt);
+  }
 
   console.log("Uploading file:", request.file);
   console.log("Is File object?", request.file instanceof File);
   console.log("Name:", request.file?.name);
+  console.log("FormData contents:");
+  for (let [key, value] of formData.entries()) {
+    console.log(`  ${key}:`, value);
+  }
 
   try {
     // The makeRequest method is used to send the file.
