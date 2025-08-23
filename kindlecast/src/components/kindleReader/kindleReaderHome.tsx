@@ -76,7 +76,7 @@ export default function KindleReaderHome({
           width: "100%",
           height: "100%",
           spread: "none",
-          flow: "paginated",
+          flow: "scrolled-doc",
         });
 
         // Register fonts
@@ -143,16 +143,8 @@ export default function KindleReaderHome({
 
           if (!rendition || !book) return;
 
-          const location = rendition.location;
-
-          // Check if we're at the last page
-          if (location?.atEnd) {
-            // Go back to the first page
-            rendition.prev();
-          } else {
-            // Go to the next page
-            rendition.next();
-          }
+          // Go to the next page
+          rendition.next();
         }, 1000);
       } catch (err) {
         console.error("Failed to load book:", err);
