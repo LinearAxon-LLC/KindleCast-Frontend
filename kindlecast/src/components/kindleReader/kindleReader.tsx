@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import ePub, { Rendition, Book, Contents } from "epubjs";
 import { Libre_Baskerville } from "next/font/google";
 import { API_CONFIG } from "@/types/api";
+import { Fullscreen } from "lucide-react";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ interface KindleReaderProps {
   isSuccess: boolean;
   error: string | null;
   preview_path: string;
+  file_url: string;
 }
 
 export default function KindleReader({
@@ -27,6 +29,7 @@ export default function KindleReader({
   isSuccess,
   error,
   preview_path,
+  file_url,
 }: KindleReaderProps) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
@@ -35,7 +38,7 @@ export default function KindleReader({
   const [bookTitle, setBookTitle] = useState<string>("Loading…");
 
   const fetchBook = async () => {
-    if (!preview_path) {
+    if (!preview_path && !file_url) {
       setMessage(" Paste a link and press 'Preview' to get started.");
       return;
     }
@@ -47,9 +50,15 @@ export default function KindleReader({
       }
       bookRef.current = null;
 
-      const res = await fetch(preview_path);
+      let res;
 
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      if (preview_path) {
+        res = await fetch(preview_path); // ✅ fetch from URL served by FastAPI
+      } else if (file_url) {
+        res = await fetch(file_url);
+      }
+
+      if (!res?.ok) throw new Error(`HTTP error! status: ${res?.status}`);
       const blob = await res.blob();
 
       if (blob.size === 0) {
@@ -169,7 +178,8 @@ export default function KindleReader({
 
   useEffect(() => {
     fetchBook();
-  }, [preview_path]);
+    console.log(file_url);
+  }, [preview_path, file_url]);
 
   return (
     <div className="flex items-center justify-center w-full h-[70vh] gap-3">

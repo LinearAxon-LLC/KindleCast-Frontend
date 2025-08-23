@@ -25,7 +25,7 @@ export interface LinkProcessResponse {
 export interface FileProcessResponse {
   status: boolean;
   message: string;
-  file_url?: string;
+  preview_link?: string;
 }
 
 // Frontend format mapping

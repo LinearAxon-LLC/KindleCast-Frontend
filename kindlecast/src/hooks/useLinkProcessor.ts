@@ -231,7 +231,9 @@ export function useFileProcessor(): UseFileProcessorReturn {
         // Prepare the request object for the API call.
         const request: FileProcessRequest = {
           file: file,
-          format: format ? FORMAT_MAPPING[format] || format.toLowerCase() : undefined,
+          format: format
+            ? FORMAT_MAPPING[format] || format.toLowerCase()
+            : undefined,
           include_image: includeImage,
           email_content: emailContent,
           custom_prompt: customPrompt?.trim() || undefined,
@@ -239,14 +241,14 @@ export function useFileProcessor(): UseFileProcessorReturn {
 
         // Make the API call using the processFile function.
         const response = await processFile(request);
-
+        console.log("File upload response", response);
         if (response.status) {
           // Success case: update the state with the file URL.
           setState({
             isFileLoading: false,
             isFileSuccess: true,
             fileUploadError: null,
-            file_url: response.file_url || "",
+            file_url: response.preview_link || "",
           });
 
           // Auto-reset success state after 4 seconds for a brief success message.
@@ -257,7 +259,7 @@ export function useFileProcessor(): UseFileProcessorReturn {
             }));
           }, 4000);
 
-          return response.file_url || "";
+          return response.preview_link || "";
         } else {
           // API returned an error: update state with the error message.
           setState({

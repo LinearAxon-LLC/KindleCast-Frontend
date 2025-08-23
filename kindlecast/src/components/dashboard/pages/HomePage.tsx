@@ -120,6 +120,8 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         ""
       );
 
+      console.log("FILE URL", fileUrl);
+
       // Handle success/error based on the return value of submitFile
       if (fileUrl) {
         console.log(`File processing successful. Preview link: ${fileUrl}`);
@@ -755,6 +757,44 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                         ? "Send to Kindle"
                         : "Send to Kindle"}
                     </button>
+                    {isFileLoading ? (
+                      <>
+                        <div className="p-3 mt-2 bg-blue-50 border border-blue-200 rounded-[8px]">
+                          <span className="text-sm text-blue-500">
+                            Uploading...
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    {/* Status Messages */}
+                    {isFileSuccess && previewGenerated ? (
+                      <div className="p-3 mt-2 bg-blue-50 border border-blue-200 rounded-[2px]">
+                        <p className="text-sm text-blue-500">
+                          Successfully generated preview!
+                        </p>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+
+                    {isFileSuccess && !previewGenerated ? (
+                      <div className="p-3 mt-2 bg-green-50 border border-green-200 rounded-[2px]">
+                        <p className="text-sm text-green-500">
+                          Successfully sent to your Kindle!
+                        </p>
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+
+                    {fileError && (
+                      <div className="p-3 mt-2 bg-red-50 border border-red-200 rounded-[8px]">
+                        <p className={text.error}>{fileError}</p>
+                      </div>
+                    )}
                   </div>
                 </form>
               )}
@@ -770,6 +810,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
               isSuccess={isSuccess}
               error={error}
               preview_path={preview_path}
+              file_url={file_url}
             ></KindleReader>
           </div>
         </div>
