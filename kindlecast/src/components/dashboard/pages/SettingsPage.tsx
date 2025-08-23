@@ -1,46 +1,59 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { User, Bell, Shield, CreditCard, Trash2, Smartphone, Crown, Loader2 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useUserProfile } from '@/hooks/useUserProfile'
-import { usePricingPlans } from '@/hooks/usePricingPlans'
-import { usePayment } from '@/hooks/usePayment'
-import Image from "next/image"
-import { useBillingPortal } from '@/hooks/useBillingPortal'
-import { text } from '@/lib/typography'
-import { UpgradePlansModal } from '@/components/ui/upgrade-plans-modal'
-import { ConfigureDeviceModal } from '@/components/ui/configure-device-modal'
-import {useUserUsage} from "@/hooks/useUserUsage";
+import React, { useState } from "react";
+import {
+  User,
+  Bell,
+  Shield,
+  CreditCard,
+  Trash2,
+  Smartphone,
+  Crown,
+  Loader2,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { usePricingPlans } from "@/hooks/usePricingPlans";
+import { usePayment } from "@/hooks/usePayment";
+import Image from "next/image";
+import { useBillingPortal } from "@/hooks/useBillingPortal";
+import { text } from "@/lib/typography";
+import { UpgradePlansModal } from "@/components/ui/upgrade-plans-modal";
+import { ConfigureDeviceModal } from "@/components/ui/configure-device-modal";
+import { useUserUsage } from "@/hooks/useUserUsage";
 
 export function SettingsPage() {
-  const { user } = useAuth()
-  const { userProfile } = useUserProfile()
-  const { plans, getUserCurrentPlan } = usePricingPlans()
-  const { redirectToPayment, isLoading: paymentLoading } = usePayment()
-  const { openBillingPortal, isLoading: billingLoading } = useBillingPortal()
-  const {usage} = useUserUsage()
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [showConfigureDeviceModal, setShowConfigureDeviceModal] = useState(false)
+  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
+  const { plans, getUserCurrentPlan } = usePricingPlans();
+  const { redirectToPayment, isLoading: paymentLoading } = usePayment();
+  const { openBillingPortal, isLoading: billingLoading } = useBillingPortal();
+  const { usage } = useUserUsage();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
+    useState(false);
 
   // Get user's current plan and premium plan for upgrade
-  const currentPlan = getUserCurrentPlan(user?.subscription_name)
-  const premiumPlan = plans.find(plan => plan.subscription_type.toLowerCase() === 'premium')
-  const isFreePlan =  currentPlan?.subscription_type.toLowerCase() === 'free'
-  const isPremiumPlan =  currentPlan?.subscription_type.toLowerCase() === 'premium'
+  const currentPlan = getUserCurrentPlan(user?.subscription_name);
+  const premiumPlan = plans.find(
+    (plan) => plan.subscription_type.toLowerCase() === "premium"
+  );
+  const isFreePlan = currentPlan?.subscription_type.toLowerCase() === "free";
+  const isPremiumPlan =
+    currentPlan?.subscription_type.toLowerCase() === "premium";
 
   const handleUpgrade = () => {
-    setShowUpgradeModal(true)
-  }
+    setShowUpgradeModal(true);
+  };
 
   const handleConfigureDevice = () => {
-    setShowConfigureDeviceModal(true)
-  }
+    setShowConfigureDeviceModal(true);
+  };
 
   const handleDeviceConfigured = () => {
     // Refresh user profile to get updated data
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   return (
     <div className="h-full overflow-y-auto">
@@ -48,7 +61,9 @@ export function SettingsPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className={`${text.sectionTitle} mb-2`}>Settings</h1>
-          <p className={text.bodySecondary}>Manage your account and preferences</p>
+          <p className={text.bodySecondary}>
+            Manage your account and preferences
+          </p>
         </div>
 
         <div className="max-w-4xl space-y-8">
@@ -56,14 +71,18 @@ export function SettingsPage() {
           <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[16px] p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10  rounded-[8px] flex items-center justify-center">
-
-                  <img src={user?.avatar || "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"}
-                       alt="User Avatar"
-                       className="w-8 h-8 rounded-full object-cover"
-                       onError={(e) => {
-                         e.currentTarget.src = "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
-                       }}
-                  />
+                <img
+                  src={
+                    user?.avatar ||
+                    "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
+                  }
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png";
+                  }}
+                />
               </div>
               <div>
                 <h2 className={text.componentTitle}>Your Profile</h2>
@@ -73,20 +92,24 @@ export function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Display Name</label>
+                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">
+                  Display Name
+                </label>
                 <input
                   disabled
                   type="text"
-                  defaultValue={user?.name || ''}
+                  defaultValue={user?.name || ""}
                   className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200"
                 />
               </div>
               <div>
-                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">Email (Signed Up)</label>
+                <label className="block text-[13px] font-medium text-[#273F4F]/70 mb-2">
+                  Email (Signed Up)
+                </label>
                 <input
                   type="email"
                   disabled
-                  defaultValue={user?.email || ''}
+                  defaultValue={user?.email || ""}
                   className="w-full px-4 py-3 bg-black/[0.03] border border-black/[0.08] rounded-[8px] text-[15px] text-black/85 focus:bg-white focus:border-brand-primary/60 focus:ring-2 focus:ring-brand-primary/20 focus:outline-none transition-all duration-200"
                 />
               </div>
@@ -106,8 +129,12 @@ export function SettingsPage() {
                 <Smartphone className="w-5 h-5 text-brand-primary" />
               </div>
               <div>
-                <h2 className="text-[17px] font-semibold text-[#273F4F]">Device Settings</h2>
-                <p className="text-[13px] text-[#273F4F]/60">Manage your Kindle device connection</p>
+                <h2 className="text-[17px] font-semibold text-[#273F4F]">
+                  Device Settings
+                </h2>
+                <p className="text-[13px] text-[#273F4F]/60">
+                  Manage your Kindle device connection
+                </p>
               </div>
             </div>
 
@@ -115,19 +142,25 @@ export function SettingsPage() {
               <div className="p-4 bg-black/[0.02] rounded-[8px]">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="text-[15px] font-medium text-[#273F4F]">Kindle Email</div>
+                    <div className="text-[15px] font-medium text-[#273F4F]">
+                      Kindle Email
+                    </div>
                     <div className="text-[13px] text-[#273F4F]/60">
-                      {userProfile?.kindle_email || 'Not configured'}
+                      {userProfile?.kindle_email || "Not configured"}
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="p-4 bg-black/[0.02] rounded-[8px]">
-                <div className="text-[15px] font-medium text-[#273F4F]">Kinddy Sender Email</div>
-                <p className={text.caption}>You will receive converted content from this email.</p>
-                <div className="text-lg text-brand-secondary italic font-medium mt-4">
-                  send@kinddy.com
+                <div className="text-[15px] font-medium text-[#273F4F]">
+                  Kinddy Sender Email
+                </div>
+                <p className={text.caption}>
+                  You will receive converted content from this email.
+                </p>
+                <div className="text-lg text-brand-primary font-regular mt-4">
+                  no-reply@kinddy.com
                 </div>
               </div>
 
@@ -135,7 +168,9 @@ export function SettingsPage() {
                 onClick={handleConfigureDevice}
                 className="px-4 py-2.5 bg-brand-primary text-white text-[13px] font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
               >
-                {userProfile?.kindle_email ?  'Change Kindle Email' : 'Configure Device'}
+                {userProfile?.kindle_email
+                  ? "Change Kindle Email"
+                  : "Configure Device"}
               </button>
             </div>
           </div>
@@ -147,33 +182,51 @@ export function SettingsPage() {
                 <CreditCard className="w-5 h-5 text-brand-primary" />
               </div>
               <div>
-                <h2 className="text-[17px] font-semibold text-[#273F4F]">Billing & Subscription</h2>
-                <p className="text-[13px] text-[#273F4F]/60">Manage your subscription and billing</p>
+                <h2 className="text-[17px] font-semibold text-[#273F4F]">
+                  Billing & Subscription
+                </h2>
+                <p className="text-[13px] text-[#273F4F]/60">
+                  Manage your subscription and billing
+                </p>
               </div>
             </div>
 
             {/* Current Plan Display */}
-            <div className={`p-4 rounded-[8px] border ${
-              isFreePlan
-                ? 'bg-gray-50 border-gray-200'
-                : 'bg-gradient-to-r from-brand-primary/10 to-green-500/10 border-brand-primary/20'
-            }`}>
+            <div
+              className={`p-4 rounded-[8px] border ${
+                isFreePlan
+                  ? "bg-gray-50 border-gray-200"
+                  : "bg-gradient-to-r from-brand-primary/10 to-green-500/10 border-brand-primary/20"
+              }`}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-[15px] font-semibold text-[#273F4F]">
-                    {currentPlan?.display_name || 'Free Plan'}
+                    {currentPlan?.display_name || "Free Plan"}
                   </div>
                   <div className="text-[13px] text-[#273F4F]/60">
-                    {`${usage?.basic_monthly_limit === -1 ? 'Unlimited' : usage?.basic_monthly_limit} basic conversions & ${usage?.ai_monthly_limit} AI conversions per month`
-                    }
+                    {`${
+                      usage?.basic_monthly_limit === -1
+                        ? "Unlimited"
+                        : usage?.basic_monthly_limit
+                    } basic conversions & ${
+                      usage?.ai_monthly_limit
+                    } AI conversions per month`}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-[17px] font-bold ${isFreePlan ? 'text-gray-600' : 'text-brand-primary'}`}>
-                    ${currentPlan?.discounted_price?.toFixed(2) || '0.00'}/{currentPlan?.billing_cycle || 'month'}
+                  <div
+                    className={`text-[17px] font-bold ${
+                      isFreePlan ? "text-gray-600" : "text-brand-primary"
+                    }`}
+                  >
+                    ${currentPlan?.discounted_price?.toFixed(2) || "0.00"}/
+                    {currentPlan?.billing_cycle || "month"}
                   </div>
                   {!isFreePlan && (
-                    <div className="text-[11px] text-[#273F4F]/60">Active subscription</div>
+                    <div className="text-[11px] text-[#273F4F]/60">
+                      Active subscription
+                    </div>
                   )}
                 </div>
               </div>
@@ -186,8 +239,12 @@ export function SettingsPage() {
                   <div className="flex items-center gap-3">
                     <Crown className="w-5 h-5 text-brand-primary" />
                     <div>
-                      <div className="text-[15px] font-semibold text-[#273F4F]">Upgrade to {premiumPlan.display_name}</div>
-                      <div className="text-[13px] text-[#273F4F]/60">Get unlimited conversions and premium features</div>
+                      <div className="text-[15px] font-semibold text-[#273F4F]">
+                        Upgrade to {premiumPlan.display_name}
+                      </div>
+                      <div className="text-[13px] text-[#273F4F]/60">
+                        Get unlimited conversions and premium features
+                      </div>
                     </div>
                   </div>
                   <button
@@ -203,24 +260,28 @@ export function SettingsPage() {
             )}
 
             {isPremiumPlan && (
-                <div className="flex gap-3 mt-4">
-              <button
-                onClick={openBillingPortal}
-                disabled={billingLoading}
-                className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {billingLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                View Billing History
-              </button>
-              <button
-                onClick={openBillingPortal}
-                disabled={billingLoading}
-                className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {billingLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                Update Payment Method
-              </button>
-            </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={openBillingPortal}
+                  disabled={billingLoading}
+                  className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {billingLoading && (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  )}
+                  View Billing History
+                </button>
+                <button
+                  onClick={openBillingPortal}
+                  disabled={billingLoading}
+                  className="px-4 py-2.5 bg-black/[0.04] text-[#273F4F] text-[13px] font-medium rounded-[8px] hover:bg-black/[0.08] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {billingLoading && (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  )}
+                  Update Payment Method
+                </button>
+              </div>
             )}
           </div>
 
@@ -256,5 +317,5 @@ export function SettingsPage() {
         onSuccess={handleDeviceConfigured}
       />
     </div>
-  )
+  );
 }

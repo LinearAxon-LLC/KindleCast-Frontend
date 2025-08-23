@@ -31,131 +31,143 @@ export default function KindleReader({
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
-
+  const [message, setMessage] = useState<string | null>(null);
   const [bookTitle, setBookTitle] = useState<string>("Loading…");
 
-  useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        // Destroy previous rendition and book if any
-        if (renditionRef.current) {
-          renditionRef.current.destroy();
-          renditionRef.current = null;
-        }
-        bookRef.current = null;
-
-        const res = await fetch(preview_path);
-
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const blob = await res.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const book = ePub(arrayBuffer);
-
-        bookRef.current = book;
-
-        const rendition = book.renderTo(viewerRef.current as HTMLElement, {
-          width: "100%",
-          height: "100%",
-          spread: "none",
-          flow: "paginated",
-        });
-
-        // Register a hook to add the font-face rule to the iframe's stylesheet
-        rendition.hooks.content.register((contents: Contents) => {
-          const fontFaceRules = {
-            "@font-face": [
-              {
-                "font-family": "LibreBaskerville",
-                src: "url('/fonts/LibreBaskerville-Regular.ttf')",
-                "font-weight": "normal", // This is the regular weight
-                "font-style": "normal",
-              },
-              {
-                "font-family": "LibreBaskerville",
-                src: "url('/fonts/LibreBaskerville-Bold.ttf')",
-                "font-weight": "bold", // This is the bold weight
-                "font-style": "normal",
-              },
-            ],
-          };
-          contents.addStylesheetRules(fontFaceRules, "libre-baskerville-font");
-        });
-
-        await rendition.display();
-        renditionRef.current = rendition;
-        rendition.themes.default({
-          "*": {
-            "font-family": "LibreBaskerville, Georgia, serif",
-            color: "#2e2e2eff !important",
-            "margin-left": "1px",
-            "margin-right": "1px",
-          },
-          p: {
-            "font-size": "14px", // adjust to your desired size
-          },
-          span: {
-            "font-size": "14px", // adjust to your desired size
-          },
-          div: {
-            "font-size": "14px", // adjust to your desired size
-          },
-          h1: {
-            "font-size": "20px",
-          },
-          h2: {
-            "font-size": "16px",
-          },
-          h3: {
-            "font-size": "14px",
-          },
-          li: {
-            "font-size": "14px",
-          },
-          a: {
-            color: "#4a4a4aff !important", // Add !important to ensure it's applied
-            textDecoration: "underline !important",
-            "font-size": "14px",
-          },
-          img: {
-            filter: "grayscale(100%)",
-            maxWidth: "50%",
-            height: "auto",
-            display: "block",
-            margin: "0 auto !important",
-          },
-        });
-
-        rendition.on("rendered", () => {
-          // Now that the content is rendered, ensure the theme is selected
-          rendition.themes.select("kindle");
-        });
-
-        const metadata = await book.loaded.metadata;
-        setBookTitle(metadata.title || "Untitled");
-      } catch (err) {
-        console.error("Failed to load book:", err);
+  const fetchBook = async () => {
+    if (!preview_path) {
+      setMessage(" Paste a link and press 'Preview' to get started.");
+      return;
+    }
+    try {
+      // Destroy previous rendition and book if any
+      if (renditionRef.current) {
+        renditionRef.current.destroy();
+        renditionRef.current = null;
       }
+      bookRef.current = null;
+
+      const res = await fetch(preview_path);
+
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const blob = await res.blob();
+
+      if (blob.size === 0) {
+        setMessage("The preview file is empty. Please try again.");
+        return;
+      }
+
+      setMessage(null);
+      const arrayBuffer = await blob.arrayBuffer();
+      const book = ePub(arrayBuffer);
+
+      bookRef.current = book;
+
+      const rendition = book.renderTo(viewerRef.current as HTMLElement, {
+        width: "100%",
+        height: "100%",
+        spread: "none",
+        flow: "paginated",
+      });
+
+      // Register a hook to add the font-face rule to the iframe's stylesheet
+      rendition.hooks.content.register((contents: Contents) => {
+        const fontFaceRules = {
+          "@font-face": [
+            {
+              "font-family": "LibreBaskerville",
+              src: "url('/fonts/LibreBaskerville-Regular.ttf')",
+              "font-weight": "normal", // This is the regular weight
+              "font-style": "normal",
+            },
+            {
+              "font-family": "LibreBaskerville",
+              src: "url('/fonts/LibreBaskerville-Bold.ttf')",
+              "font-weight": "bold", // This is the bold weight
+              "font-style": "normal",
+            },
+          ],
+        };
+        contents.addStylesheetRules(fontFaceRules, "libre-baskerville-font");
+      });
+
+      await rendition.display();
+      renditionRef.current = rendition;
+      rendition.themes.default({
+        "*": {
+          "font-family": "LibreBaskerville, Georgia, serif",
+          color: "#2e2e2eff !important",
+          "margin-left": "1px",
+          "margin-right": "1px",
+        },
+        p: {
+          "font-size": "14px", // adjust to your desired size
+        },
+        span: {
+          "font-size": "14px", // adjust to your desired size
+        },
+        div: {
+          "font-size": "14px", // adjust to your desired size
+        },
+        h1: {
+          "font-size": "20px",
+        },
+        h2: {
+          "font-size": "16px",
+        },
+        h3: {
+          "font-size": "14px",
+        },
+        li: {
+          "font-size": "14px",
+        },
+        a: {
+          color: "#4a4a4aff !important", // Add !important to ensure it's applied
+          textDecoration: "underline !important",
+          "font-size": "14px",
+        },
+        img: {
+          filter: "grayscale(100%)",
+          maxWidth: "50%",
+          height: "auto",
+          display: "block",
+          margin: "0 auto !important",
+        },
+      });
+
+      rendition.on("rendered", () => {
+        // Now that the content is rendered, ensure the theme is selected
+        rendition.themes.select("kindle");
+      });
+
+      const metadata = await book.loaded.metadata;
+      setBookTitle(metadata.title || "Untitled");
+    } catch (err) {
+      console.error("Failed to load book:", err);
+      setMessage("Failed to load preview. Please try again.");
+    }
+  };
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (!renditionRef.current) return;
+    if (e.key === "ArrowRight") renditionRef.current.next();
+    if (e.key === "ArrowLeft") renditionRef.current.prev();
+  });
+
+  renditionRef.current?.on("touchstart", (event: TouchEvent) => {
+    const startX = event.changedTouches[0].screenX;
+
+    const handleTouchEnd = (ev: TouchEvent) => {
+      const endX = ev.changedTouches[0].screenX;
+      if (startX - endX > 50) renditionRef.current?.next(); // swipe left
+      if (endX - startX > 50) renditionRef.current?.prev(); // swipe right
+      document.removeEventListener("touchend", handleTouchEnd);
     };
 
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (!renditionRef.current) return;
-      if (e.key === "ArrowRight") renditionRef.current.next();
-      if (e.key === "ArrowLeft") renditionRef.current.prev();
-    });
+    document.addEventListener("touchend", handleTouchEnd);
+  });
 
-    renditionRef.current?.on("touchstart", (event: TouchEvent) => {
-      const startX = event.changedTouches[0].screenX;
-
-      const handleTouchEnd = (ev: TouchEvent) => {
-        const endX = ev.changedTouches[0].screenX;
-        if (startX - endX > 50) renditionRef.current?.next(); // swipe left
-        if (endX - startX > 50) renditionRef.current?.prev(); // swipe right
-        document.removeEventListener("touchend", handleTouchEnd);
-      };
-
-      document.addEventListener("touchend", handleTouchEnd);
-    });
-
+  useEffect(() => {
     fetchBook();
   }, [preview_path]);
 
@@ -194,39 +206,30 @@ export default function KindleReader({
           <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
             {/* The viewerRef div is given a lower z-index */}
 
-            <div className="w-full overflow-y-auto">
-              <div
-                ref={viewerRef}
-                style={{
-                  position: "absolute",
-                  top: "0%",
-                  left: "0%",
-                  width: "100%",
-                  height: "100%",
-                  border: "3px solid #373737ff",
-                  margin: "auto",
-                  overflowY: "auto",
-                  WebkitOverflowScrolling: "touch",
-                  backgroundColor: "#fbf9f1ff",
-                  zIndex: 1, // Set a lower z-index
-                }}
-              ></div>
+            <div className="w-full h-full overflow-y-auto">
+              {message ? (
+                <div className="flex items-center justify-center w-full h-full bg-white text-center p-4">
+                  {message}
+                </div>
+              ) : (
+                <div
+                  ref={viewerRef}
+                  style={{
+                    position: "absolute",
+                    top: "0%",
+                    left: "0%",
+                    width: "100%",
+                    height: "100%",
+                    border: "3px solid #373737ff",
+                    margin: "auto",
+                    overflowY: "auto",
+                    WebkitOverflowScrolling: "touch",
+                    backgroundColor: "#fbf9f1ff",
+                    zIndex: 1, // Set a lower z-index
+                  }}
+                ></div>
+              )}
             </div>
-
-            {/* This div will now appear on top because of the higher z-index */}
-            {!url || !isSuccess ? (
-              // If URL is missing, display the placeholder text
-              <div
-                className="flex items-center justify-center w-full h-full bg-white text-center p-4"
-                style={{ zIndex: 999 }} // Give it a higher z-index
-              >
-                <p className="text-gray-500 text-sm">
-                  Paste a link and press "Preview" to get started.
-                </p>
-              </div>
-            ) : (
-              <></>
-            )}
           </div>
           {/* Kindle Logo */}
           <div className="absolute bottom-8 text-white/30 font-light text-2xl">

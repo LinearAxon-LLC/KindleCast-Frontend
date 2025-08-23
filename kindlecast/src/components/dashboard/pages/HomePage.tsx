@@ -114,10 +114,10 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     if (buttonName === "preview" || buttonName === "sendToKindle") {
       const fileUrl = await submitFile(
         selectedFile,
-        selectedFormat,
-        includeImage,
-        sendEmail,
-        customPrompt
+        "quick send",
+        true,
+        true,
+        ""
       );
 
       // Handle success/error based on the return value of submitFile
@@ -228,6 +228,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         customPrompt
       );
     }
+  };
+
+  const handleReset = () => {
+    setUrl("");
+    setSelectedFormat("Quick Send");
   };
 
   // Check if user has exceeded limits
@@ -384,9 +389,17 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     <form onSubmit={handleSubmit} className="space-y-5">
                       {/* URL Input */}
                       <div>
-                        <label className="block text-[15px] font-medium text-black mb-2">
-                          Enter an URL
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-[15px] font-medium text-black ">
+                            Enter an URL
+                          </label>
+                          <button
+                            onClick={() => setUrl("")}
+                            className="text-sm text-brand-primary font-medium"
+                          >
+                            Reset
+                          </button>
+                        </div>
                         <input
                           type="text"
                           value={url}
@@ -706,13 +719,41 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       </p>
                     </div>
 
-                    <button
+                    {/* <button
                       type="submit"
                       name="sendToKindle"
                       disabled={isFileLoading}
                       className="w-full mt-4 px-6 py-3 bg-brand-primary text-white text-base font-medium rounded-[8px] hover:bg-brand-primary/90 transition-colors duration-150"
                     >
                       Send to Kindle
+                    </button> */}
+                    <button
+                      type="submit"
+                      name="sendToKindle"
+                      disabled={
+                        isFileLoading ||
+                        !selectedFile ||
+                        (selectedFormat === "Custom" && !customPrompt.trim()) ||
+                        (!hasKindleSetup && !hasExceededLimit)
+                      }
+                      className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                        hasExceededLimit
+                          ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                          : !hasKindleSetup
+                          ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                          : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
+                      }`}
+                      onClick={
+                        !hasKindleSetup && !hasExceededLimit
+                          ? handleConfigureDeviceClick
+                          : undefined
+                      }
+                    >
+                      {hasExceededLimit
+                        ? "Upgrade to Send"
+                        : !hasKindleSetup
+                        ? "Send to Kindle"
+                        : "Send to Kindle"}
                     </button>
                   </div>
                 </form>

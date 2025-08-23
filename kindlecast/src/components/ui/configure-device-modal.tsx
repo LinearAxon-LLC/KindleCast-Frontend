@@ -1,117 +1,129 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import {X, Loader2, CheckCircle, AlertTriangle, MonitorCog} from 'lucide-react'
-import { useUserProfile } from '@/hooks/useUserProfile'
-import { text } from '@/lib/typography'
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  MonitorCog,
+} from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { text } from "@/lib/typography";
 
 interface ConfigureDeviceModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSuccess?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDeviceModalProps) {
-  const { userProfile, setupDevice } = useUserProfile()
-  const [step, setStep] = useState(1)
-  const [kindleEmail, setKindleEmail] = useState('')
-  const [confirmed, setConfirmed] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+export function ConfigureDeviceModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: ConfigureDeviceModalProps) {
+  const { userProfile, setupDevice } = useUserProfile();
+  const [step, setStep] = useState(1);
+  const [kindleEmail, setKindleEmail] = useState("");
+  const [confirmed, setConfirmed] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const KINDDY_SENDER_EMAIL = 'send@kinddy.com'
-  const isConfigured = Boolean(userProfile?.kindle_email && userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === 'yes')
+  const KINDDY_SENDER_EMAIL = "no-reply@kinddy.com";
+  const isConfigured = Boolean(
+    userProfile?.kindle_email &&
+      userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === "yes"
+  );
 
   // Initialize form when modal opens
   useEffect(() => {
     if (isOpen) {
       if (isConfigured && userProfile?.kindle_email) {
         // Extract email prefix for editing
-        const emailPrefix = userProfile.kindle_email.replace('@kindle.com', '')
-        setKindleEmail(emailPrefix)
-        setConfirmed('yes')
-        setStep(1) // For configured users, we only need step 1
+        const emailPrefix = userProfile.kindle_email.replace("@kindle.com", "");
+        setKindleEmail(emailPrefix);
+        setConfirmed("yes");
+        setStep(1); // For configured users, we only need step 1
       } else {
         // Reset for new configuration
-        setKindleEmail('')
-        setConfirmed('')
-        setStep(1)
+        setKindleEmail("");
+        setConfirmed("");
+        setStep(1);
       }
-      setError('')
+      setError("");
     }
-  }, [isOpen, isConfigured, userProfile?.kindle_email])
+  }, [isOpen, isConfigured, userProfile?.kindle_email]);
 
   const handleNext = async () => {
     if (step === 1) {
       if (!kindleEmail.trim()) {
-        setError('Please enter your Kindle email prefix')
-        return
+        setError("Please enter your Kindle email prefix");
+        return;
       }
       // Validate that it doesn't contain @ (since we append @kindle.com)
-      if (kindleEmail.includes('@')) {
-        setError('Please enter only the part before @kindle.com')
-        return
+      if (kindleEmail.includes("@")) {
+        setError("Please enter only the part before @kindle.com");
+        return;
       }
-      setError('')
-      
+      setError("");
+
       if (isConfigured) {
         // For configured users, submit directly
-        await handleSubmit()
+        await handleSubmit();
       } else {
         // For new users, go to whitelisting step
-        setStep(2)
+        setStep(2);
       }
     } else if (step === 2) {
       // This is the whitelisting confirmation step
-      if (confirmed.toLowerCase() !== 'yes') {
-        setError('Please enter "YES" to confirm you have whitelisted our email')
-        return
+      if (confirmed.toLowerCase() !== "yes") {
+        setError(
+          'Please enter "YES" to confirm you have whitelisted our email'
+        );
+        return;
       }
-      await handleSubmit()
+      await handleSubmit();
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    setIsLoading(true)
-    setError('')
+    setIsLoading(true);
+    setError("");
 
     try {
       // Append @kindle.com to the email prefix
-      const fullKindleEmail = `${kindleEmail}@kindle.com`
-      const result = await setupDevice(fullKindleEmail, confirmed || 'yes')
+      const fullKindleEmail = `${kindleEmail}@kindle.com`;
+      const result = await setupDevice(fullKindleEmail, confirmed || "yes");
 
       if (result.success) {
         // Success! Close modal and call success callback
-        onClose()
+        onClose();
         if (onSuccess) {
-          window.location.reload()
+          window.location.reload();
         }
       } else {
-        setError(result.error || 'Failed to configure device')
+        setError(result.error || "Failed to configure device");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleBack = () => {
     if (step > 1) {
-      setStep(step - 1)
-      setError('')
+      setStep(step - 1);
+      setError("");
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/20"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
 
       {/* Dialog */}
       <div className="relative bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[16px] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_20px_40px_rgba(0,0,0,0.15)] w-full max-w-[480px] mx-4 overflow-hidden">
@@ -120,7 +132,7 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 active:bg-black/15 flex items-center justify-center transition-colors duration-150 z-10"
         >
-          <X className="w-4 h-4 text-black/60"/>
+          <X className="w-4 h-4 text-black/60" />
         </button>
 
         {/* Content */}
@@ -128,21 +140,20 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
           {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-brand-primary rounded-[12px] flex items-center justify-center">
-              <MonitorCog className="w-8 h-8 text-white"/>
+              <MonitorCog className="w-8 h-8 text-white" />
             </div>
           </div>
 
           {/* Title */}
           <h2 className="text-[17px] font-semibold text-black mb-2 text-center leading-tight">
-            {isConfigured ? 'Update Kindle Email' : 'Configure Your Kindle'}
+            {isConfigured ? "Update Kindle Email" : "Configure Your Kindle"}
           </h2>
 
           {/* Message */}
           <p className="text-[13px] text-black/70 text-center leading-relaxed mb-6">
-            {isConfigured 
-              ? 'Update your Kindle email address below.'
-              : 'Set up your Kindle to receive converted content directly.'
-            }
+            {isConfigured
+              ? "Update your Kindle email address below."
+              : "Set up your Kindle to receive converted content directly."}
           </p>
 
           {/* Step 1: Kindle Email Input */}
@@ -185,12 +196,12 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-[15px] font-medium">
-                      {isConfigured ? 'Updating...' : 'Configuring...'}
+                      {isConfigured ? "Updating..." : "Configuring..."}
                     </span>
                   </>
                 ) : (
                   <span className="text-[15px] font-medium">
-                    {isConfigured ? 'Update Email' : 'Next'}
+                    {isConfigured ? "Update Email" : "Next"}
                   </span>
                 )}
               </button>
@@ -205,12 +216,24 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
                   Important: Whitelist Our Email
                 </h4>
                 <p className="text-[12px] text-blue-700 mb-3">
-                  To receive content on your Kindle, you must add <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong> to your approved email list in your Amazon account.
+                  To receive content on your Kindle, you must add{" "}
+                  <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong>{" "}
+                  to your approved email list in your Amazon account.
                 </p>
                 <div className="text-[11px] text-blue-600">
-                  <p className="mb-1">1. Go to Amazon → Manage Your Content and Devices</p>
-                  <p className="mb-1">2. Click "Preferences" → "Personal Document Settings"</p>
-                  <p>3. Add <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong> to approved email list</p>
+                  <p className="mb-1">
+                    1. Go to Amazon → Manage Your Content and Devices
+                  </p>
+                  <p className="mb-1">
+                    2. Click "Preferences" → "Personal Document Settings"
+                  </p>
+                  <p>
+                    3. Add{" "}
+                    <strong className="text-[14px]">
+                      {KINDDY_SENDER_EMAIL}
+                    </strong>{" "}
+                    to approved email list
+                  </p>
                 </div>
               </div>
 
@@ -247,16 +270,20 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
                 </button>
                 <button
                   onClick={handleNext}
-                  disabled={isLoading || confirmed.toLowerCase() !== 'yes'}
+                  disabled={isLoading || confirmed.toLowerCase() !== "yes"}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-primary text-white rounded-[10px] hover:bg-brand-primary/90 active:bg-brand-primary/80 transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-primary disabled:active:scale-100"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-[15px] font-medium">Configuring...</span>
+                      <span className="text-[15px] font-medium">
+                        Configuring...
+                      </span>
                     </>
                   ) : (
-                    <span className="text-[15px] font-medium">Complete Setup</span>
+                    <span className="text-[15px] font-medium">
+                      Complete Setup
+                    </span>
                   )}
                 </button>
               </div>
@@ -265,5 +292,5 @@ export function ConfigureDeviceModal({ isOpen, onClose, onSuccess }: ConfigureDe
         </div>
       </div>
     </div>
-  )
+  );
 }
