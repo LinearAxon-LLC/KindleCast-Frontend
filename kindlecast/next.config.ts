@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
     assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
 
     // Use standard build instead of standalone to avoid chunk issues
-    // output: 'standalone', // Commented out - causes chunk loading issues
+   // output: 'standalone', // Commented out - causes chunk loading issues
 };
 
 export default nextConfig;

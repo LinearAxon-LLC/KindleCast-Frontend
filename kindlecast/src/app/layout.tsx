@@ -7,7 +7,6 @@ import { ToastProvider } from "@/components/ui/toast"
 import { ErrorBoundary } from "@/components/auth/ErrorBoundary"
 import { OrganizationSchema } from "@/components/seo/OrganizationSchema"
 import { WebApplicationSchema } from "@/components/seo/WebApplicationSchema"
-import { PostHogProvider } from "@/components/analytics/PostHogProvider"
 
 
 const rubik = Rubik({
@@ -140,13 +139,11 @@ export default function RootLayout({
       </head>
       <body className={`${rubik.variable} font-sans antialiased bg-[#EFEEEA]`}>
         <ErrorBoundary>
-          <PostHogProvider>
             <ToastProvider>
               <AuthProvider>
                 {children}
               </AuthProvider>
             </ToastProvider>
-          </PostHogProvider>
         </ErrorBoundary>
 
       </body>

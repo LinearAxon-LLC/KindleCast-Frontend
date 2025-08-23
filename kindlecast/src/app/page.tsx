@@ -11,7 +11,6 @@ import {useUserProfile} from "@/hooks/useUserProfile";
 import {usePricingPlans} from "@/hooks/usePricingPlans";
 import {usePaymentFlow} from "@/hooks/usePayment";
 import Image from "next/image";
-import {FadeInSection, SlideIn} from "@/components/ui/animated";
 import {motion, useInView, useScroll, useTransform} from "framer-motion";
 import {HomePageStructuredData} from "@/components/seo/StructuredData";
 import KindleReader from "@/components/kindleReader/kindleReaderHome";
@@ -473,7 +472,7 @@ export default function Home() {
             <section className="pt-24 sm:pt-32 lg:pt-40 pb-16 sm:pb-20 lg:pb-32 bg-[#EFEEEA]">
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-[36px] sm:text-[44px] lg:text-6xl font-bold text-black/85 leading-[36px] sm:leading-[44px] lg:leading-[56px] mb-3 sm:mb-4">
-                        Save Your Eyes.
+                        Save Your Eyes
                     </h1>
                     <h1 className="text-[36px] sm:text-[44px] lg:text-6xl font-bold leading-[36px] sm:leading-[44px] lg:leading-[56px] mb-6 sm:mb-8">
             <span
@@ -995,13 +994,13 @@ export default function Home() {
                             >
                                 Start Free Trial
                             </Button>
-                            <Button
-                                variant="outline"
-                                size="xl"
-                                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-medium"
-                            >
-                                Watch Demo
-                            </Button>
+                            {/*<Button*/}
+                            {/*    variant="outline"*/}
+                            {/*    size="xl"*/}
+                            {/*    className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-medium"*/}
+                            {/*>*/}
+                            {/*    Watch Demo*/}
+                            {/*</Button>*/}
                         </div>
                         <div className="pt-6">
                             <p className="text-gray-500 text-sm">
@@ -1160,7 +1159,7 @@ export default function Home() {
                                     </li>
                                     <li>
                                         <a
-                                            href="mailto:support@kinddy.com?subject=Status%20Page%20Inquiry&body=Hi%20Kinddy%2C%0A%0AI%20want%20to%20check%20the%20status..."
+                                            href="https://linearaxon-ai.betteruptime.com"
                                             className="hover:text-white transition-colors cursor-pointer text-base"
                                         >
                                             Status Page
