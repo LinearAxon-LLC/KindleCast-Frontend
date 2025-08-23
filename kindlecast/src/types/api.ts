@@ -47,6 +47,7 @@ export const API_CONFIG = {
     PROCESS_FILE: "/api/v1/file/process",
     LINK_HISTORY: "/api/v1/link/history",
     PREVIEW_PATH: "/api/v1/link/preview",
+    IFRAME_PROXY: "/api/v1/link/proxy",
 
     // Auth endpoints - matching your FastAPI routes
     AUTH_GOOGLE: "/api/v1/auth/google",
