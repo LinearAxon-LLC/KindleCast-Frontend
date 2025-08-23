@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import ePub, { Rendition, Book, Contents } from "epubjs";
 import { Libre_Baskerville } from "next/font/google";
+import { API_CONFIG } from "@/types/api";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
@@ -290,7 +291,7 @@ export default function KindleReaderHome({
             {/* Screen area */}
             <div className="flex-1 bg-white overflow-hidden relative rounded-b-lg">
               <iframe
-                src="http://localhost:8000/api/v1/link/proxy?url=https://medium.com/@maddiewang/how-to-build-startups-that-get-in-yc-dabb4c1bfe1b" // Replace with any URL
+                src={`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.IFRAME_PROXY}?url=https://medium.com/@maddiewang/how-to-build-startups-that-get-in-yc-dabb4c1bfe1b`} // Replace with any URL
                 className="w-full h-full border-0"
                 title="Webpage Preview"
               />
