@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import {Button} from "@/components/ui/button";
 import {Cast, Check, Loader2, Menu, X} from "lucide-react";
 import {useLinkProcessor} from "@/hooks/useLinkProcessor";
@@ -13,7 +13,6 @@ import {usePaymentFlow} from "@/hooks/usePayment";
 import Image from "next/image";
 import {motion, useInView, useScroll, useTransform} from "framer-motion";
 import {HomePageStructuredData} from "@/components/seo/StructuredData";
-import KindleReader from "@/components/kindleReader/kindleReaderHome";
 import KindleReaderHome from "@/components/kindleReader/kindleReaderHome";
 
 // Animation component for scroll-triggered animations
@@ -269,24 +268,22 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-[#EFEEEA]">
-            {/* Mobile-First Navigation */}
+            {/* Navigation */}
             <nav className="fixed top-4 left-4 right-4 sm:top-6 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50 bg-[#EFEEEA]/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)]">
                 <div className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 flex items-center justify-between w-full sm:w-[900px] sm:max-w-[calc(100vw-48px)]">
-                    {/* Mobile Menu Button - Left Side */}
-                    <button
-                        className="lg:hidden p-2 rounded-[8px] hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        {mobileMenuOpen ? (
-                            <X className="w-5 h-5 text-black/60"/>
-                        ) : (
-                            <Menu className="w-5 h-5 text-black/60"/>
-                        )}
-                    </button>
-
-                    {/* Logo - Center on Mobile, Left on Desktop */}
-                    <div className="flex items-center space-x-2 sm:space-x-3 lg:ml-0">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
+                    <div className="flex items-center space-x-3 lg:space-x-0">
+                        <button
+                            className="lg:hidden p-2 rounded-[8px] hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            {mobileMenuOpen ? (
+                                <X className="w-5 h-5 text-black/60"/>
+                            ) : (
+                                <Menu className="w-5 h-5 text-black/60"/>
+                            )}
+                        </button>
+                        <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
                             <svg
                                 width="16"
                                 height="16"
@@ -358,9 +355,9 @@ export default function Home() {
                             </svg>
                         </div>
                         <span className="text-[15px] sm:text-[17px] font-bold text-black/90">Kinddy</span>
+                        </div>
                     </div>
 
-                    {/* Desktop Navigation - Hidden on Mobile */}
                     <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                         <a
                             href="#how-it-works"
@@ -403,14 +400,11 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Empty div for spacing on mobile */}
                     <div className="lg:hidden w-9"></div>
                 </div>
 
-                {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div
-                        className="lg:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
+                    <div className="lg:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
                         <div className="py-4 px-4 sm:px-6 space-y-4">
                             <a
                                 href="#pricing"
@@ -449,8 +443,8 @@ export default function Home() {
                                                 className="w-8 h-8 rounded-full border-2 border-brand-primary/20"
                                             />
                                             <span className="text-[15px] font-medium text-black/85">
-                        {user?.name || "User"}
-                      </span>
+                                                {user?.name || "User"}
+                                            </span>
                                         </div>
                                     </div>
                                 ) : (

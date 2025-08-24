@@ -10,6 +10,13 @@ let globalError: string | null = null;
 let isCurrentlyFetching = false;
 let fetchPromise: Promise<void> | null = null;
 
+// Global listeners for state changes
+const listeners = new Set<() => void>();
+
+const notifyListeners = () => {
+  listeners.forEach(listener => listener());
+};
+
 interface UseUserUsageReturn {
   usage: UserUsageResponse | null;
   isLoading: boolean;
@@ -26,16 +33,34 @@ export function useUserUsage(): UseUserUsageReturn {
   const [error, setError] = useState<string | null>(globalError);
   const { isAuthenticated } = useAuth();
 
+  // Subscribe to global state changes
+  useEffect(() => {
+    const updateState = () => {
+      setUsage(globalUsage);
+      setIsLoading(globalIsLoading);
+      setError(globalError);
+    };
+
+    listeners.add(updateState);
+    return () => {
+      listeners.delete(updateState);
+    };
+  }, []);
+
   const fetchUsage = useCallback(async (): Promise<void> => {
     if (!isAuthenticated) {
       setUsage(null);
       setError(null);
+      globalUsage = null;
+      globalError = null;
       return;
     }
 
     try {
       setIsLoading(true);
       setError(null);
+      globalIsLoading = true;
+      globalError = null;
 
       const response = await AuthenticatedAPI.makeRequest<UserUsageResponse>(
         API_CONFIG.ENDPOINTS.SUBSCRIPTION_USAGE,
@@ -44,14 +69,24 @@ export function useUserUsage(): UseUserUsageReturn {
         }
       );
 
+      // Update both local and global state
       setUsage(response);
+      globalUsage = response;
+
+      // Notify all listeners of the state change
+      notifyListeners();
+
+      console.log("Usage refreshed:", response);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch usage data";
       setError(errorMessage);
+      globalError = errorMessage;
       console.error("Usage fetch failed:", err);
     } finally {
       setIsLoading(false);
+      globalIsLoading = false;
+      notifyListeners();
     }
   }, [isAuthenticated]);
 

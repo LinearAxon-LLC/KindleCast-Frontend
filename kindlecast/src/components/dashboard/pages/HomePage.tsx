@@ -1,7 +1,7 @@
 "use client";
 
-import React, { use, useState, useRef } from "react";
-import { Plus, FileText, Upload, Info } from "lucide-react";
+import React, { use, useState, useRef, useEffect } from "react";
+import { Plus, FileText, Upload, Info, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useFileProcessor, useLinkProcessor } from "@/hooks/useLinkProcessor";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { getTimeBasedGreeting } from "@/lib/time-utils";
@@ -11,9 +11,22 @@ import { UpgradePlansModal } from "@/components/ui/upgrade-plans-modal";
 import { FormatInfoModal } from "@/components/ui/format-info-modal";
 import { text } from "@/lib/typography";
 import { isValidUrl } from "@/lib/api";
+import { validateURL, validateURLFormat } from "@/lib/urlValidation";
 import { useUserUsage } from "@/hooks/useUserUsage";
 import { useAuth } from "@/contexts/AuthContext";
 import KindleReader from "@/components/kindleReader/kindleReader";
+
+// Debounce utility
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 interface HomePageProps {
   onSwitchTab: (tab: string) => void;
@@ -26,6 +39,14 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   const [customPrompt, setCustomPrompt] = useState("");
   const [emailContent, setEmailContent] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [urlValidation, setUrlValidation] = useState<{
+    isValidating: boolean;
+    isValid: boolean;
+    error?: string;
+  }>({
+    isValidating: false,
+    isValid: false
+  });
   const { isLoading, isSuccess, error, preview_path, submitLink } =
     useLinkProcessor();
   const {
@@ -37,6 +58,41 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   } = useFileProcessor();
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
   const { getRemainingUsage, isUnlimited } = useUserUsage();
+
+  // Debounced URL validation
+  const validateUrlWithDebounce = React.useCallback(
+    debounce(async (url: string) => {
+      setUrlValidation(prev => ({ ...prev, isValidating: true }));
+
+      try {
+        // First check format
+        const formatResult = validateURLFormat(url);
+        if (!formatResult.isValid) {
+          setUrlValidation({
+            isValidating: false,
+            isValid: false,
+            error: formatResult.error
+          });
+          return;
+        }
+
+        // Then check existence
+        const fullResult = await validateURL(url);
+        setUrlValidation({
+          isValidating: false,
+          isValid: fullResult.isValid,
+          error: fullResult.error
+        });
+      } catch (error) {
+        setUrlValidation({
+          isValidating: false,
+          isValid: false,
+          error: "Validation failed"
+        });
+      }
+    }, 1000), // 1 second debounce
+    []
+  );
   const { getPendingLinkData, clearPendingLinkData } = useAuth();
   const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
   const [includeImage, setIncludeImage] = useState(false);
@@ -174,6 +230,17 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     // Clear error when user starts typing
     if (urlError) {
       setUrlError(null);
+    }
+
+    // Clear previous validation state
+    setUrlValidation({
+      isValidating: false,
+      isValid: false
+    });
+
+    // Start validation if URL is not empty
+    if (newUrl.trim()) {
+      validateUrlWithDebounce(newUrl.trim());
     }
   };
 
@@ -408,17 +475,42 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           onChange={handleUrlChange}
                           placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
                           className={`w-full px-3 py-2.5 border rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 transition-all duration-200 ${
-                            urlError
+                            urlError || (urlValidation.error && !urlValidation.isValidating)
                               ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                              : urlValidation.isValid && !urlValidation.isValidating
+                              ? "border-green-300 focus:border-green-500 focus:ring-green-500/20"
                               : "border-black/[0.15] focus:ring-brand-primary/20 focus:border-brand-primary"
                           }`}
                         />
+
+                        {/* URL Validation Status */}
+                        {url.trim() && (
+                          <div className="mt-2 flex items-center gap-2">
+                            {urlValidation.isValidating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                                <span className="text-[13px] text-blue-600">Validating URL...</span>
+                              </>
+                            ) : urlValidation.isValid ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 text-green-500" />
+                                <span className="text-[13px] text-green-600">Valid URL</span>
+                              </>
+                            ) : urlValidation.error ? (
+                              <>
+                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                <span className="text-[13px] text-red-600">{urlValidation.error}</span>
+                              </>
+                            ) : null}
+                          </div>
+                        )}
+
                         {urlError && (
                           <p className="text-[13px] mt-1.5 text-red-600">
                             {urlError}
                           </p>
                         )}
-                        {!urlError && (
+                        {!urlError && !url.trim() && (
                           <p className="text-[13px] mt-1.5 text-black/60">
                             Try an example:{" "}
                             <button
@@ -538,6 +630,8 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             disabled={
                               isLoading ||
                               !url.trim() ||
+                              urlValidation.isValidating ||
+                              !urlValidation.isValid ||
                               (selectedFormat === "Custom" &&
                                 !customPrompt.trim())
                             }
@@ -551,6 +645,8 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             disabled={
                               isLoading ||
                               !url.trim() ||
+                              urlValidation.isValidating ||
+                              !urlValidation.isValid ||
                               (selectedFormat === "Custom" &&
                                 !customPrompt.trim()) ||
                               (!hasKindleSetup && !hasExceededLimit)
