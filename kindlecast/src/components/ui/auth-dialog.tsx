@@ -3,6 +3,7 @@
 import React, {useState} from 'react'
 import {X, User, Loader2, Mail} from 'lucide-react'
 import {useAuth} from '@/contexts/AuthContext'
+import {sendMagicLink} from '@/lib/api'
 
 interface AuthDialogProps {
     isOpen: boolean
@@ -20,10 +21,10 @@ export function AuthDialog({
                                linkData
                            }: AuthDialogProps) {
     const {login, isLoading} = useAuth()
-    const [loadingProvider, setLoadingProvider] = useState<'google' | 'twitter' | 'apple' | 'email' | null>(null)
+    const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | 'email' | null>(null)
     const [showEmailForm, setShowEmailForm] = useState(false)
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [magicLinkSent, setMagicLinkSent] = useState(false)
 
     if (!isOpen) return null
 
@@ -32,21 +33,32 @@ export function AuthDialog({
         login('google')
     }
 
-    const handleTwitterLogin = () => {
-        setLoadingProvider('twitter')
-        login('twitter')
-    }
-
     const handleAppleLogin = () => {
         setLoadingProvider('apple')
         login('apple')
     }
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const handleMagicLinkSend = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!email.trim()) return
+
         setLoadingProvider('email')
-        // TODO: Implement email login
-        login('email')
+
+        try {
+            const response = await sendMagicLink({ email: email.trim() })
+
+            if (response.status) {
+                setMagicLinkSent(true)
+            } else {
+                console.error('Failed to send magic link:', response.message)
+                // You could show an error toast here
+            }
+        } catch (error) {
+            console.error('Error sending magic link:', error)
+            // You could show an error toast here
+        } finally {
+            setLoadingProvider(null)
+        }
     }
 
     return (
@@ -137,40 +149,63 @@ export function AuthDialog({
               </span>
                         </button>
 
-                        {/* X (Twitter) Login */}
-                        <button
-                            onClick={handleTwitterLogin}
-                            disabled={isLoading || loadingProvider !== null}
-                            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-black hover:bg-black/90 active:bg-black/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:active:scale-100"
-                        >
-                            {loadingProvider === 'twitter' ? (
-                                <Loader2 className="w-5 h-5 animate-spin text-white"/>
-                            ) : (
-                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                                </svg>
-                            )}
-                            <span className="text-[15px] font-medium">
-                {loadingProvider === 'twitter' ? 'Connecting...' : 'Continue with X'}
-              </span>
-                        </button>
+                        {/* Divider */}
+                        <div className="flex items-center gap-4 my-4">
+                            <div className="flex-1 h-px bg-black/[0.08]"></div>
+                            <span className="text-[13px] text-black/50 font-medium">Or</span>
+                            <div className="flex-1 h-px bg-black/[0.08]"></div>
+                        </div>
 
-                        {/* Apple Login */}
-  {/*                      <button*/}
-  {/*                          onClick={handleAppleLogin}*/}
-  {/*                          disabled={isLoading || loadingProvider !== null}*/}
-  {/*                          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-black hover:bg-black/90 active:bg-black/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:active:scale-100"*/}
-  {/*                      >*/}
-  {/*                          {loadingProvider === 'apple' ? (*/}
-  {/*                              <Loader2 className="w-5 h-5 animate-spin text-white"/>*/}
-  {/*                          ) : (*/}
-  {/*                              <img src="./apple-icon.svg" alt="Apple Logo" className="w-5 h-5"/>*/}
-  {/*                          )}*/}
-  {/*                          <span className="text-[15px] font-medium pt-1">*/}
-  {/*  {loadingProvider === 'apple' ? 'Connecting...' : 'Continue with Apple'}*/}
-  {/*</span>*/}
-  {/*                      </button>*/}
+                        {/* Email Magic Link Form */}
+                        {!magicLinkSent ? (
+                            <form onSubmit={handleMagicLinkSend} className="space-y-3">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] text-[15px] placeholder:text-black/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isLoading || loadingProvider !== null || !email.trim()}
+                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-brand-primary hover:bg-brand-primary/90 active:bg-brand-primary/80 text-white rounded-[10px] transition-all duration-150 active:scale-[0.98] shadow-[0_1px_2px_rgba(0,0,0,0.05)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-primary disabled:active:scale-100"
+                                >
+                                    {loadingProvider === 'email' ? (
+                                        <Loader2 className="w-5 h-5 animate-spin text-white"/>
+                                    ) : (
+                                        <Mail className="w-5 h-5 text-white"/>
+                                    )}
+                                    <span className="text-[15px] font-medium">
+                                        Send Magic Link
+                                    </span>
+                                </button>
+                            </form>
+                        ) : (
+                            <div className="text-center p-4 bg-green-50 border border-green-200 rounded-[12px]">
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <Mail className="w-6 h-6 text-green-600"/>
+                                </div>
+                                <h3 className="text-[15px] font-semibold text-green-800 mb-2">
+                                    Magic Link Sent!
+                                </h3>
+                                <p className="text-[13px] text-green-700 mb-4">
+                                    We've sent a magic link to <strong>{email}</strong>. Click the link to instantly access your dashboard and send files to your Kindle.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setMagicLinkSent(false)
+                                        setEmail('')
+                                    }}
+                                    className="text-[13px] text-green-600 hover:text-green-700 font-medium underline"
+                                >
+                                    Use different email
+                                </button>
+                            </div>
+                        )}
+
+
 
                         {/* Email Login Toggle */}
                         {/*{!showEmailForm ? (*/}

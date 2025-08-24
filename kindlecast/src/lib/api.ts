@@ -5,6 +5,9 @@ import {
   LinkProcessResponse,
   FileProcessRequest,
   FileProcessResponse,
+  MagicLinkRequest,
+  MagicLinkResponse,
+  MagicLoginResponse,
   API_CONFIG,
 } from "@/types/api";
 
@@ -138,5 +141,53 @@ export async function processFile(
           ? error.message
           : "Failed to upload file. Please try again.",
     };
+  }
+}
+
+// Magic Link Authentication Functions
+export async function sendMagicLink(
+  request: MagicLinkRequest
+): Promise<MagicLinkResponse> {
+  const { AuthenticatedAPI } = await import("./auth");
+
+  try {
+    const response = await AuthenticatedAPI.makeRequest<MagicLinkResponse>(
+      API_CONFIG.ENDPOINTS.AUTH_MAGIC_LINK,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+      false, // not a file
+      false, // not authenticated (public endpoint)
+      false  // not retry
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error sending magic link:", error);
+    throw error;
+  }
+}
+
+export async function verifyMagicLink(
+  token: string
+): Promise<MagicLoginResponse> {
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/auth/magic-login?token=${token}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error verifying magic link:", error);
+    throw error;
   }
 }

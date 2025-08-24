@@ -7,6 +7,7 @@ import {
   FileProcessRequest,
   FORMAT_MAPPING,
 } from "@/types/api";
+import { useUserUsage } from "@/hooks/useUserUsage";
 
 interface UseLinkProcessorState {
   isLoading: boolean;
@@ -45,6 +46,7 @@ interface UseFileProcessorReturn extends UseFileProcessorState {
 }
 
 export function useLinkProcessor(): UseLinkProcessorReturn {
+  const { refetch: refreshUsage } = useUserUsage();
   const [state, setState] = useState<UseLinkProcessorState>({
     isLoading: false,
     isSuccess: false,
@@ -127,6 +129,9 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
             preview_path: response.preview_link,
           });
 
+          // Refresh usage stats after successful conversion
+          refreshUsage().catch(console.error);
+
           // Auto-reset success state after 4 seconds
           setTimeout(() => {
             setState((prev) => ({
@@ -168,6 +173,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
 }
 
 export function useFileProcessor(): UseFileProcessorReturn {
+  const { refetch: refreshUsage } = useUserUsage();
   // Use the useState hook to manage the state of the file processor.
   const [state, setState] = useState<UseFileProcessorState>({
     isFileLoading: false,
@@ -250,6 +256,9 @@ export function useFileProcessor(): UseFileProcessorReturn {
             fileUploadError: null,
             file_url: response.preview_link || "",
           });
+
+          // Refresh usage stats after successful conversion
+          refreshUsage().catch(console.error);
 
           // Auto-reset success state after 4 seconds for a brief success message.
           setTimeout(() => {

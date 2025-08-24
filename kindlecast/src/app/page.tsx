@@ -269,13 +269,24 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-[#EFEEEA]">
-            {/* Floating Navigation */}
-            <nav
-                className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-[#EFEEEA]/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)]">
-                <div className="px-8 py-4 flex items-center justify-between w-[900px] max-w-[calc(100vw-48px)]">
-                    {/* Logo */}
-                    <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
+            {/* Mobile-First Navigation */}
+            <nav className="fixed top-4 left-4 right-4 sm:top-6 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50 bg-[#EFEEEA]/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)]">
+                <div className="px-4 py-3 sm:px-6 sm:py-4 lg:px-8 flex items-center justify-between w-full sm:w-[900px] sm:max-w-[calc(100vw-48px)]">
+                    {/* Mobile Menu Button - Left Side */}
+                    <button
+                        className="lg:hidden p-2 rounded-[8px] hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? (
+                            <X className="w-5 h-5 text-black/60"/>
+                        ) : (
+                            <Menu className="w-5 h-5 text-black/60"/>
+                        )}
+                    </button>
+
+                    {/* Logo - Center on Mobile, Left on Desktop */}
+                    <div className="flex items-center space-x-2 sm:space-x-3 lg:ml-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
                             <svg
                                 width="16"
                                 height="16"
@@ -346,11 +357,11 @@ export default function Home() {
                                 </defs>
                             </svg>
                         </div>
-                        <span className="text-[17px] font-bold text-black/90">Kinddy</span>
+                        <span className="text-[15px] sm:text-[17px] font-bold text-black/90">Kinddy</span>
                     </div>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* Desktop Navigation - Hidden on Mobile */}
+                    <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                         <a
                             href="#how-it-works"
                             className="text-black/60 hover:text-black/85 font-medium cursor-pointer text-[13px] transition-colors duration-200"
@@ -370,7 +381,7 @@ export default function Home() {
                             FAQ
                         </a>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-3">
                             {isAuthenticated ? (
                                 <>
                                     <a
@@ -392,24 +403,15 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="md:hidden p-2 text-black/60 hover:text-black/85 transition-colors duration-200"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        {mobileMenuOpen ? (
-                            <X className="w-5 h-5"/>
-                        ) : (
-                            <Menu className="w-5 h-5"/>
-                        )}
-                    </button>
+                    {/* Empty div for spacing on mobile */}
+                    <div className="lg:hidden w-9"></div>
                 </div>
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
                     <div
-                        className="md:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
-                        <div className="py-4 px-6 space-y-4">
+                        className="lg:hidden absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
+                        <div className="py-4 px-4 sm:px-6 space-y-4">
                             <a
                                 href="#pricing"
                                 className="block text-black/60 hover:text-black/85 font-medium cursor-pointer text-[15px] transition-colors duration-200"
@@ -469,19 +471,19 @@ export default function Home() {
             </nav>
 
             {/* Hero Section - A Color */}
-            <section className="pt-24 sm:pt-32 lg:pt-40 pb-16 sm:pb-20 lg:pb-32 bg-[#EFEEEA]">
+            <section className="pt-28 sm:pt-32 lg:pt-40 pb-16 sm:pb-20 lg:pb-32 bg-[#EFEEEA] px-6 sm:px-8 lg:px-12">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-[36px] sm:text-[44px] lg:text-6xl font-bold text-black/85 leading-[36px] sm:leading-[44px] lg:leading-[56px] mb-3 sm:mb-4">
+                    <h1 className="text-[32px] sm:text-[44px] lg:text-6xl font-bold text-black/85 leading-[34px] sm:leading-[44px] lg:leading-[56px] mb-2 sm:mb-3">
                         Save Your Eyes
                     </h1>
-                    <h1 className="text-[36px] sm:text-[44px] lg:text-6xl font-bold leading-[36px] sm:leading-[44px] lg:leading-[56px] mb-6 sm:mb-8">
+                    <h1 className="text-[32px] sm:text-[44px] lg:text-6xl font-bold leading-[34px] sm:leading-[44px] lg:leading-[56px] mb-6 sm:mb-8">
             <span
                 className="bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-tertiary bg-clip-text text-transparent">
               Read Anything on Kindle.
             </span>
                     </h1>
 
-                    <p className="text-[16px] sm:text-[18px] lg:text-xl text-center text-gray-600 leading-relaxed max-w-2xl mx-auto px-4">
+                    <p className="text-[15px] sm:text-[17px] lg:text-xl text-center text-gray-600 leading-relaxed max-w-2xl mx-auto px-2 sm:px-4">
                         Send
                         <span
                             className="mx-1 sm:mx-2 inline-block bg-blue-400 rounded-sm"
@@ -554,26 +556,26 @@ export default function Home() {
             {/* How it Works Section - B Color */}
             <section
                 id="how-it-works"
-                className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[#E8E7E3]"
+                className="py-16 sm:py-20 lg:py-24 px-6 sm:px-8 lg:px-12 bg-[#E8E7E3]"
             >
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-36 sm:mb-44">
+                    <div className="text-center mb-16 sm:mb-20 lg:mb-24">
                         <h2 className="text-[32px] sm:text-[40px] lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
                             How it Works
                         </h2>
                         <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 max-w-3xl mx-auto">
                             Features to save your eyes and make your reading more comfortable.
                         </p>
-                        <div className="p-0 m-10 rounded-2xl overflow-hidden shadow-xl shadow-violet-400">
+                        <div className="p-0 mt-8 sm:mt-12 lg:mt-16 rounded-2xl overflow-hidden shadow-xl shadow-violet-400">
                             <img className="w-full h-auto block" src="/landing/dashboard-preview.webp"
                                  alt="How it Works"/>
                         </div>
                     </div>
 
-                    <div className="space-y-20 lg:space-y-32">
+                    <div className="space-y-16 sm:space-y-20 lg:space-y-32">
                         {/* Feature 1 */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-                            <div className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+                            <div className="space-y-4 sm:space-y-6">
                                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
                                     Paste Any Link or Upload Content
                                 </h3>
@@ -783,6 +785,7 @@ export default function Home() {
                                     user?.subscription_name
                                 );
                                 const isFree = plan.subscription_type === "free";
+                                const isPlus = plan.display_name.toLowerCase() === "plus";
 
                                 return (
                                     <div
@@ -790,7 +793,7 @@ export default function Home() {
                                         className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative ${
                                             isFree
                                                 ? "bg-gray-50 border border-gray-200"
-                                                : "bg-brand-primary text-white"
+                                                : (isPlus ? "bg-brand-secondary" : "bg-brand-primary")
                                         }`}
                                     >
                                         {plan.is_most_popular && (

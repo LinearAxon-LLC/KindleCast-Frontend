@@ -1,13 +1,13 @@
 "use client";
 
-import { LayoutDashboard, FileText, Settings, Menu, X, Crown } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, Menu, X, Crown, ChevronDown, Home, LogOut } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUsageDisplay } from "@/hooks/useUserUsage";
 import { text } from "@/lib/typography";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UpgradePlansModal } from "@/components/ui/upgrade-plans-modal";
 // Using regular img tag instead of Next/Image for better compatibility
 
@@ -41,16 +41,32 @@ export function DashboardSidebar({
   activeTab,
   onTabChange,
 }: DashboardSidebarProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { userProfile } = useUserProfile();
   const { usage, formatUsageText, isUnlimited } = useUsageDisplay();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close mobile menu when tab changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [activeTab]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Close mobile menu on window resize to desktop
   useEffect(() => {
@@ -159,42 +175,97 @@ export function DashboardSidebar({
 
         {/* User Profile Section */}
         <div className="p-4 border-t border-[#273F4F]/20">
-          <div className="flex items-center gap-3 mb-3">
-            <img
-              src={
-                user?.avatar ||
-                "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
-              }
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png";
-              }}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <div className={`${text.body} font-semibold truncate`}>
-                  {user?.name || "User"}
-                </div>
-                <div
-                  className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    userProfile?.subscription_type &&
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              className="w-full flex items-center gap-3 mb-3 p-2 rounded-[8px] hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+            >
+              <img
+                src={
+                  user?.avatar ||
+                  "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png"
+                }
+                alt="User Avatar"
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    "https://cdn.jsdelivr.net/gh/alohe/memojis/png/vibrent_3.png";
+                }}
+              />
+              <div className="flex-1 min-w-0 text-left">
+                <div className="flex items-center gap-2">
+                  <div className={`${text.body} font-semibold truncate`}>
+                    {user?.name || "User"}
+                  </div>
+                  <div
+                    className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      userProfile?.subscription_type &&
+                      userProfile.subscription_type !== "free"
+                        ? "bg-brand-primary"
+                        : "bg-gray-400"
+                    }`}
+                  >
+                    {userProfile?.subscription_type &&
                     userProfile.subscription_type !== "free"
-                      ? "bg-brand-primary"
-                      : "bg-gray-400"
-                  }`}
-                >
-                  {userProfile?.subscription_type &&
-                  userProfile.subscription_type !== "free"
-                    ? userProfile.subscription_type.toUpperCase()
-                    : "FREE"}
+                      ? userProfile.subscription_type.toUpperCase()
+                      : "FREE"}
+                  </div>
+                </div>
+                <div className={`${text.caption} truncate`}>
+                  {user?.email || "user@example.com"}
                 </div>
               </div>
-              <div className={`${text.caption} truncate`}>
-                {user?.email || "user@example.com"}
+              <ChevronDown className={`w-4 h-4 text-black/60 transition-transform duration-200 ${showUserDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserDropdown && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] overflow-hidden">
+                <div className="py-2">
+                  <button
+                    onClick={() => {
+                      onTabChange('home');
+                      setShowUserDropdown(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+                  >
+                    <Home className="w-4 h-4 text-black/60" />
+                    <span className="text-[15px] font-medium text-black/80">Home</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onTabChange('files');
+                      setShowUserDropdown(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+                  >
+                    <FileText className="w-4 h-4 text-black/60" />
+                    <span className="text-[15px] font-medium text-black/80">My Files</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onTabChange('settings');
+                      setShowUserDropdown(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-black/[0.04] active:bg-black/[0.08] transition-colors duration-150"
+                  >
+                    <Settings className="w-4 h-4 text-black/60" />
+                    <span className="text-[15px] font-medium text-black/80">Settings</span>
+                  </button>
+                  <div className="border-t border-black/[0.08] my-2"></div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowUserDropdown(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-red-50 active:bg-red-100 transition-colors duration-150"
+                  >
+                    <LogOut className="w-4 h-4 text-red-600" />
+                    <span className="text-[15px] font-medium text-red-600">Log out</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Usage Stats - Now with singleton API calls */}

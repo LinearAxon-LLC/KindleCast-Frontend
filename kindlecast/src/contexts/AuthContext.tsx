@@ -14,6 +14,7 @@ interface AuthContextType {
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
+  setTokens: (accessToken: string, refreshToken: string) => Promise<void>
   setRedirectIntent: (intent: 'payment' | 'dashboard' | null, planName?: string) => void
   getRedirectIntent: () => { intent: 'payment' | 'dashboard' | null; planName?: string }
   clearRedirectIntent: () => void
@@ -135,6 +136,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [toast])
 
+  const setTokens = useCallback(async (accessToken: string, refreshToken: string) => {
+    try {
+      setIsLoading(true)
+
+      // Store tokens using TokenManager
+      TokenManager.setTokens({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        token_type: 'bearer',
+        expires_in: 3600 // Default 1 hour, will be updated when we get actual token info
+      })
+
+      // Fetch user data with new tokens
+      await fetchCurrentUser()
+
+      console.log('Magic link login successful')
+    } catch (error) {
+      console.error('Failed to set tokens:', error)
+      toast.error('Login Failed', 'Failed to complete login process')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [fetchCurrentUser, toast])
+
   const logout = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -205,6 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     refreshUser,
     isAuthenticated: !!user,
+    setTokens,
     setRedirectIntent,
     getRedirectIntent,
     clearRedirectIntent,

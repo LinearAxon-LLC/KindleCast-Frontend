@@ -193,33 +193,33 @@ export default function KindleReaderHome({
 
   return (
     <div className="w-full flex flex-col items-center justify-between my-1">
-      <div className="w-full flex items-center justify-center max-w-4xl mx-auto mb-6 sm:mb-8 mt-8 sm:mt-12 px-4">
-        <div className="w-4/5 bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] p-4 sm:p-6 lg:p-8">
+      <div className="w-full flex items-center justify-center max-w-4xl mx-auto mb-6 sm:mb-8 mt-6 sm:mt-8 lg:mt-12 px-4 sm:px-6">
+        <div className="w-full sm:w-4/5 bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_rgba(0,0,0,0.04)] p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 sm:space-y-6">
               <div>
                 <input
                   type="text"
                   value={urlInput}
-                  className={`border-brand-primary/80 border-2 ring-2 ring-brand-primary/20 w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/[0.03] rounded-[8px] text-[14px] sm:text-[15px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 cursor-text`}
+                  className={`border-brand-primary/80 border-2 ring-2 ring-brand-primary/20 w-full px-3 sm:px-4 py-3 sm:py-3.5 bg-black/[0.03] rounded-[8px] text-[15px] sm:text-[16px] text-black/85 placeholder:text-black/40 focus:bg-white focus:outline-none transition-all duration-200 cursor-text`}
                   disabled // prevent user editing
                 />
               </div>
 
               {/* Format Selection */}
               <div>
-                <label className="text-[12px] sm:text-[13px] font-medium text-black/60 uppercase tracking-[0.4px] mb-2 sm:mb-3 block text-center">
+                <label className="text-[13px] sm:text-[14px] font-medium text-black/60 uppercase tracking-[0.4px] mb-3 sm:mb-4 block text-center">
                   Choose your format:
                 </label>
 
-                <div className="flex gap-1.5 sm:gap-2 flex-wrap justify-center">
+                <div className="flex gap-2 sm:gap-2.5 flex-wrap justify-center">
                   {["Quick Send", "Summarize", "Study Guide", "Custom"].map(
                     (format) => (
                       <button
                         key={format}
                         type="button"
                         onClick={() => setSelectedFormat(format)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] text-[12px] sm:text-[13px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
+                        className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-[8px] text-[13px] sm:text-[14px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
                           selectedFormat === format
                             ? "bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
                             : "bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]"
@@ -319,7 +319,7 @@ export default function KindleReaderHome({
               <path d="m9 18 6-6-6-6" />
             </svg>
           </button>
-          <div className="relative bg-[#222] rounded-[30px] border-[8px] border-[#333] h-[75vh] min-w-[400px] max-w-[100px] flex flex-col items-center shadow-xl">
+          <div className="relative bg-[#222] rounded-[20px] sm:rounded-[30px] border-[6px] sm:border-[8px] border-[#333] h-[60vh] sm:h-[70vh] lg:h-[75vh] w-[280px] sm:w-[350px] lg:min-w-[400px] max-w-[100px] flex flex-col items-center shadow-xl">
             {/* Screen */}
             <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
               {/* The viewerRef div is given a lower z-index */}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css"
-// import Script from "next/script";
+import Script from "next/script";
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ToastProvider } from "@/components/ui/toast"
 import { ErrorBoundary } from "@/components/auth/ErrorBoundary"
@@ -136,6 +136,16 @@ export default function RootLayout({
 
         <OrganizationSchema />
         <WebApplicationSchema />
+
+        {/* Umami Analytics - Only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id="313e2b7e-32bb-4123-b29c-c39b9b97d209"
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body className={`${rubik.variable} font-sans antialiased bg-[#EFEEEA]`}>
         <ErrorBoundary>

@@ -16,6 +16,23 @@ export interface FileProcessRequest {
   custom_prompt?: string;
 }
 
+export interface MagicLinkRequest {
+  email: string;
+}
+
+export interface MagicLinkResponse {
+  status: boolean;
+  message: string;
+}
+
+export interface MagicLoginResponse {
+  status: boolean;
+  message: string;
+  email: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+}
+
 export interface LinkProcessResponse {
   status: boolean;
   message: string;
@@ -58,6 +75,8 @@ export const API_CONFIG = {
     AUTH_ME: "/api/v1/auth/me",
     AUTH_STATUS: "/api/v1/auth/status",
     AUTH_LOGOUT: "/api/v1/auth/logout",
+    AUTH_MAGIC_LINK: "/api/v1/auth/send-magic-link",
+    AUTH_MAGIC_LOGIN: "/api/v1/auth/magic-login",
     // Subscription endpoints
     SUBSCRIPTION_PLANS: "/api/v1/subscription/plans",
     SUBSCRIPTION_PAYMENT: "/api/v1/subscription/payment",
