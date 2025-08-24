@@ -160,7 +160,7 @@ export function SettingsPage() {
                   You will receive converted content from this email.
                 </p>
                 <div className="text-lg text-brand-primary font-regular mt-4">
-                  no-reply@kinddy.com
+                  hello@kinddy.com
                 </div>
               </div>
 

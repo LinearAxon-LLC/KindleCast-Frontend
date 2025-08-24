@@ -29,7 +29,7 @@ export function ConfigureDeviceModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const KINDDY_SENDER_EMAIL = "no-reply@kinddy.com";
+  const KINDDY_SENDER_EMAIL = "hello@kinddy.com";
   const isConfigured = Boolean(
     userProfile?.kindle_email &&
       userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === "yes"
