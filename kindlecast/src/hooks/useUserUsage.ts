@@ -8,7 +8,9 @@ let globalUsage: UserUsageResponse | null = null;
 let globalIsLoading = false;
 let globalError: string | null = null;
 let isCurrentlyFetching = false;
-let fetchPromise: Promise<void> | null = null;
+let fetchPromise: Promise<void> | null = null
+let lastFetchTime = 0
+const FETCH_DEBOUNCE_MS = 1000 // Prevent fetches within 1 second;
 
 // Global listeners for state changes
 const listeners = new Set<() => void>();
@@ -53,21 +55,39 @@ export function useUserUsage(): UseUserUsageReturn {
       setError(null);
       globalUsage = null;
       globalError = null;
+      notifyListeners();
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setError(null);
-      globalIsLoading = true;
-      globalError = null;
+    // Debounce rapid successive calls
+    const now = Date.now();
+    if (now - lastFetchTime < FETCH_DEBOUNCE_MS && globalUsage) {
+      console.log('Debouncing usage fetch - using cached data');
+      return;
+    }
 
-      const response = await AuthenticatedAPI.makeRequest<UserUsageResponse>(
-        API_CONFIG.ENDPOINTS.SUBSCRIPTION_USAGE,
-        {
-          method: "GET",
-        }
-      );
+    // If already fetching, wait for the existing promise
+    if (fetchPromise) {
+      await fetchPromise;
+      return;
+    }
+
+    // Create single fetch promise
+    lastFetchTime = now;
+    fetchPromise = (async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        globalIsLoading = true;
+        globalError = null;
+        notifyListeners();
+
+        const response = await AuthenticatedAPI.makeRequest<UserUsageResponse>(
+          API_CONFIG.ENDPOINTS.SUBSCRIPTION_USAGE,
+          {
+            method: "GET",
+          }
+        );
 
       // Update both local and global state
       setUsage(response);
@@ -76,18 +96,23 @@ export function useUserUsage(): UseUserUsageReturn {
       // Notify all listeners of the state change
       notifyListeners();
 
-      console.log("Usage refreshed:", response);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch usage data";
-      setError(errorMessage);
-      globalError = errorMessage;
-      console.error("Usage fetch failed:", err);
-    } finally {
-      setIsLoading(false);
-      globalIsLoading = false;
-      notifyListeners();
-    }
+        console.log("Usage refreshed:", response);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch usage data";
+        setError(errorMessage);
+        globalError = errorMessage;
+        console.error("Usage fetch failed:", err);
+      } finally {
+        setIsLoading(false);
+        globalIsLoading = false;
+        isCurrentlyFetching = false;
+        fetchPromise = null;
+        notifyListeners();
+      }
+    })();
+
+    await fetchPromise;
   }, [isAuthenticated]);
 
   // Auto-fetch on mount and auth changes

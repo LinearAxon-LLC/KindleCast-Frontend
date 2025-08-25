@@ -9,21 +9,45 @@ import { SettingsPage } from '@/components/dashboard/pages/SettingsPage'
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { useUserProfile } from '@/hooks/useUserProfile'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 function DashboardContent() {
   const { isLoading } = useAuth()
   const { userProfile } = useUserProfile()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('home')
 
-  // Handle URL parameters for tab switching
+  // Clean checkout parameters from URL
   useEffect(() => {
+    const checkoutId = searchParams.get('checkout_id')
+    const orderId = searchParams.get('order_id')
+    const customerId = searchParams.get('customer_id')
+    const subscriptionId = searchParams.get('subscription_id')
+    const productId = searchParams.get('product_id')
+    const signature = searchParams.get('signature')
+
+    // If any checkout parameters exist, clean the URL
+    if (checkoutId || orderId || customerId || subscriptionId || productId || signature) {
+      console.log('Cleaning checkout parameters from URL')
+
+      // Get current tab parameter if it exists
+      const tab = searchParams.get('tab')
+
+      // Build clean URL
+      const cleanUrl = tab ? `/dashboard?tab=${tab}` : '/dashboard'
+
+      // Replace current URL without adding to history
+      router.replace(cleanUrl)
+      return
+    }
+
+    // Handle normal tab switching
     const tab = searchParams.get('tab')
     if (tab && ['home', 'history', 'settings'].includes(tab)) {
       setActiveTab(tab)
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   // Cache all tab components to prevent re-rendering and flickering
   const cachedComponents = useMemo(() => ({

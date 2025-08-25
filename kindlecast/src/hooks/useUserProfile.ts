@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { UserProfile, API_CONFIG } from '@/types/api'
-import { AuthenticatedAPI } from '@/lib/auth'
+import {useEffect, useState} from 'react'
+import {useAuth} from '@/contexts/AuthContext'
+import {API_CONFIG, UserProfile} from '@/types/api'
+import {AuthenticatedAPI} from '@/lib/auth'
 
 // Global singleton to prevent multiple API calls across all components
 let globalUserProfile: UserProfile | null = null
@@ -9,6 +9,15 @@ let globalIsLoading = false
 let globalError: string | null = null
 let isCurrentlyFetching = false
 let fetchPromise: Promise<void> | null = null
+let lastFetchTime = 0
+const FETCH_DEBOUNCE_MS = 1000 // Prevent fetches within 1 second
+
+// Global listeners for state changes
+const listeners = new Set<() => void>()
+
+const notifyListeners = () => {
+  listeners.forEach(listener => listener())
+}
 
 export function useUserProfile() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
@@ -16,14 +25,33 @@ export function useUserProfile() {
   const [isLoading, setIsLoading] = useState(globalIsLoading)
   const [error, setError] = useState<string | null>(globalError)
 
+  // Subscribe to global state changes
+  useEffect(() => {
+    const updateState = () => {
+      setUserProfile(globalUserProfile)
+      setIsLoading(globalIsLoading)
+      setError(globalError)
+    }
+
+    listeners.add(updateState)
+    return () => {
+      listeners.delete(updateState)
+    }
+  }, [])
+
   const fetchUserProfile = async () => {
     if (!isAuthenticated) {
       globalUserProfile = null
       globalIsLoading = false
       globalError = null
-      setUserProfile(null)
-      setIsLoading(false)
-      setError(null)
+      notifyListeners()
+      return
+    }
+
+    // Debounce rapid successive calls
+    const now = Date.now()
+    if (now - lastFetchTime < FETCH_DEBOUNCE_MS && globalUserProfile) {
+      console.log('Debouncing user profile fetch - using cached data')
       return
     }
 
@@ -46,36 +74,37 @@ export function useUserProfile() {
     }
 
     // Create single fetch promise
+    lastFetchTime = now
     fetchPromise = (async () => {
       try {
         globalIsLoading = true
         isCurrentlyFetching = true
+        notifyListeners()
 
         // Single API call to /me endpoint
-        const profile = await AuthenticatedAPI.makeRequest<UserProfile>(
-          API_CONFIG.ENDPOINTS.AUTH_ME
+        globalUserProfile = await AuthenticatedAPI.makeRequest<UserProfile>(
+            API_CONFIG.ENDPOINTS.AUTH_ME
         )
-
-        globalUserProfile = profile
         globalError = null
         globalIsLoading = false
+
+        console.log('User profile fetched successfully')
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to load profile'
-        globalError = errorMsg
+        globalError = err instanceof Error ? err.message : 'Failed to load profile'
         globalUserProfile = null
         globalIsLoading = false
+
+        console.error('Failed to fetch user profile:', err)
       } finally {
         isCurrentlyFetching = false
         fetchPromise = null
+
+        // Notify all listeners of state change
+        notifyListeners()
       }
     })()
 
     await fetchPromise
-
-    // Update local state
-    setUserProfile(globalUserProfile)
-    setIsLoading(globalIsLoading)
-    setError(globalError)
   }
 
   const connectKindle = async (kindleEmail: string, acknowledgment: string = 'yes') => {

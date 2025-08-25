@@ -9,6 +9,8 @@ let globalIsLoading = false
 let globalError: string | null = null
 let isCurrentlyFetching = false
 let fetchPromise: Promise<void> | null = null
+let lastFetchTime = 0
+const FETCH_DEBOUNCE_MS = 2000 // Prevent fetches within 2 seconds for pricing plans
 
 interface UsePricingPlansReturn {
   plans: SubscriptionPlan[];
@@ -26,6 +28,13 @@ export function usePricingPlans(): UsePricingPlansReturn {
   const { user } = useAuth();
 
   const fetchPricingPlans = useCallback(async (): Promise<void> => {
+    // Debounce rapid successive calls
+    const now = Date.now()
+    if (now - lastFetchTime < FETCH_DEBOUNCE_MS && globalPlans.length > 0) {
+      console.log('Debouncing pricing plans fetch - using cached data')
+      return
+    }
+
     // If already fetching, wait for the existing promise
     if (fetchPromise) {
       await fetchPromise
@@ -44,6 +53,7 @@ export function usePricingPlans(): UsePricingPlansReturn {
     }
 
     // Create single fetch promise
+    lastFetchTime = now
     fetchPromise = (async () => {
       try {
         globalIsLoading = true

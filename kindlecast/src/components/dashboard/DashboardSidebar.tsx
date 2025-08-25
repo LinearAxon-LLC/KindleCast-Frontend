@@ -201,13 +201,13 @@ export function DashboardSidebar({
                     className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
                       userProfile?.subscription_type &&
                       userProfile.subscription_type !== "free"
-                        ? "bg-brand-primary"
+                        ? (userProfile.subscription_name.toUpperCase() == "PRO" ? "bg-brand-primary": "bg-brand-secondary")
                         : "bg-gray-400"
                     }`}
                   >
                     {userProfile?.subscription_type &&
                     userProfile.subscription_type !== "free"
-                      ? userProfile.subscription_type.toUpperCase()
+                      ? userProfile.subscription_name.toUpperCase()
                       : "FREE"}
                   </div>
                 </div>
@@ -324,13 +324,13 @@ export function DashboardSidebar({
               </div>
 
               {/* Upgrade Button - Only show for free users */}
-              {userProfile?.subscription_type === 'free' && (
+              {(userProfile?.subscription_type === 'free' || userProfile?.subscription_name?.toLowerCase() === 'plus') && (
                 <button
                   onClick={() => setShowUpgradeModal(true)}
                   className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-[8px] hover:bg-brand-primary/90 active:bg-brand-primary/80 transition-all duration-150 active:scale-[0.98]"
                 >
                   <Crown className="w-4 h-4" />
-                  <span className="text-[13px] font-medium">Upgrade Now</span>
+                  <span className="text-[13px] font-medium">Upgrade {userProfile?.subscription_name?.toLowerCase() === 'plus' ? 'to Pro' : 'Now'}</span>
                 </button>
               )}
             </div>

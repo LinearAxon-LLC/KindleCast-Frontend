@@ -227,13 +227,13 @@ export default function Home() {
             };
         }
 
-        // If user is pro and this is the free plan, disable the button
+        // If user is pro and this is the free plan
         if (isFree && userProfile?.subscription_type === "premium") {
             return {
-                text: "Get Started Free",
+                text: "Downgrade to Free",
                 action: () => {
                 },
-                disabled: true,
+                disabled: false,
             };
         }
 
@@ -731,7 +731,7 @@ export default function Home() {
                 id="pricing"
                 className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[#EFEEEA]"
             >
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-fit mx-auto">
                     <div className="text-center mb-12 sm:mb-16">
                         <h2 className="text-[32px] sm:text-[40px] lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
                             Simple, Transparent Pricing
@@ -741,7 +741,7 @@ export default function Home() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-fit mx-auto">
                         {plansLoading ? (
                             // Loading skeleton
                             <>
@@ -780,6 +780,7 @@ export default function Home() {
                                 );
                                 const isFree = plan.subscription_type === "free";
                                 const isPlus = plan.display_name.toLowerCase() === "plus";
+                                const isPro = plan.display_name.toLowerCase() === "pro";
 
                                 return (
                                     <div
@@ -894,8 +895,8 @@ export default function Home() {
                                                 }
                                                 disabled={
                                                     isCurrentPlan ||
-                                                    paymentLoading ||
-                                                    getPricingButtonConfig(plan.name, isFree).disabled
+                                                    paymentLoading // ||
+                                                    // getPricingButtonConfig(plan.name, isFree).disabled
                                                 }
                                             >
                                                 {paymentLoading ? (
