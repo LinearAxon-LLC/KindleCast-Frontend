@@ -58,7 +58,7 @@ export default function KindleReaderHome({
 
         const formatToEpub: Record<string, string> = {
           "Quick Send": "/epubs/quick.epub",
-          "Summarize": "/epubs/summarize.epub",
+          Summarize: "/epubs/summarize.epub",
           "Study Guide": "/epubs/study.epub",
           Custom: "/epubs/custom.epub",
         };
@@ -282,7 +282,7 @@ export default function KindleReaderHome({
             </button>
           </div>
 
-          <div className="w-full lg:flex-[3] flex justify-center items-center py-5">
+          <div className="w-full lg:flex-[3] flex justify-center items-center py-5 ">
             <div className="relative bg-[#222] rounded-[20px] sm:rounded-[30px] border-[6px] sm:border-[8px] border-[#333] h-[50vh] sm:h-[60vh] lg:h-[75vh] w-[280px] sm:w-[350px] lg:w-[400px] flex flex-col items-center shadow-xl">
               <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
                 <div className="w-full overflow-y-auto">
