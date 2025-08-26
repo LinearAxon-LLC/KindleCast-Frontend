@@ -1,7 +1,15 @@
 "use client";
 
 import React, { use, useState, useRef, useEffect } from "react";
-import { Plus, FileText, Upload, Info, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import {
+  Plus,
+  FileText,
+  Upload,
+  Info,
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { useFileProcessor, useLinkProcessor } from "@/hooks/useLinkProcessor";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { getTimeBasedGreeting } from "@/lib/time-utils";
@@ -45,7 +53,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     error?: string;
   }>({
     isValidating: false,
-    isValid: false
+    isValid: false,
   });
   const { isLoading, isSuccess, error, preview_path, submitLink } =
     useLinkProcessor();
@@ -62,7 +70,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   // Debounced URL validation
   const validateUrlWithDebounce = React.useCallback(
     debounce(async (url: string) => {
-      setUrlValidation(prev => ({ ...prev, isValidating: true }));
+      setUrlValidation((prev) => ({ ...prev, isValidating: true }));
 
       try {
         // First check format
@@ -71,7 +79,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           setUrlValidation({
             isValidating: false,
             isValid: false,
-            error: formatResult.error
+            error: formatResult.error,
           });
           return;
         }
@@ -81,13 +89,13 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         setUrlValidation({
           isValidating: false,
           isValid: fullResult.isValid,
-          error: fullResult.error
+          error: fullResult.error,
         });
       } catch (error) {
         setUrlValidation({
           isValidating: false,
           isValid: false,
-          error: "Validation failed"
+          error: "Validation failed",
         });
       }
     }, 1000), // 1 second debounce
@@ -235,7 +243,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     // Clear previous validation state
     setUrlValidation({
       isValidating: false,
-      isValid: false
+      isValid: false,
     });
 
     // Start validation if URL is not empty
@@ -475,9 +483,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           onChange={handleUrlChange}
                           placeholder="Paste your link - webpage, YouTube, Wikipedia, Reddit, etc."
                           className={`w-full px-3 py-2.5 border rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 transition-all duration-200 ${
-                            urlError || (urlValidation.error && !urlValidation.isValidating)
+                            urlError ||
+                            (urlValidation.error && !urlValidation.isValidating)
                               ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                              : urlValidation.isValid && !urlValidation.isValidating
+                              : urlValidation.isValid &&
+                                !urlValidation.isValidating
                               ? "border-green-300 focus:border-green-500 focus:ring-green-500/20"
                               : "border-black/[0.15] focus:ring-brand-primary/20 focus:border-brand-primary"
                           }`}
@@ -489,17 +499,23 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             {urlValidation.isValidating ? (
                               <>
                                 <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-                                <span className="text-[13px] text-blue-600">Validating URL...</span>
+                                <span className="text-[13px] text-blue-600">
+                                  Validating URL...
+                                </span>
                               </>
                             ) : urlValidation.isValid ? (
                               <>
                                 <CheckCircle className="w-4 h-4 text-green-500" />
-                                <span className="text-[13px] text-green-600">Valid URL</span>
+                                <span className="text-[13px] text-green-600">
+                                  Valid URL
+                                </span>
                               </>
                             ) : urlValidation.error ? (
                               <>
                                 <AlertCircle className="w-4 h-4 text-red-500" />
-                                <span className="text-[13px] text-red-600">{urlValidation.error}</span>
+                                <span className="text-[13px] text-red-600">
+                                  {urlValidation.error}
+                                </span>
                               </>
                             ) : null}
                           </div>
@@ -898,7 +914,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           </div>
 
           {/* Right Column - Kindle Preview */}
-          <div className="flex items-center justify-center w-full">
+          <div className="w-full flex items-center justify-center sm: mt-10 sm: ml-1">
             <KindleReader
               url={url}
               urlError={urlError}

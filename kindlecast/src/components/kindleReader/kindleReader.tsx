@@ -36,6 +36,7 @@ export default function KindleReader({
   const bookRef = useRef<Book | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [bookTitle, setBookTitle] = useState<string>("Loading…");
+  let interval: NodeJS.Timeout;
 
   const fetchBook = async () => {
     if (!preview_path && !file_url) {
@@ -76,7 +77,7 @@ export default function KindleReader({
         width: "100%",
         height: "100%",
         spread: "none",
-        flow: "paginated",
+        flow: "scrolled-doc",
       });
 
       // Register a hook to add the font-face rule to the iframe's stylesheet
@@ -151,39 +152,46 @@ export default function KindleReader({
 
       const metadata = await book.loaded.metadata;
       setBookTitle(metadata.title || "Untitled");
+      interval = setInterval(() => {
+        const rendition = renditionRef.current;
+        if (!rendition) return;
+        rendition.next();
+      }, 1000);
     } catch (err) {
       console.error("Failed to load book:", err);
       setMessage("Failed to load preview. Please try again.");
     }
   };
 
-  document.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (!renditionRef.current) return;
-    if (e.key === "ArrowRight") renditionRef.current.next();
-    if (e.key === "ArrowLeft") renditionRef.current.prev();
-  });
+  // document.addEventListener("keydown", (e: KeyboardEvent) => {
+  //   if (!renditionRef.current) return;
+  //   if (e.key === "ArrowRight") renditionRef.current.next();
+  //   if (e.key === "ArrowLeft") renditionRef.current.prev();
+  // });
 
-  renditionRef.current?.on("touchstart", (event: TouchEvent) => {
-    const startX = event.changedTouches[0].screenX;
+  // renditionRef.current?.on("touchstart", (event: TouchEvent) => {
+  //   const startX = event.changedTouches[0].screenX;
 
-    const handleTouchEnd = (ev: TouchEvent) => {
-      const endX = ev.changedTouches[0].screenX;
-      if (startX - endX > 50) renditionRef.current?.next(); // swipe left
-      if (endX - startX > 50) renditionRef.current?.prev(); // swipe right
-      document.removeEventListener("touchend", handleTouchEnd);
-    };
+  //   const handleTouchEnd = (ev: TouchEvent) => {
+  //     const endX = ev.changedTouches[0].screenX;
+  //     if (startX - endX > 50) renditionRef.current?.next(); // swipe left
+  //     if (endX - startX > 50) renditionRef.current?.prev(); // swipe right
+  //     document.removeEventListener("touchend", handleTouchEnd);
+  //   };
 
-    document.addEventListener("touchend", handleTouchEnd);
-  });
+  //   document.addEventListener("touchend", handleTouchEnd);
+  // });
 
   useEffect(() => {
     fetchBook();
-    console.log(file_url);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [preview_path, file_url]);
 
   return (
     <div className="flex items-center justify-center w-full h-[70vh] gap-3">
-      <button
+      {/* <button
         className="px-6 py-3 bg-brand-primary/10 text-brand-primary font-medium rounded-[8px] hover:bg-brand-primary hover:text-white transition-colors duration-150"
         onClick={() => renditionRef.current?.prev()}
       >
@@ -199,7 +207,7 @@ export default function KindleReader({
         >
           <path d="m15 18-6-6 6-6" />
         </svg>
-      </button>
+      </button> */}
 
       {/* <div
           className="relative w-[400px] h-[724px] mt-[-30px] mb-8 flex justify-center items-center"
@@ -211,7 +219,7 @@ export default function KindleReader({
           }}
         ></div> */}
       <div className="flex w-full justify-center items-center py-5">
-        <div className="relative bg-[#222] rounded-[30px] border-[8px] border-[#333] h-[75vh] min-w-[400px] max-w-[100px] flex flex-col items-center shadow-xl">
+        <div className="relative bg-[#222] rounded-[30px] border-[8px] border-[#333] h-[75vh] min-w-[400px] max-w-[400px] flex flex-col items-center shadow-xl">
           {/* Screen */}
           <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
             {/* The viewerRef div is given a lower z-index */}
@@ -248,7 +256,7 @@ export default function KindleReader({
         </div>
       </div>
 
-      <button
+      {/* <button
         className="px-6 py-3 bg-brand-primary/10 text-brand-primary font-medium rounded-[8px] hover:bg-brand-primary hover:text-white transition-colors duration-150"
         onClick={() => renditionRef.current?.next()}
       >
@@ -264,8 +272,8 @@ export default function KindleReader({
         >
           <path d="m9 18 6-6-6-6" />
         </svg>
-      </button>
-      <div className="flex justify-center gap-4 w-full"></div>
+      </button> */}
+      {/* <div className="flex justify-center gap-4 w-full"></div> */}
     </div>
   );
 }
