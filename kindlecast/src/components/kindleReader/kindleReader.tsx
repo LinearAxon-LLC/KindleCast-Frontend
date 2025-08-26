@@ -104,6 +104,12 @@ export default function KindleReader({
       await rendition.display();
       renditionRef.current = rendition;
       rendition.themes.default({
+        // body: {
+        //   "user-select": "none",
+        //   "-webkit-user-select": "none",
+        //   cursor: "default", // grab
+        // },
+
         "*": {
           "font-family": "LibreBaskerville, Georgia, serif",
           color: "#2e2e2eff !important",
@@ -232,6 +238,7 @@ export default function KindleReader({
               ) : (
                 <div
                   ref={viewerRef}
+                  className="select-none cursor-default"
                   style={{
                     position: "absolute",
                     top: "0%",

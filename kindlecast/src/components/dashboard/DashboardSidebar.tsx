@@ -201,13 +201,13 @@ export function DashboardSidebar({
                     className={`text-white text-xs font-semibold px-2 py-0.5 rounded-full ${
                       userProfile?.subscription_type &&
                       userProfile.subscription_type !== "free"
-                        ? (userProfile.subscription_name.toUpperCase() == "PRO" ? "bg-brand-primary": "bg-brand-secondary")
+                        ? (userProfile.subscription_name?.toUpperCase() == "PRO" ? "bg-brand-primary": "bg-brand-secondary")
                         : "bg-gray-400"
                     }`}
                   >
                     {userProfile?.subscription_type &&
                     userProfile.subscription_type !== "free"
-                      ? userProfile.subscription_name.toUpperCase()
+                      ? userProfile.subscription_name?.toUpperCase()
                       : "FREE"}
                   </div>
                 </div>

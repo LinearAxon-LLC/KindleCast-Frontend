@@ -193,15 +193,15 @@ export function AuthDialog({
                                 <p className="text-[13px] text-green-700 mb-4">
                                     We've sent a magic link to <strong>{email}</strong>. Click the link to instantly access your dashboard and send files to your Kindle.
                                 </p>
-                                <button
-                                    onClick={() => {
-                                        setMagicLinkSent(false)
-                                        setEmail('')
-                                    }}
-                                    className="text-[13px] text-green-600 hover:text-green-700 font-medium underline"
-                                >
-                                    Use different email
-                                </button>
+                                {/*<button*/}
+                                {/*    onClick={() => {*/}
+                                {/*        setMagicLinkSent(false)*/}
+                                {/*        setEmail('')*/}
+                                {/*    }}*/}
+                                {/*    className="text-[13px] text-green-600 hover:text-green-700 font-medium underline"*/}
+                                {/*>*/}
+                                {/*    Use different email*/}
+                                {/*</button>*/}
                             </div>
                         )}
 
@@ -268,7 +268,7 @@ export function AuthDialog({
                     {/* Footer */}
                     <div className="text-center mt-6">
                         <p className="text-[11px] text-black/50 leading-relaxed">
-                            By continuing, you agree to our Terms of Service and Privacy Policy
+                            By continuing, you agree to our <a href="/terms-of-service" className="text-brand-primary hover:underline" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="/privacy-policy" className="text-brand-primary hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
                         </p>
                     </div>
                 </div>

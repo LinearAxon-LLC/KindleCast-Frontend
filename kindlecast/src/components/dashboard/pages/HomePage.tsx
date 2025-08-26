@@ -36,6 +36,33 @@ function debounce<T extends (...args: any[]) => any>(
   };
 }
 
+// File size formatter
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Get file type icon
+function getFileIcon(fileName: string): string {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return '📄';
+    case 'docx':
+    case 'doc':
+      return '📝';
+    case 'epub':
+      return '📚';
+    case 'md':
+      return '📋';
+    default:
+      return '📄';
+  }
+}
+
 interface HomePageProps {
   onSwitchTab: (tab: string) => void;
 }
@@ -486,9 +513,6 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                             urlError ||
                             (urlValidation.error && !urlValidation.isValidating)
                               ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                              : urlValidation.isValid &&
-                                !urlValidation.isValidating
-                              ? "border-green-300 focus:border-green-500 focus:ring-green-500/20"
                               : "border-black/[0.15] focus:ring-brand-primary/20 focus:border-brand-primary"
                           }`}
                         />
@@ -498,17 +522,17 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           <div className="mt-2 flex items-center gap-2">
                             {urlValidation.isValidating ? (
                               <>
-                                <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-                                <span className="text-[13px] text-blue-600">
-                                  Validating URL...
-                                </span>
+                                {/*<Loader2 className="w-4 h-4 text-blue-500 animate-spin" />*/}
+                                {/*<span className="text-[13px] text-blue-600">*/}
+                                {/*  Validating URL...*/}
+                                {/*</span>*/}
                               </>
                             ) : urlValidation.isValid ? (
                               <>
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                                <span className="text-[13px] text-green-600">
-                                  Valid URL
-                                </span>
+                                {/*<CheckCircle className="w-4 h-4 text-green-500" />*/}
+                                {/*<span className="text-[13px] text-green-600">*/}
+                                {/*  Valid URL*/}
+                                {/*</span>*/}
                               </>
                             ) : urlValidation.error ? (
                               <>
@@ -647,11 +671,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                               isLoading ||
                               !url.trim() ||
                               urlValidation.isValidating ||
-                              !urlValidation.isValid ||
+                              // !urlValidation.isValid ||
                               (selectedFormat === "Custom" &&
                                 !customPrompt.trim())
                             }
-                            className="px-1 py-1.5 bg-gray-400 hover:bg-violet-500 active:bg-violet-500/80 text-white text-[15px] font-medium rounded-[8px] cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                            className="px-1 py-1.5 bg-brand-secondary hover:bg-brand-secondary/90 text-white text-[15px] font-medium rounded-[8px] cursor-pointer transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
                           >
                             Preview
                           </button>
@@ -780,39 +804,49 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                         <Upload className="w-6 h-6 text-gray-500" />
                       </div>
                       {selectedFile ? (
-                        <div>
-                          {selectedFile ? (
-                            <div>
-                              <p className={`${text.body} mb-2`}>
-                                {selectedFile.name}
-                              </p>
-                            </div>
-                          ) : (
-                            "No file selected"
-                          )}
+                        <div className="bg-gray-50 rounded-[8px] p-4 border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {/* File Icon */}
+                              <div className="text-2xl flex-shrink-0">
+                                {getFileIcon(selectedFile.name)}
+                              </div>
 
-                          <button
-                            onClick={() => setSelectedFile(null)}
-                            className="p-2 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors duration-150"
-                            aria-label="Remove selected file"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="lucide lucide-trash-icon lucide-trash"
+                              {/* File Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className={`${text.body} font-medium truncate`}>
+                                  {selectedFile.name}
+                                </p>
+                                <p className={`${text.caption} text-gray-500`}>
+                                  {formatFileSize(selectedFile.size)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Remove Button */}
+                            <button
+                              onClick={() => setSelectedFile(null)}
+                              className="p-2 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors duration-150 flex-shrink-0"
+                              aria-label="Remove selected file"
                             >
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                              <path d="M3 6h18" />
-                              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-trash"
+                              >
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div>
@@ -824,10 +858,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           </p>
                         </div>
                       )}
-                      <p className={`${text.footnote} mt-2`}>
-                        * Only available for legacy paying customers
-                      </p>
-                      <p className={text.footnote}>
+                      <p className={`${text.footnote} mt-4`}>
                         * For best quality, use a non-scanned, text-based PDF
                         document
                       </p>

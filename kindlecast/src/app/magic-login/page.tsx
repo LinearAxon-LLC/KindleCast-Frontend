@@ -6,6 +6,9 @@ import { Loader2, CheckCircle, XCircle, Mail } from 'lucide-react'
 import { verifyMagicLink } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 
+// Global flag to prevent multiple magic link verifications
+let isGloballyVerifying = false
+
 function MagicLoginContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -13,31 +16,43 @@ function MagicLoginContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
 
   useEffect(() => {
     const token = searchParams.get('token')
-    
+
     if (!token) {
       setStatus('error')
       setMessage('Invalid magic link - no token provided')
       return
     }
 
+    // Prevent multiple simultaneous verification attempts (both local and global)
+    if (isVerifying || isGloballyVerifying) {
+      console.log('Already verifying token, skipping...')
+      return
+    }
+
     const verifyToken = async () => {
+      // Set flags to prevent multiple calls
+      setIsVerifying(true)
+      isGloballyVerifying = true
+
       try {
+        console.log('Starting magic link verification...')
         const response = await verifyMagicLink(token)
 
         if (response.status && response.access_token && response.refresh_token) {
           // Success - set tokens and redirect to dashboard
+          console.log('Magic link verification successful, setting tokens...')
           await setTokens(response.access_token, response.refresh_token)
           setStatus('success')
           setMessage('Successfully logged in! Redirecting to dashboard...')
           setEmail(response.email || '')
-          
-          // Redirect to dashboard after a short delay
-          // setTimeout(() => {
-          router.push('/dashboard')
-          // }, 1000)
+
+          // Immediate redirect to dashboard
+          console.log('Redirecting to dashboard...')
+          router.replace('/dashboard')
         } else {
           // Failed verification
           setStatus('error')
@@ -47,11 +62,14 @@ function MagicLoginContent() {
         console.error('Magic link verification error:', error)
         setStatus('error')
         setMessage('Failed to verify magic link. Please try again.')
+      } finally {
+        setIsVerifying(false)
+        isGloballyVerifying = false
       }
     }
 
-    verifyToken().then(r => console.log(r));
-  }, [searchParams, router, setTokens])
+    verifyToken()
+  }, [searchParams.get('token')]) // Only depend on the token, not the entire objects
 
   return (
     <div className="min-h-screen bg-[#EFEEEA] flex items-center justify-center p-4">
