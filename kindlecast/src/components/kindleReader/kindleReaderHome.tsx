@@ -1,8 +1,12 @@
+"use client";
 import React from "react";
+import { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
 import ePub, { Rendition, Book, Contents } from "epubjs";
 import { Libre_Baskerville } from "next/font/google";
 import { API_CONFIG } from "@/types/api";
+import { Button } from "../ui/button";
+import { ArrowRight } from "lucide-react";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
@@ -17,6 +21,8 @@ interface KindleReaderProps {
   isSuccess: boolean;
   error: string | null;
   preview_path: string;
+  isAuthenticated?: boolean;
+  setShowAuthDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function KindleReaderHome({
@@ -26,6 +32,8 @@ export default function KindleReaderHome({
   isSuccess,
   error,
   preview_path,
+  isAuthenticated,
+  setShowAuthDialog,
 }: KindleReaderProps) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
@@ -33,6 +41,13 @@ export default function KindleReaderHome({
   const [selectedFormat, setSelectedFormat] = useState("Quick Send");
   const [customPrompt, setCustomPrompt] = useState("");
   const [urlInput, setUrlInput] = useState("");
+  const [articleHtml, setArticleHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/html-content/medium.html")
+      .then((res) => res.text())
+      .then((html) => setArticleHtml(html));
+  }, []);
 
   const demoLinks = [
     "https://www.reddit.com/r/startups/comments/...",
@@ -194,26 +209,56 @@ export default function KindleReaderHome({
                   Choose your format:
                 </label>
 
-                <div className="flex gap-2 sm:gap-2.5 flex-wrap justify-center">
+                <div className="flex gap-2 flex-wrap items-center justify-center">
                   {["Quick Send", "Summarize", "Study Guide", "Custom"].map(
                     (format) => (
                       <button
                         key={format}
                         type="button"
-                        onClick={() => setSelectedFormat(format)}
-                        className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-[8px] text-[13px] sm:text-[14px] font-medium transition-all duration-150 active:scale-[0.95] cursor-pointer ${
+                        onClick={() => {
+                          setSelectedFormat(format);
+                        }}
+                        className={`px-3 py-1.5 rounded-[6px] text-[13px] font-medium transition-all duration-150 active:scale-[0.98] ${
                           selectedFormat === format
-                            ? "bg-brand-primary text-white shadow-sm"
+                            ? "bg-brand-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
                             : "bg-black/[0.04] hover:bg-black/[0.08] text-black/70 border border-black/[0.06]"
                         }`}
-                        disabled={isLoading}
                       >
                         {format}
+                        {(format === "Summarize" ||
+                          format === "Study Guide" ||
+                          format === "Custom") && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 50 50"
+                            className={`inline-block h-3 w-3 ml-1 ${
+                              selectedFormat === format
+                                ? "text-white"
+                                : "text-black/70"
+                            }`}
+                            fill="currentColor"
+                          >
+                            <path d="M22.462 11.035l2.88 7.097c1.204 2.968 3.558 5.322 6.526 6.526l7.097 2.88c1.312.533 1.312 2.391 0 2.923l-7.097 2.88c-2.968 1.204-5.322 3.558-6.526 6.526l-2.88 7.097c-.533 1.312-2.391 1.312-2.923 0l-2.88-7.097c-1.204-2.968-3.558-5.322-6.526-6.526l-7.097-2.88c-1.312-.533-1.312-2.391 0-2.923l7.097-2.88c2.968-1.204 5.322-3.558 6.526-6.526l2.88-7.097C20.071 9.723 21.929 9.723 22.462 11.035zM39.945 2.701l.842 2.428c.664 1.915 2.169 3.42 4.084 4.084l2.428.842c.896.311.896 1.578 0 1.889l-2.428.842c-1.915.664-3.42 2.169-4.084 4.084l-.842 2.428c-.311.896-1.578.896-1.889 0l-.842-2.428c-.664-1.915-2.169-3.42-4.084-4.084l-2.428-.842c-.896-.311-.896-1.578 0-1.889l2.428-.842c1.915-.664 3.42-2.169 4.084-4.084l.842-2.428C38.366 1.805 39.634 1.805 39.945 2.701z" />
+                          </svg>
+                        )}
                       </button>
                     )
                   )}
                 </div>
               </div>
+              <Button
+                className="w-full py-6 bg-brand-primary hover:bg-violet-500 text-white px-8 text-lg font-medium shadow-lg mt-16 rounded-md"
+                onClick={() =>
+                  isAuthenticated
+                    ? (window.location.href = "/dashboard")
+                    : setShowAuthDialog(true)
+                }
+              >
+                {isAuthenticated
+                  ? "Go to Dashboard"
+                  : "Get Started for Free Now"}{" "}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
 
               {selectedFormat === "Custom" && (
                 <div>
@@ -252,11 +297,21 @@ export default function KindleReaderHome({
                 </div>
               </div>
               <div className="flex-1 bg-white overflow-hidden relative rounded-b-lg">
-                <iframe
+                {/* <iframe
                   src={`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.IFRAME_PROXY}?url=https://medium.com/@maddiewang/how-to-build-startups-that-get-in-yc-dabb4c1bfe1b`}
                   className="w-full h-full border-0"
                   title="Website Preview"
-                />
+                /> */}
+                <div className="w-full h-full overflow-y-auto p-4">
+                  {articleHtml ? (
+                    <div
+                      className="prose max-w-none"
+                      dangerouslySetInnerHTML={{ __html: articleHtml }}
+                    />
+                  ) : (
+                    <p>Loading article...</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>

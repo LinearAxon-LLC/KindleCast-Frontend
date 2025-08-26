@@ -38,28 +38,28 @@ function debounce<T extends (...args: any[]) => any>(
 
 // File size formatter
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 // Get file type icon
 function getFileIcon(fileName: string): string {
-  const extension = fileName.split('.').pop()?.toLowerCase();
+  const extension = fileName.split(".").pop()?.toLowerCase();
   switch (extension) {
-    case 'pdf':
-      return '📄';
-    case 'docx':
-    case 'doc':
-      return '📝';
-    case 'epub':
-      return '📚';
-    case 'md':
-      return '📋';
+    case "pdf":
+      return "📄";
+    case "docx":
+    case "doc":
+      return "📝";
+    case "epub":
+      return "📚";
+    case "md":
+      return "📋";
     default:
-      return '📄';
+      return "📄";
   }
 }
 
@@ -814,7 +814,9 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
                               {/* File Info */}
                               <div className="flex-1 min-w-0">
-                                <p className={`${text.body} font-medium truncate`}>
+                                <p
+                                  className={`${text.body} font-medium truncate`}
+                                >
                                   {selectedFile.name}
                                 </p>
                                 <p className={`${text.caption} text-gray-500`}>
@@ -872,34 +874,55 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     >
                       Send to Kindle
                     </button> */}
-                    <button
-                      type="submit"
-                      name="sendToKindle"
-                      disabled={
-                        isFileLoading ||
-                        !selectedFile ||
-                        (selectedFormat === "Custom" && !customPrompt.trim()) ||
-                        (!hasKindleSetup && !hasExceededLimit)
-                      }
-                      className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
-                        hasExceededLimit
-                          ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="submit"
+                        name="preview"
+                        disabled={
+                          isLoading ||
+                          !selectedFile ||
+                          (selectedFormat === "Custom" && !customPrompt.trim())
+                        }
+                        className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                          hasExceededLimit
+                            ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                            : !hasKindleSetup
+                            ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                            : "bg-brand-secondary hover:bg-violet-500 active:bg-violet-500/80"
+                        }`}
+                      >
+                        Preview
+                      </button>
+                      <button
+                        type="submit"
+                        name="sendToKindle"
+                        disabled={
+                          isFileLoading ||
+                          !selectedFile ||
+                          (selectedFormat === "Custom" &&
+                            !customPrompt.trim()) ||
+                          (!hasKindleSetup && !hasExceededLimit)
+                        }
+                        className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                          hasExceededLimit
+                            ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                            : !hasKindleSetup
+                            ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                            : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
+                        }`}
+                        onClick={
+                          !hasKindleSetup && !hasExceededLimit
+                            ? handleConfigureDeviceClick
+                            : undefined
+                        }
+                      >
+                        {hasExceededLimit
+                          ? "Upgrade to Send"
                           : !hasKindleSetup
-                          ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
-                          : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
-                      }`}
-                      onClick={
-                        !hasKindleSetup && !hasExceededLimit
-                          ? handleConfigureDeviceClick
-                          : undefined
-                      }
-                    >
-                      {hasExceededLimit
-                        ? "Upgrade to Send"
-                        : !hasKindleSetup
-                        ? "Send to Kindle"
-                        : "Send to Kindle"}
-                    </button>
+                          ? "Send to Kindle"
+                          : "Send to Kindle"}
+                      </button>
+                    </div>
                     {isFileLoading ? (
                       <>
                         <div className="p-3 mt-2 bg-blue-50 border border-blue-200 rounded-[8px]">
