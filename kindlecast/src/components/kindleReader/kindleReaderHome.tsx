@@ -235,7 +235,7 @@ export default function KindleReaderHome({
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8">
           <div className="w-full lg:flex-[7] flex justify-center items-center py-5">
             <div className="w-full max-w-md lg:max-w-none relative bg-[#f1f1f1] rounded-lg border border-gray-400 h-[50vh] sm:h-[60vh] lg:h-[75vh] shadow-2xl flex flex-col">

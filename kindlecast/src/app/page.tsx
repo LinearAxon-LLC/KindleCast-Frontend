@@ -1,8 +1,8 @@
 "use client";
 
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 import {Button} from "@/components/ui/button";
-import {Cast, Check, Loader2, Menu, X} from "lucide-react";
+import {ArrowRight, Loader2, Menu, X} from "lucide-react";
 import {useLinkProcessor} from "@/hooks/useLinkProcessor";
 import {AuthDialog} from "@/components/ui/auth-dialog";
 import {useAuth} from "@/contexts/AuthContext";
@@ -11,159 +11,9 @@ import {useUserProfile} from "@/hooks/useUserProfile";
 import {usePricingPlans} from "@/hooks/usePricingPlans";
 import {usePaymentFlow} from "@/hooks/usePayment";
 import Image from "next/image";
-import {motion, useInView, useScroll, useTransform} from "framer-motion";
 import {HomePageStructuredData} from "@/components/seo/StructuredData";
 import KindleReaderHome from "@/components/kindleReader/kindleReaderHome";
 
-// Animation component for scroll-triggered animations
-function AnimatedFeature({
-                             children,
-                             delay = 0,
-                         }: {
-    children: React.ReactNode;
-    delay?: number;
-}) {
-    const ref = useRef(null);
-    const isInView = useInView(ref, {once: true, margin: "-100px"});
-
-    return (
-        <motion.div
-            ref={ref}
-            initial={{opacity: 0, y: 50}}
-            animate={isInView ? {opacity: 1, y: 0} : {opacity: 0, y: 50}}
-            transition={{duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1]}}
-        >
-            {children}
-        </motion.div>
-    );
-}
-
-// Graphics components for How it Works
-function GraphicStep1() {
-    return (
-        <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[20px] p-8 shadow-lg">
-            <div className="space-y-4">
-                <div className="h-12 bg-gray-100 rounded-xl flex items-center px-4">
-          <span className="text-gray-400 text-sm">
-            https://example.com/article
-          </span>
-                </div>
-                <div className="flex space-x-2">
-                    <div className="h-8 bg-brand-primary/20 rounded-lg px-3 flex items-center">
-            <span className="text-brand-primary text-xs font-medium">
-              Quick Send
-            </span>
-                    </div>
-                    <div className="h-8 bg-gray-100 rounded-lg px-3 flex items-center">
-                        <span className="text-gray-500 text-xs">Summarize</span>
-                    </div>
-                    <div className="h-8 bg-gray-100 rounded-lg px-3 flex items-center">
-                        <span className="text-gray-500 text-xs">Study Guide</span>
-                    </div>
-                </div>
-                <div className="h-10 bg-brand-primary rounded-xl flex items-center justify-center">
-                    <span className="text-white font-medium">Convert & Send</span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function GraphicStep2() {
-    return (
-        <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[20px] p-8 shadow-lg">
-            <div className="space-y-4">
-                <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-8 h-8 bg-brand-secondary rounded-lg flex items-center justify-center">
-                        <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                            />
-                        </svg>
-                    </div>
-                    <span className="font-medium text-gray-900">AI Processing</span>
-                </div>
-                <div className="space-y-2">
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-brand-secondary rounded-full w-3/4"></div>
-                    </div>
-                    <div className="text-xs text-gray-500">Extracting content...</div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="h-16 bg-gray-100 rounded-lg"></div>
-                    <div className="h-16 bg-gray-100 rounded-lg"></div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function GraphicStep3() {
-    return (
-        <div className="bg-black rounded-[24px] p-6 shadow-2xl">
-            <div className="bg-white rounded-[16px] p-6 h-80">
-                <div className="space-y-4">
-                    <div className="text-center border-b border-gray-200 pb-4">
-                        <h4 className="font-bold text-gray-900 text-sm">
-                            The Future of Reading
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1">Chapter 1</p>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="h-2 bg-gray-200 rounded w-full"></div>
-                        <div className="h-2 bg-gray-200 rounded w-5/6"></div>
-                        <div className="h-2 bg-gray-200 rounded w-4/5"></div>
-                        <div className="h-2 bg-gray-200 rounded w-full"></div>
-                        <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                        <div className="mt-4 h-2 bg-gray-200 rounded w-5/6"></div>
-                        <div className="h-2 bg-gray-200 rounded w-full"></div>
-                        <div className="h-2 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function GraphicStep4() {
-    return (
-        <div className="bg-white/80 backdrop-blur-xl border border-black/[0.08] rounded-[20px] p-8 shadow-lg">
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-          <span className="font-medium text-gray-900">
-            Sending to Kindle...
-          </span>
-                    <div
-                        className="w-6 h-6 border-2 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
-                </div>
-                <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-700">Content processed</span>
-                    </div>
-                    <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-700">EPUB generated</span>
-                    </div>
-                    <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-blue-700">
-              Sending to your Kindle...
-            </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 // Image Placeholders with taller aspect ratio for screenshots
 function FeatureImage({
@@ -476,12 +326,13 @@ export default function Home() {
                     </h1>
                     <h1 className="text-[32px] sm:text-[44px] lg:text-6xl font-bold leading-[34px] sm:leading-[44px] lg:leading-[56px] mb-6 sm:mb-8">
             <span
-                className="bg-gradient-to-r from-violet-600 via-purple-500 to-violet-600 bg-clip-text text-transparent">
+
+                className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent">
               Read Anything on Kindle.
             </span>
                     </h1>
 
-                    <p className="text-[15px] sm:text-[17px] lg:text-xl text-center text-gray-600 leading-relaxed max-w-3xl mx-auto px-2 sm:px-4">
+                    <p className="text-[15px] sm:text-[17px] lg:text-xl text-center text-gray-600 leading-tight max-w-3xl mx-auto px-2 sm:px-4">
                         Send & Read
                         <span
                             className="mx-1 sm:mx-2 inline-block bg-purple-500 rounded-sm"
@@ -508,7 +359,7 @@ export default function Home() {
             </span>
                         ,
                         <span
-                            className="mx-1 sm:mx-2 inline-block bg-teal-400 rounded-sm"
+                            className="mx-1 sm:mx-2 inline-block bg-blue-500 rounded-sm"
                             style={{transform: "skew(-10deg)"}}
                         >
               <span
@@ -542,9 +393,20 @@ export default function Home() {
                 reddit posts
               </span>
             </span>
-                        to the comfortable screen of your Kindle. Experience digital content without the eye strain.
+                        to the comfortable screen of your Kindle.
+                        {" "}
+                     Supercharge your reading with <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500  bg-clip-text text-transparent font-bold text-xl"> Kinddy's AI Powered </span> {"  "} web content to Kindle EPUB transformation.
+
                     </p>
 
+
+                     <Button
+                                size="xl"
+                                className="bg-brand-primary hover:bg-violet-500 text-white px-8 py-2 text-lg font-medium shadow-lg mt-16 rounded-md"
+                                onClick={() => isAuthenticated ? (window.location.href = "/dashboard") : setShowAuthDialog(true)}
+                            >
+                         {isAuthenticated ? "Go to Dashboard" : "Get Started Free Now"} <ArrowRight className="w-4 h-4 ml-2"/>
+                            </Button>
                     {/* macOS Native Input Box */}
                 </div>
                 <KindleReaderHome
@@ -1050,7 +912,7 @@ export default function Home() {
                         </div>
                         <div className="pt-6">
                             <p className="text-gray-500 text-sm">
-                                No credit card required • 5 free conversions • Cancel anytime
+                                No credit card required • 5 QUICK SEND & 3 AI FORMATTING free conversions • Cancel anytime
                             </p>
                         </div>
                     </div>
@@ -1259,7 +1121,7 @@ export default function Home() {
 
                     {/* Big Kinddy Text */}
                     <div className="text-center mb-8">
-                        <h2 className="text-4xl sm:text-6xl lg:text-[6rem] font-bold text-white tracking-tight mb-6">
+                        <h2 className="text-4xl sm:text-6xl lg:text-[10rem] font-bold text-white tracking-tight mb-6">
               <span
                   className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent drop-shadow-xl"
                   style={{
