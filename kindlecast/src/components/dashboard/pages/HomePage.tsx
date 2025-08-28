@@ -93,6 +93,32 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   } = useFileProcessor();
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
   const { getRemainingUsage, isUnlimited } = useUserUsage();
+  const forbiddenPatterns = [
+    /drop\s+table/i,
+    /select\s+.*\s+from/i,
+    /insert\s+into/i,
+    /delete\s+from/i,
+    /--/g,
+    /;/g,
+    /(http|https):\/\//i, // optional: block URLs
+  ];
+
+  const { getPendingLinkData, clearPendingLinkData } = useAuth();
+  const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
+  const [includeImage, setIncludeImage] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
+    useState(false);
+  const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileError, setFileError] = useState("");
+
+  const { greeting, emoji } = getTimeBasedGreeting();
+
+  const isSuspicious = (text: string) => {
+    return forbiddenPatterns.some((pattern) => pattern.test(text));
+  };
 
   // Debounced URL validation
   const validateUrlWithDebounce = React.useCallback(
@@ -125,21 +151,9 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           error: "Validation failed",
         });
       }
-    }, 1000), // 1 second debounce
+    }, 2000), // 2 second debounce
     []
   );
-  const { getPendingLinkData, clearPendingLinkData } = useAuth();
-  const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
-  const [includeImage, setIncludeImage] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
-    useState(false);
-  const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fileError, setFileError] = useState("");
-
-  const { greeting, emoji } = getTimeBasedGreeting();
 
   // Prefill form with pending link data after login
   React.useEffect(() => {
@@ -201,26 +215,37 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     // Determine if content should be emailed
     const sendEmail = buttonName === "sendToKindle" || emailContent;
 
+    let fileUrl;
     // Use a placeholder for the preview/send logic
-    if (buttonName === "preview" || buttonName === "sendToKindle") {
-      const fileUrl = await submitFile(
-        selectedFile,
-        "quick send",
-        true,
-        true,
-        ""
-      );
+    if (buttonName === "preview") {
+      fileUrl = await submitFile(selectedFile, "quick send", false, false, "");
+      setPreviewGenerated(true);
+    } else if (buttonName == "sendToKindle") {
+      setPreviewGenerated(false);
+      fileUrl = await submitFile(selectedFile, "quick send", false, true, "");
+    }
 
-      console.log("FILE URL", fileUrl);
+    console.log("FILE URL", fileUrl);
 
-      // Handle success/error based on the return value of submitFile
-      if (fileUrl) {
-        console.log(`File processing successful. Preview link: ${fileUrl}`);
-        // You can add logic here to display the preview or a success message
-      } else {
-        console.error("File processing failed.");
-        // The useFileProcessor hook handles the error state internally
-      }
+    // Handle success/error based on the return value of submitFile
+    if (fileUrl) {
+      console.log(`File processing successful. Preview link: ${fileUrl}`);
+      // You can add logic here to display the preview or a success message
+    } else {
+      console.error("File processing failed.");
+      // The useFileProcessor hook handles the error state internally
+    }
+  };
+
+  const handleCustomPromptChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    if (!isSuspicious(value)) {
+      setCustomPrompt(value);
+    } else {
+      // you can also show a warning here
+      console.warn("⚠️ Suspicious input blocked");
     }
   };
 
@@ -630,10 +655,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           </label>
                           <textarea
                             value={customPrompt}
-                            onChange={(e) => setCustomPrompt(e.target.value)}
+                            // onChange={(e) => setCustomPrompt(e.target.value)}
+                            onChange={handleCustomPromptChange}
                             placeholder="e.g., 'make me a business playbook from this link'"
                             className="w-full px-3 py-2.5 border border-black/[0.15] rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
                             rows={3}
+                            maxLength={180}
                           />
                         </div>
                       )}

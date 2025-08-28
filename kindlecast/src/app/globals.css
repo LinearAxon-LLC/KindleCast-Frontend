@@ -31,11 +31,11 @@
 
 /* Hide scrollbar utility class */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 ::-webkit-scrollbar-thumb {
@@ -56,8 +56,10 @@
 /* Brand colors and shadcn/ui variables */
 :root {
   /* Brand colors */
-  --brand-primary: 143 135 241;
-  --brand-secondary: 198 142 253;
+  /* --brand-primary: 143 135 241; */
+  /* --brand-secondary: 198 142 253; */
+  --brand-primary: 140 50 250;
+  --brand-secondary: 170 80 250;
   --brand-tertiary: 233 165 241;
   --brand-accent: 254 210 226;
 
@@ -123,14 +125,19 @@
   }
 
   .from-brand-primary {
-    --tw-gradient-from: rgb(var(--brand-primary)) var(--tw-gradient-from-position);
-    --tw-gradient-to: rgb(var(--brand-primary) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-from: rgb(var(--brand-primary))
+      var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(var(--brand-primary) / 0)
+      var(--tw-gradient-to-position);
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   }
 
   .via-brand-secondary {
-    --tw-gradient-to: rgb(var(--brand-secondary) / 0) var(--tw-gradient-to-position);
-    --tw-gradient-stops: var(--tw-gradient-from), rgb(var(--brand-secondary)) var(--tw-gradient-via-position), var(--tw-gradient-to);
+    --tw-gradient-to: rgb(var(--brand-secondary) / 0)
+      var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from),
+      rgb(var(--brand-secondary)) var(--tw-gradient-via-position),
+      var(--tw-gradient-to);
   }
 
   .to-brand-tertiary {
@@ -151,27 +158,25 @@
   --radius: 16px;
 
   /* White theme - Clean and minimal */
-  --background: #FFFFFF;
+  --background: #ffffff;
   --foreground: #171717;
-  --card: #FFFFFF;
+  --card: #ffffff;
   --card-foreground: #171717;
-  --popover: #FFFFFF;
+  --popover: #ffffff;
   --popover-foreground: #171717;
-  --primary: #8F87F1;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F8F9FA;
+  --primary: #8f87f1;
+  --primary-foreground: #ffffff;
+  --secondary: #f8f9fa;
   --secondary-foreground: #171717;
-  --muted: #F8F9FA;
-  --muted-foreground: #6B7280;
-  --accent: #E9A5F1;
+  --muted: #f8f9fa;
+  --muted-foreground: #6b7280;
+  --accent: #e9a5f1;
   --accent-foreground: #171717;
-  --destructive: #EF4444;
-  --border: #E5E7EB;
-  --input: #F9FAFB;
-  --ring: #8F87F1;
+  --destructive: #ef4444;
+  --border: #e5e7eb;
+  --input: #f9fafb;
+  --ring: #8f87f1;
 }
-
-
 
 @layer base {
   * {
@@ -234,10 +239,15 @@
 }
 
 @keyframes bounceSubtle {
-  0%, 20%, 53%, 80%, 100% {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translate3d(0, 0, 0);
   }
-  40%, 43% {
+  40%,
+  43% {
     transform: translate3d(0, -8px, 0);
   }
   70% {
