@@ -351,7 +351,7 @@ export default function Home() {
             Save Your Eyes
           </h1>
           <h1 className="text-[32px] sm:text-[44px] lg:text-6xl font-bold leading-[34px] sm:leading-[44px] lg:leading-[56px] mb-6 sm:mb-8">
-            <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500 bg-clip-text text-transparent">
               Read Anything on Kindle.
             </span>
           </h1>
@@ -419,7 +419,7 @@ export default function Home() {
             </span>
             to the comfortable screen of your Kindle. Supercharge your reading
             with{" "}
-            <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500  bg-clip-text text-transparent font-bold text-xl">
+            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500  bg-clip-text text-transparent font-bold text-xl">
               {" "}
               Kinddy's AI Powered{" "}
             </span>{" "}
@@ -511,7 +511,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               <div className="space-y-6 lg:order-2">
                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                  <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500  bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500  bg-clip-text text-transparent">
                     Powered by AI
                     <br />
                   </span>{" "}
@@ -826,7 +826,10 @@ export default function Home() {
       </section>
 
       {/* FAQ Section - B Color */}
-      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-[#E8E7E3]">
+      <section
+        id="faq"
+        className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-[#E8E7E3]"
+      >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-[32px] sm:text-[40px] lg:text-5xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">
             Frequently Asked Questions
@@ -861,22 +864,22 @@ export default function Home() {
             <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-gray-200">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 How does{" "}
-                <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500 bg-clip-text text-transparent">
                   AI Content Transformation
                 </span>{" "}
                 make reading better?
               </h3>
               <p className="text-gray-600 text-sm sm:text-base">
                 With one click, you can{" "}
-                <b className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
+                <b className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
                   Summarize
                 </b>
                 , create an{" "}
-                <b className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
+                <b className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
                   AI Study Guide
                 </b>
                 , or provide your own{" "}
-                <b className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
+                <b className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-red-500 bg-clip-text text-transparent uppercase">
                   Custom Instructions
                 </b>
                 . This means less fluff, more focus—so you absorb key insights
