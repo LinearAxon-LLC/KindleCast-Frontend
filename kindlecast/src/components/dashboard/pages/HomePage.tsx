@@ -91,7 +91,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     file_url,
     submitFile,
   } = useFileProcessor();
-  const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
+  const { userProfile, isLoading: profileLoading, error: profileError, refetch } = useUserProfile();
   const { getRemainingUsage, isUnlimited } = useUserUsage();
   const forbiddenPatterns = [
     /drop\s+table/i,
@@ -359,9 +359,11 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       return; // Stop the function from proceeding
     }
 
+    let submissionResult = "";
+
     if (buttonName === "preview") {
       console.log("Preview button was clicked");
-      await submitLink(
+      submissionResult = await submitLink(
         processUrl,
         selectedFormat,
         includeImage,
@@ -374,7 +376,7 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     } else if (buttonName === "sendToKindle") {
       setPreviewGenerated(false);
       setEmailContent(true);
-      await submitLink(
+      submissionResult = await submitLink(
         processUrl,
         selectedFormat,
         includeImage,
@@ -383,13 +385,16 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         customPrompt
       );
     }
-    // Update the ref with the new values after a successful submission
-    lastSubmittedValues.current = {
-      processUrl,
-      selectedFormat,
-      includeImage,
-      customPrompt,
-    };
+
+    // Only update the ref with the new values after a successful submission
+    if (submissionResult) {
+      lastSubmittedValues.current = {
+        processUrl,
+        selectedFormat,
+        includeImage,
+        customPrompt,
+      };
+    }
   };
 
   const handleReset = () => {
@@ -429,7 +434,8 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
       userProfile?.acknowledged_mail_whitelisting?.toLowerCase() === "yes"
   );
 
-  if (profileLoading) {
+  // Show loading state while profile is loading OR if we don't have profile data yet and no error
+  if (profileLoading || (!userProfile && !profileError)) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-[15px] text-[#273F4F]/70">Loading...</div>
@@ -437,8 +443,8 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     );
   }
 
-  // If no user profile (API failed), show error
-  if (!userProfile) {
+  // If there's an error and no profile data, show error
+  if (profileError && !userProfile) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
