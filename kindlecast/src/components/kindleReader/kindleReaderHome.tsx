@@ -50,9 +50,9 @@ export default function KindleReaderHome({
   }, []);
 
   const demoLinks = [
-    "https://www.reddit.com/r/startups/comments/...",
-    "https://medium.com/@maddiewang/how-to-build...",
-    "https://www.ycombinator.com/library/8g-how-to...",
+    "https://www.reddit.com/r/no-sleep/",
+    "https://medium.com/how-to-build",
+    "https://www.ycombinator.com/library/",
     "https://en.wikipedia.org/wiki/Startup_company",
   ];
 
@@ -337,9 +337,9 @@ export default function KindleReaderHome({
             </button>
           </div>
 
-          <div className="w-full lg:flex-[3] flex justify-center items-center py-5 ">
-            <div className="relative bg-[#222] rounded-[20px] sm:rounded-[30px] border-[6px] sm:border-[8px] border-[#333] h-[50vh] sm:h-[60vh] lg:h-[75vh] w-[280px] sm:w-[350px] lg:w-[400px] flex flex-col items-center shadow-xl">
-              <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
+          <div className="w-full lg:flex-[3] flex justify-center items-center md:py-5 ">
+            <div className="relative bg-[#222] rounded-[20px] sm:rounded-[30px] border-[6px] sm:border-[8px] border-[#333] h-[50vh] h-[60vh] lg:h-[75vh] w-[280px] w-[550px] lg:w-[400px] flex flex-col items-center shadow-xl">
+              <div className="relative bg-white border-[8px] border-[#222] rounded-md w-[90%] md:w-[85%] h-[85%] overflow-hidden mt-10 mb-20">
                 <div className="w-full overflow-y-auto">
                   <div
                     ref={viewerRef}

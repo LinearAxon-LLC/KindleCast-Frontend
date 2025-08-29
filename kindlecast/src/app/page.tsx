@@ -130,7 +130,7 @@ export default function Home() {
             </button>
             <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
-                <svg
+                {/* <svg
                   width="16"
                   height="16"
                   viewBox="0 0 14 14"
@@ -198,8 +198,40 @@ export default function Home() {
                       <rect width="14" height="14" fill="white" />
                     </clipPath>
                   </defs>
+                </svg> */}
+                {/* <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-message-square-quote-icon lucide-message-square-quote"
+                >
+                  <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
+                  <path d="M14 13a2 2 0 0 0 2-2V9h-2" />
+                  <path d="M8 13a2 2 0 0 0 2-2V9H8" />
+                </svg> */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  stroke="none"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="scale-x-[-1] scale-y-[-1] lucide lucide-message-square-quote-icon lucide-message-square-quote"
+                >
+                  <path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
+                  <path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
                 </svg>
               </div>
+
               <span className="text-[15px] sm:text-[17px] font-bold text-black/90">
                 Kinddy
               </span>
@@ -324,7 +356,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="text-[15px] sm:text-[17px] lg:text-xl text-center text-gray-600 leading-tight max-w-3xl mx-auto px-2 sm:px-4">
+          <p className="text-[15px] sm:text-[17px] lg:text-xl text-center text-gray-600 leading-8 md:leading-tight max-w-3xl mx-auto px-2 sm:px-4">
             Send
             <span
               className="mx-1 sm:mx-2 inline-block bg-purple-500 rounded-sm"
@@ -421,13 +453,13 @@ export default function Home() {
             <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 max-w-3xl mx-auto">
               Features to save your eyes and make your reading more comfortable.
             </p>
-            <div className="p-0 mt-8 sm:mt-12 lg:mt-16 rounded-2xl overflow-hidden shadow-xl">
+            {/* <div className="p-0 mt-8 sm:mt-12 lg:mt-16 rounded-2xl overflow-hidden shadow-xl">
               <img
                 className="w-full h-auto block"
                 src="/landing/dashboard-preview.webp"
                 alt="How it Works"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-16 sm:space-y-20 lg:space-y-32">
@@ -446,25 +478,25 @@ export default function Home() {
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Web articles & blog posts
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Social Media post or thread
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       YouTube Video
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-primary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       PDF, Docx, ReadMe, EPUB documents
                     </span>
                   </li>
@@ -479,10 +511,11 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               <div className="space-y-6 lg:order-2">
                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-                  Enjoy an Uninterrupted Reading Flow -
                   <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-red-500  bg-clip-text text-transparent">
                     Powered by AI
+                    <br />
                   </span>{" "}
+                  Enjoy an Uninterrupted Reading Flow
                 </h3>
                 <p className="text-[16px] sm:text-[18px] lg:text-xl text-gray-600 leading-relaxed">
                   Our AI acts as your digital de-clutter. It intelligently
@@ -493,19 +526,19 @@ export default function Home() {
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-secondary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Summarization & key point extraction
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-secondary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Study Guide Generation
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-secondary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Custom instructions
                     </span>
                   </li>
@@ -531,19 +564,19 @@ export default function Home() {
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Perfect EPUB formatting, Kindle optimized
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Link and file tracking
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-tertiary rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Resend to Kindle or Download
                     </span>
                   </li>
@@ -569,19 +602,19 @@ export default function Home() {
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-accent rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Change your Kindle email anytime.
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-accent rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Track your billing, cancel anytime.
                     </span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-brand-accent rounded-full"></div>
-                    <span className="text-gray-600 text-[15px] sm:text-base">
+                    <span className="text-gray-600 md:text-[17px] text-base">
                       Track your usages and upgrade when you need more.
                     </span>
                   </li>
@@ -592,6 +625,13 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+        <div className="p-0 mt-8 sm:mt-12 lg:mt-16 rounded-2xl overflow-hidden shadow-xl">
+          <img
+            className="w-full h-auto block"
+            src="/landing/dashboard-preview.webp"
+            alt="How it Works"
+          />
         </div>
       </section>
 
@@ -929,75 +969,106 @@ export default function Home() {
             {/* Brand Section */}
             <div className="lg:col-span-5 space-y-8">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
+                  {/* <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_1222_36625)">
+                    <path
+                      d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M6 0.5H8M8 13.5H6"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M0.500001 8L0.5 6"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13.5002 8V6"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M7 10V4"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M5 6L7 4L9 6"
+                      stroke="white"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1222_36625">
+                      <rect width="14" height="14" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg> */}
+                  {/* <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-message-square-quote-icon lucide-message-square-quote"
+                >
+                  <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
+                  <path d="M14 13a2 2 0 0 0 2-2V9h-2" />
+                  <path d="M8 13a2 2 0 0 0 2-2V9H8" />
+                </svg> */}
                   <svg
-                    width="56"
-                    height="56"
-                    viewBox="0 0 14 14"
-                    fill="none"
                     xmlns="http://www.w3.org/2000/svg"
+                    width="42"
+                    height="42"
+                    viewBox="0 0 24 24"
+                    fill="white"
+                    stroke="none"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="scale-x-[-1] scale-y-[-1] lucide lucide-message-square-quote-icon lucide-message-square-quote"
                   >
-                    <g clipPath="url(#clip0_footer)">
-                      <path
-                        d="M2.70524 0.606445C1.72029 0.876364 0.937712 1.63573 0.635254 2.60678"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M11.295 0.606445C12.28 0.876364 13.0625 1.63573 13.365 2.60678"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M6 0.5H8M8 13.5H6"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M0.500001 8L0.5 6"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.5002 8V6"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M2.70524 13.3936C1.72029 13.1237 0.937712 12.3644 0.635254 11.3933"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M11.295 13.3936C12.28 13.1237 13.0625 12.3644 13.365 11.3933"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M7 10V4"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M5 6L7 4L9 6"
-                        stroke="white"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_footer">
-                        <rect width="14" height="14" fill="white" />
-                      </clipPath>
-                    </defs>
+                    <path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
+                    <path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z" />
                   </svg>
                 </div>
                 <span className="font-bold text-white text-4xl">Kinddy</span>

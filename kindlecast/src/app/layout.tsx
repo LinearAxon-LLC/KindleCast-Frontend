@@ -24,19 +24,33 @@ export const metadata: Metadata = {
     default: "Kinddy - Save Your Eyes. Read Anything on Kindle.",
     template: "%s | Kinddy",
   },
+  // icons: {
+  //   icon: [
+  //     {
+  //       url: "/favicon.svg",
+  //       type: "image/svg+xml",
+  //     },
+  //     {
+  //       url: "/favicon.ico",
+  //       type: "image/x-icon",
+  //     },
+  //   ],
+  //   shortcut: "/favicon.ico",
+  //   apple: "/apple-touch-icon.png",
+  // },
   icons: {
     icon: [
       {
-        url: "/favicon.svg",
+        url: "/favicon-kinddy.png",
         type: "image/svg+xml",
       },
       {
-        url: "/favicon.ico",
+        url: "/favicon-kinddy.png",
         type: "image/x-icon",
       },
     ],
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon-kinddy.png",
+    apple: "/favicon-kinddy.png",
   },
   description:
     "Transform web pages, newsletters, podcasts, videos & threads into perfectly formatted Kindle reading. Reduce eye strain with Kinddy's smart content conversion. Free to start.",
@@ -124,15 +138,25 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
 
         {/* Favicons */}
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="/favicon-kinddy.png" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-kinddy.png" type="image/x-icon" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/apple-touch-icon.png"
+          href="/favicon-kinddy.png"
         />
-        <link rel="icon" type="image/png" sizes="32x32" href="/logo_send.svg" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-kinddy.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-kinddy.png"
+        />
         <link rel="manifest" href="/manifest.json" />
 
         {/* Preconnect to external domains */}
