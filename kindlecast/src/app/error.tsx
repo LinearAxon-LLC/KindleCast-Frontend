@@ -89,7 +89,7 @@ export default function Error({ error, reset }: ErrorProps) {
             If this error persists, please let us know what you were doing when it occurred.
           </p>
           <a
-            href={`mailto:support@kindlecast.com?subject=Error Report&body=Error: ${encodeURIComponent(error.message)}${error.digest ? `%0AError ID: ${error.digest}` : ''}`}
+            href={`mailto:support@kinddy.com?subject=Error Report&body=Error: ${encodeURIComponent(error.message)}${error.digest ? `%0AError ID: ${error.digest}` : ''}`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-black/[0.04] text-[#273F4F] text-sm font-medium rounded-[6px] hover:bg-black/[0.08] transition-colors duration-150"
           >
             <Bug className="w-4 h-4" />

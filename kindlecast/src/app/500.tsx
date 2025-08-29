@@ -61,7 +61,7 @@ export default function InternalServerError() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://status.kindlecast.com"
+              href=""
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-black/[0.04] text-[#273F4F] text-sm font-medium rounded-[6px] hover:bg-black/[0.08] transition-colors duration-150"
@@ -70,7 +70,7 @@ export default function InternalServerError() {
               Service Status
             </a>
             <a
-              href="mailto:support@kindlecast.com?subject=Server Error (500)"
+              href="mailto:support@kindddy.com?subject=Server Error (500)"
               className="inline-flex items-center gap-2 px-4 py-2 bg-black/[0.04] text-[#273F4F] text-sm font-medium rounded-[6px] hover:bg-black/[0.08] transition-colors duration-150"
             >
               <AlertTriangle className="w-4 h-4" />

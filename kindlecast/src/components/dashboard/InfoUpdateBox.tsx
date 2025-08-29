@@ -141,7 +141,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
                 To receive converted content, you must add our email to your Kindle's approved sender list:
               </p>
               <div className="p-2 bg-white border border-blue-200 rounded-[4px] font-mono text-sm text-blue-800">
-                no-reply@kindlecast.com
+                send@kinddy.com
               </div>
               <p className={`${text.caption} text-blue-700 mt-2`}>
                 Go to Amazon → Manage Your Content and Devices → Preferences → Personal Document Settings → Add Email
