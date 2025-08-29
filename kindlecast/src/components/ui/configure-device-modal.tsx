@@ -99,7 +99,7 @@ export function ConfigureDeviceModal({
         // Success! Close modal and call success callback
         onClose();
         if (onSuccess) {
-          window.location.reload();
+          onSuccess();
         }
       } else {
         setError(result.error || "Failed to configure device");

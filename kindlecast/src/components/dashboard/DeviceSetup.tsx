@@ -48,8 +48,7 @@ export function DeviceSetup({ onComplete }: DeviceSetupProps) {
 
         if (result.success) {
           // Success! Call onComplete to hide DeviceSetup and show main screen
-          // onComplete()
-          window.location.reload()
+          onComplete()
         } else {
           setError(result.error || 'Failed to connect your Kindle')
         }

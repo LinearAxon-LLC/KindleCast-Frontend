@@ -12,13 +12,13 @@
   "categories": ["productivity", "utilities", "education", "reading"],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/favicon-kinddy.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/favicon-kinddy.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -46,7 +46,7 @@
       "url": "/",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/favicon-kinddy.png",
           "sizes": "192x192"
         }
       ]
@@ -58,7 +58,7 @@
       "url": "/dashboard",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/favicon-kinddy.png",
           "sizes": "192x192"
         }
       ]

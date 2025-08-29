@@ -73,13 +73,12 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
       hasSubmitInputChanged: boolean,
       customPrompt?: string
     ) => {
-      // // Reset previous state
-      // setState({
-      //   isLoading: false,
-      //   isSuccess: false,
-      //   error: null,
-      //   preview_path: "",
-      // });
+      // Clear any previous error state at the start of each request
+      setState(prevState => ({
+        ...prevState,
+        error: null,
+        isSuccess: false
+      }));
 
       // Map frontend format to backend format
       const backendFormat = FORMAT_MAPPING[format] || "epub";
@@ -100,7 +99,7 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
         return "";
       }
 
-      // // Set loading state
+      // Set loading state
       if (!hasSubmitInputChanged) {
         setState((prevState) => ({
           ...prevState, // Spread the previous state to maintain other properties
@@ -172,12 +171,20 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
           });
           return "";
         }
-      } catch {
-        // Network or other error
+      } catch (error) {
+        // Network or other error - show specific error message
+        let errorMessage = "Failed to process link";
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
         setState({
           isLoading: false,
           isSuccess: false,
-          error: "Network error. Please check your connection and try again.",
+          error: errorMessage,
           preview_path: "",
         });
         return "";
@@ -301,12 +308,19 @@ export function useFileProcessor(): UseFileProcessorReturn {
           return "";
         }
       } catch (error) {
-        // Handle network or other unexpected errors.
+        // Handle network or other unexpected errors - show specific error message
+        let errorMessage = "Failed to upload file";
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
         setState({
           isFileLoading: false,
           isFileSuccess: false,
-          fileUploadError:
-            "Network error. Please check your connection and try again.",
+          fileUploadError: errorMessage,
           file_url: "",
         });
         return "";
