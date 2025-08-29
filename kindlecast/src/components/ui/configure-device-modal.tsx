@@ -160,15 +160,25 @@ export function ConfigureDeviceModal({
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[13px] font-medium text-black/80 mb-2">
-                  Kindle Email Prefix
+                <label className="block text-[13px] font-medium text-black/80 mb-2 flex items-center justify-between">
+                  <span>Enter your Send-To-Kindle Email </span>
+                  <u className="text-[10px]">
+                    <a
+                      className="text-brand-primary"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      href="https://www.amazon.com/hz/mycd/preferences/myx#/home/settings/"
+                    >
+                      [↗ Under "Personal Document Settings"]
+                    </a>
+                  </u>
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={kindleEmail}
                     onChange={(e) => setKindleEmail(e.target.value)}
-                    placeholder="your-kindle-name"
+                    placeholder="your-kindle-email"
                     className="w-full px-4 py-3 bg-white border border-black/[0.08] rounded-[10px] text-[15px] placeholder:text-black/50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-black/50">
@@ -220,9 +230,18 @@ export function ConfigureDeviceModal({
                   <strong className="text-[14px]">{KINDDY_SENDER_EMAIL}</strong>{" "}
                   to your approved email list in your Amazon account.
                 </p>
-                <div className="text-[11px] text-blue-600">
+                <div className="text-[13px] text-blue-600">
                   <p className="mb-1">
-                    1. Go to Amazon → Manage Your Content and Devices
+                    1. Go to Amazon → Manage Your Content and Devices{" "}
+                    <u>
+                      <a
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        href="https://www.amazon.com/hz/mycd/preferences/myx#/home/settings/"
+                      >
+                        [Link ↗]
+                      </a>
+                    </u>
                   </p>
                   <p className="mb-1">
                     2. Click "Preferences" → "Personal Document Settings"
