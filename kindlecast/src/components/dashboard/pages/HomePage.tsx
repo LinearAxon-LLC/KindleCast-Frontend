@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus,
   FileText,
@@ -38,28 +38,28 @@ function debounce<T extends (...args: any[]) => any>(
 
 // File size formatter
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 // Get file type icon
 function getFileIcon(fileName: string): string {
-  const extension = fileName.split('.').pop()?.toLowerCase();
+  const extension = fileName.split(".").pop()?.toLowerCase();
   switch (extension) {
-    case 'pdf':
-      return '📄';
-    case 'docx':
-    case 'doc':
-      return '📝';
-    case 'epub':
-      return '📚';
-    case 'md':
-      return '📋';
+    case "pdf":
+      return "📄";
+    case "docx":
+    case "doc":
+      return "📝";
+    case "epub":
+      return "📚";
+    case "md":
+      return "📋";
     default:
-      return '📄';
+      return "📄";
   }
 }
 
@@ -93,6 +93,32 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
   } = useFileProcessor();
   const { userProfile, isLoading: profileLoading, refetch } = useUserProfile();
   const { getRemainingUsage, isUnlimited } = useUserUsage();
+  const forbiddenPatterns = [
+    /drop\s+table/i,
+    /select\s+.*\s+from/i,
+    /insert\s+into/i,
+    /delete\s+from/i,
+    /--/g,
+    /;/g,
+    /(http|https):\/\//i, // optional: block URLs
+  ];
+
+  const { getPendingLinkData, clearPendingLinkData } = useAuth();
+  const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
+  const [includeImage, setIncludeImage] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
+    useState(false);
+  const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileError, setFileError] = useState("");
+
+  const { greeting, emoji } = getTimeBasedGreeting();
+
+  const isSuspicious = (text: string) => {
+    return forbiddenPatterns.some((pattern) => pattern.test(text));
+  };
 
   // Debounced URL validation
   const validateUrlWithDebounce = React.useCallback(
@@ -125,24 +151,12 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
           error: "Validation failed",
         });
       }
-    }, 1000), // 1 second debounce
+    }, 2000), // 2 second debounce
     []
   );
-  const { getPendingLinkData, clearPendingLinkData } = useAuth();
-  const [activeTab, setActiveTab] = useState<"convert" | "upload">("convert");
-  const [includeImage, setIncludeImage] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showConfigureDeviceModal, setShowConfigureDeviceModal] =
-    useState(false);
-  const [showFormatInfoModal, setShowFormatInfoModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fileError, setFileError] = useState("");
-
-  const { greeting, emoji } = getTimeBasedGreeting();
 
   // Prefill form with pending link data after login
-  React.useEffect(() => {
+  useEffect(() => {
     const pendingData = getPendingLinkData();
     if (pendingData) {
       console.log("Prefilling form with pending link data:", pendingData);
@@ -201,26 +215,39 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     // Determine if content should be emailed
     const sendEmail = buttonName === "sendToKindle" || emailContent;
 
+    let fileUrl;
     // Use a placeholder for the preview/send logic
-    if (buttonName === "preview" || buttonName === "sendToKindle") {
-      const fileUrl = await submitFile(
-        selectedFile,
-        "quick send",
-        true,
-        true,
-        ""
-      );
+    if (buttonName === "preview") {
+      fileUrl = await submitFile(selectedFile, "quick send", false, false, "");
+      setPreviewGenerated(true);
+      setEmailContent(false);
+    } else if (buttonName == "sendToKindle") {
+      setPreviewGenerated(false);
+      setEmailContent(true);
+      fileUrl = await submitFile(selectedFile, "quick send", false, true, "");
+    }
 
-      console.log("FILE URL", fileUrl);
+    console.log("FILE URL", fileUrl);
 
-      // Handle success/error based on the return value of submitFile
-      if (fileUrl) {
-        console.log(`File processing successful. Preview link: ${fileUrl}`);
-        // You can add logic here to display the preview or a success message
-      } else {
-        console.error("File processing failed.");
-        // The useFileProcessor hook handles the error state internally
-      }
+    // Handle success/error based on the return value of submitFile
+    if (fileUrl) {
+      console.log(`File processing successful. Preview link: ${fileUrl}`);
+      // You can add logic here to display the preview or a success message
+    } else {
+      console.error("File processing failed.");
+      // The useFileProcessor hook handles the error state internally
+    }
+  };
+
+  const handleCustomPromptChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    if (!isSuspicious(value)) {
+      setCustomPrompt(value);
+    } else {
+      // you can also show a warning here
+      console.warn("⚠️ Suspicious input blocked");
     }
   };
 
@@ -279,6 +306,14 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     }
   };
 
+  // Use a ref to store previous values without triggering re-renders
+  const lastSubmittedValues = useRef({
+    processUrl: "",
+    selectedFormat: "",
+    includeImage: false,
+    customPrompt: "",
+  });
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -311,6 +346,19 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
     // Now you can safely access the 'name' property
     const buttonName = submitter?.name;
 
+    // Check if any of the values have changed
+    const hasSubmitInputChanged =
+      processUrl !== lastSubmittedValues.current.processUrl ||
+      selectedFormat !== lastSubmittedValues.current.selectedFormat ||
+      includeImage !== lastSubmittedValues.current.includeImage ||
+      customPrompt !== lastSubmittedValues.current.customPrompt;
+
+    // Only proceed if values have changed or if it's the first submission
+    if (!hasSubmitInputChanged && buttonName === "preview") {
+      console.log("No changes detected. Skipping submitLink.");
+      return; // Stop the function from proceeding
+    }
+
     if (buttonName === "preview") {
       console.log("Preview button was clicked");
       await submitLink(
@@ -318,20 +366,30 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
         selectedFormat,
         includeImage,
         emailContent,
+        hasSubmitInputChanged,
         customPrompt
       );
+      setEmailContent(false);
       setPreviewGenerated(true);
     } else if (buttonName === "sendToKindle") {
       setPreviewGenerated(false);
-
+      setEmailContent(true);
       await submitLink(
         processUrl,
         selectedFormat,
         includeImage,
         true,
+        hasSubmitInputChanged,
         customPrompt
       );
     }
+    // Update the ref with the new values after a successful submission
+    lastSubmittedValues.current = {
+      processUrl,
+      selectedFormat,
+      includeImage,
+      customPrompt,
+    };
   };
 
   const handleReset = () => {
@@ -494,12 +552,52 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                       {/* URL Input */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="block text-[15px] font-medium text-black ">
-                            Enter an URL
-                          </label>
+                          <div className="flex items-center justify-center">
+                            <label className="block text-[15px] font-medium text-black ">
+                              Enter a URL
+                            </label>
+                            {url.trim().includes("youtube.com") && (
+                              <label className="flex items-center justify-center text-sm font-bold text-white bg-rose-500 rounded-lg px-3 py-1 ml-2">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="white"
+                                  stroke="currentColor"
+                                  strokeWidth="1"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 lucide lucide-zap-icon lucide-zap"
+                                >
+                                  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+                                </svg>
+                                Youtube
+                              </label>
+                            )}
+                            {url.trim().includes("reddit.com") && (
+                              <label className="flex items-center justify-center text-sm font-bold text-white bg-orange-600 rounded-lg px-3 py-1 ml-2">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="white"
+                                  stroke="currentColor"
+                                  strokeWidth="1"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="mr-2 lucide lucide-zap-icon lucide-zap"
+                                >
+                                  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+                                </svg>
+                                Reddit
+                              </label>
+                            )}
+                          </div>
                           <button
                             onClick={() => setUrl("")}
-                            className="text-sm text-brand-primary font-medium"
+                            className="text-sm text-brand-primary font-medium pr-4"
                           >
                             Reset
                           </button>
@@ -630,36 +728,41 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           </label>
                           <textarea
                             value={customPrompt}
-                            onChange={(e) => setCustomPrompt(e.target.value)}
+                            // onChange={(e) => setCustomPrompt(e.target.value)}
+                            onChange={handleCustomPromptChange}
                             placeholder="e.g., 'make me a business playbook from this link'"
                             className="w-full px-3 py-2.5 border border-black/[0.15] rounded-[6px] text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
                             rows={3}
+                            maxLength={180}
                           />
                         </div>
                       )}
 
-                      {selectedFormat == "Quick Send" && (
-                        <div className="flex flex-col items-start max-w-sm ">
-                          <div className="flex items-center space-x-4">
-                            <span className="text-sm font-medium text-gray-900">
-                              Include Images?
-                            </span>
-                            <label
-                              htmlFor="image-toggle"
-                              className="relative inline-flex items-center cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                id="image-toggle"
-                                checked={includeImage}
-                                onChange={() => setIncludeImage(!includeImage)}
-                                className="sr-only peer"
-                              />
-                              <div className="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
-                            </label>
+                      {selectedFormat == "Quick Send" &&
+                        !url.trim().includes("youtube.com") && (
+                          <div className="flex flex-col items-start max-w-sm ">
+                            <div className="flex items-center space-x-4">
+                              <span className="text-sm font-medium text-gray-900">
+                                Include Images?
+                              </span>
+                              <label
+                                htmlFor="image-toggle"
+                                className="relative inline-flex items-center cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  id="image-toggle"
+                                  checked={includeImage}
+                                  onChange={() =>
+                                    setIncludeImage(!includeImage)
+                                  }
+                                  className="sr-only peer"
+                                />
+                                <div className="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Action Buttons */}
                       <div className="space-y-3">
@@ -728,37 +831,37 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                           </div>
                         )}
                       </div>
-                      {isLoading ? (
-                        <>
-                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-[8px]">
-                            <span className="text-sm text-blue-500">
-                              Converting...
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <></>
+                      {isLoading && !emailContent && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-[8px]">
+                          <span className="text-sm text-blue-500">
+                            Converting...
+                          </span>
+                        </div>
+                      )}
+
+                      {isLoading && emailContent && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-[8px]">
+                          <span className="text-sm text-blue-500">
+                            Sending to your kindle email...
+                          </span>
+                        </div>
                       )}
 
                       {/* Status Messages */}
-                      {isSuccess && previewGenerated ? (
-                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-[2px]">
+                      {isSuccess && previewGenerated && (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-[2px]">
                           <p className="text-sm text-blue-500">
                             Successfully generated preview!
                           </p>
                         </div>
-                      ) : (
-                        <></>
                       )}
 
-                      {isSuccess && !previewGenerated ? (
+                      {isSuccess && !previewGenerated && (
                         <div className="p-3 bg-green-50 border border-green-200 rounded-[2px]">
                           <p className="text-sm text-green-500">
                             Successfully sent to your Kindle!
                           </p>
                         </div>
-                      ) : (
-                        <></>
                       )}
 
                       {error && (
@@ -814,7 +917,9 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
 
                               {/* File Info */}
                               <div className="flex-1 min-w-0">
-                                <p className={`${text.body} font-medium truncate`}>
+                                <p
+                                  className={`${text.body} font-medium truncate`}
+                                >
                                   {selectedFile.name}
                                 </p>
                                 <p className={`${text.caption} text-gray-500`}>
@@ -872,34 +977,55 @@ export function HomePage({ onSwitchTab }: HomePageProps) {
                     >
                       Send to Kindle
                     </button> */}
-                    <button
-                      type="submit"
-                      name="sendToKindle"
-                      disabled={
-                        isFileLoading ||
-                        !selectedFile ||
-                        (selectedFormat === "Custom" && !customPrompt.trim()) ||
-                        (!hasKindleSetup && !hasExceededLimit)
-                      }
-                      className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
-                        hasExceededLimit
-                          ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="submit"
+                        name="preview"
+                        disabled={
+                          isLoading ||
+                          !selectedFile ||
+                          (selectedFormat === "Custom" && !customPrompt.trim())
+                        }
+                        className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                          hasExceededLimit
+                            ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                            : !hasKindleSetup
+                            ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                            : "bg-brand-secondary hover:bg-violet-500 active:bg-violet-500/80"
+                        }`}
+                      >
+                        Preview
+                      </button>
+                      <button
+                        type="submit"
+                        name="sendToKindle"
+                        disabled={
+                          isFileLoading ||
+                          !selectedFile ||
+                          (selectedFormat === "Custom" &&
+                            !customPrompt.trim()) ||
+                          (!hasKindleSetup && !hasExceededLimit)
+                        }
+                        className={`w-full mt-4 px-4 py-2.5 text-white text-[15px] font-medium rounded-[8px] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] ${
+                          hasExceededLimit
+                            ? "bg-orange-500 hover:bg-orange-600 active:bg-orange-700"
+                            : !hasKindleSetup
+                            ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
+                            : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
+                        }`}
+                        onClick={
+                          !hasKindleSetup && !hasExceededLimit
+                            ? handleConfigureDeviceClick
+                            : undefined
+                        }
+                      >
+                        {hasExceededLimit
+                          ? "Upgrade to Send"
                           : !hasKindleSetup
-                          ? "bg-gray-400 hover:bg-gray-500 active:bg-gray-600"
-                          : "bg-brand-primary hover:bg-violet-500 active:bg-violet-500/80"
-                      }`}
-                      onClick={
-                        !hasKindleSetup && !hasExceededLimit
-                          ? handleConfigureDeviceClick
-                          : undefined
-                      }
-                    >
-                      {hasExceededLimit
-                        ? "Upgrade to Send"
-                        : !hasKindleSetup
-                        ? "Send to Kindle"
-                        : "Send to Kindle"}
-                    </button>
+                          ? "Send to Kindle"
+                          : "Send to Kindle"}
+                      </button>
+                    </div>
                     {isFileLoading ? (
                       <>
                         <div className="p-3 mt-2 bg-blue-50 border border-blue-200 rounded-[8px]">

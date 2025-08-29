@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         // Brand colors
         brand: {
-          primary: "rgb(143, 135, 241)",
+          primary: "rgb(140, 50, 250)",
           secondary: "rgb(198, 142, 253)",
           tertiary: "rgb(233, 165, 241)",
           accent: "rgb(254, 210, 226)",
@@ -69,12 +69,7 @@ const config: Config = {
           "sans-serif",
         ],
         mono: ["SF Mono", "Consolas", "Monaco", "monospace"],
-        rubik: [
-          "Rubik",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "sans-serif"
-        ],
+        rubik: ["Rubik", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       fontSize: {
         xs: ["11px", { lineHeight: "16px", letterSpacing: "0.066em" }],

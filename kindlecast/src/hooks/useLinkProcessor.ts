@@ -29,6 +29,7 @@ interface UseLinkProcessorReturn extends UseLinkProcessorState {
     format: string,
     includeImage: boolean,
     emailContent: boolean,
+    hasSubmitInputChanged: boolean,
     customPrompt?: string
   ) => Promise<string>;
   resetState: () => void;
@@ -69,15 +70,16 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
       format: string,
       includeImage: boolean,
       emailContent: boolean,
+      hasSubmitInputChanged: boolean,
       customPrompt?: string
     ) => {
-      // Reset previous state
-      setState({
-        isLoading: false,
-        isSuccess: false,
-        error: null,
-        preview_path: "",
-      });
+      // // Reset previous state
+      // setState({
+      //   isLoading: false,
+      //   isSuccess: false,
+      //   error: null,
+      //   preview_path: "",
+      // });
 
       // Map frontend format to backend format
       const backendFormat = FORMAT_MAPPING[format] || "epub";
@@ -98,17 +100,26 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
         return "";
       }
 
-      // Set loading state
-      setState({
-        isLoading: true,
-        isSuccess: false,
-        error: null,
-        preview_path: "",
-      });
+      // // Set loading state
+      if (!hasSubmitInputChanged) {
+        setState((prevState) => ({
+          ...prevState, // Spread the previous state to maintain other properties
+          isLoading: true,
+          isSuccess: false,
+          error: null,
+          preview_path: prevState.preview_path, // Keep the old value
+        }));
+      } else {
+        setState({
+          isLoading: true,
+          isSuccess: false,
+          error: null,
+          preview_path: "",
+        });
+      }
 
       try {
         // Prepare the request
-        console.log(emailContent);
         const request: LinkProcessRequest = {
           url: url.trim(),
           format: backendFormat,
@@ -122,12 +133,22 @@ export function useLinkProcessor(): UseLinkProcessorReturn {
 
         if (response.status) {
           // Success
-          setState({
-            isLoading: false,
-            isSuccess: true,
-            error: null,
-            preview_path: response.preview_link,
-          });
+          if (!hasSubmitInputChanged) {
+            setState((prevState) => ({
+              ...prevState, // Spread the previous state to maintain other properties
+              isLoading: false,
+              isSuccess: true,
+              error: null,
+              preview_path: prevState.preview_path, // Keep the old value
+            }));
+          } else {
+            setState({
+              isLoading: false,
+              isSuccess: true,
+              error: null,
+              preview_path: response.preview_link,
+            });
+          }
 
           // Refresh usage stats after successful conversion
           refreshUsage().catch(console.error);
