@@ -191,7 +191,7 @@ export default function PrivacyPolicy() {
                 <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
               </ul>
               <p>
-                To exercise these rights, contact us at privacy@kindlecast.com or through your account settings.
+                To exercise these rights, contact us at privacy@kinddy.com or through your account settings.
               </p>
             </div>
           </section>
@@ -263,7 +263,7 @@ export default function PrivacyPolicy() {
                 <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
                 <li><strong>Complaint:</strong> Lodge a complaint with your data protection authority</li>
               </ul>
-              <p>To exercise these rights, contact us at privacy@kindlecast.com. We will respond within 30 days.</p>
+              <p>To exercise these rights, contact us at privacy@kinddy.com. We will respond within 30 days.</p>
             </div>
           </section>
 

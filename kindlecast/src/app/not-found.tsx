@@ -87,10 +87,10 @@ export default function NotFound() {
           <p className={`${text.caption} text-[#273F4F]/50`}>
             Need help? Contact us at{' '}
             <a 
-              href="mailto:support@kindlecast.com" 
+              href="mailto:support@kinddy.com"
               className="text-brand-primary hover:underline"
             >
-              support@kindlecast.com
+              support@kinddy.com
             </a>
           </p>
         </div>

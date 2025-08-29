@@ -141,7 +141,7 @@ export function DashboardSidebar({
             {/* <div className="w-10 h-10 flex items-center justify-center">
               <img
                 src="/logo.png"
-                alt="KindleCast Logo"
+                alt="Kinddy Logo"
                 className="w-8 h-8"
                 onError={(e) => {
                   e.currentTarget.src = "/logo.png";
