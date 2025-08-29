@@ -50,10 +50,10 @@ export default function KindleReaderHome({
   }, []);
 
   const demoLinks = [
-    "https://www.reddit.com/r/no-sleep/",
-    "https://medium.com/how-to-build",
-    "https://www.ycombinator.com/library/",
-    "https://en.wikipedia.org/wiki/Startup_company",
+    "https://www.reddit.com/r/no-sleep/theres_a_well_in_my_house/",
+    "https://medium.com/how-to-build-that-get-in-yc/",
+    "https://www.ycombinator.com/library//8g-how-to-get-startup-ideas/",
+    "https://en.wikipedia.org/wiki/Startup_company/",
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
