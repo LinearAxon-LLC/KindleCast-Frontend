@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Mail, CheckCircle, AlertCircle, X } from 'lucide-react';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { text } from '@/lib/typography';
+import React, { useState } from "react";
+import { Mail, CheckCircle, AlertCircle, X } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { text } from "@/lib/typography";
 
 interface InfoUpdateBoxProps {
   onComplete?: () => void;
@@ -11,8 +11,8 @@ interface InfoUpdateBoxProps {
 }
 
 export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
-  const [kindleEmail, setKindleEmail] = useState('');
-  const [acknowledgment, setAcknowledgment] = useState('');
+  const [kindleEmail, setKindleEmail] = useState("");
+  const [acknowledgment, setAcknowledgment] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!kindleEmail.trim() || acknowledgment.toLowerCase() !== 'yes') {
+    if (!kindleEmail.trim() || acknowledgment.toLowerCase() !== "yes") {
       return;
     }
 
@@ -37,20 +37,24 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
       if (result.success) {
         setShowSuccess(true);
 
-        console.log('🔍 InfoUpdateBox: API call successful, refreshing profile...');
+        console.log(
+          "🔍 InfoUpdateBox: API call successful, refreshing profile..."
+        );
         // Refresh user profile to get updated data
         await refetch();
-        console.log('🔍 InfoUpdateBox: Profile refreshed, calling onComplete...');
+        console.log(
+          "🔍 InfoUpdateBox: Profile refreshed, calling onComplete..."
+        );
 
         // Auto-complete after 2 seconds to go to main screen
         setTimeout(() => {
           onComplete?.();
         }, 2000);
       } else {
-        setError(result.error || 'Failed to connect your Kindle');
+        setError(result.error || "Failed to connect your Kindle");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -65,12 +69,16 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <h3 className={`${text.body} font-semibold text-green-800`}>Kindle Connected!</h3>
-              <p className={`${text.caption} text-green-700`}>Your Kindle has been successfully connected</p>
+              <h3 className={`${text.body} font-semibold text-green-800`}>
+                Kindle Connected!
+              </h3>
+              <p className={`${text.caption} text-green-700`}>
+                Your Kindle has been successfully connected
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="p-3 bg-green-50 rounded-[8px]">
           <p className={`${text.caption} text-green-800`}>
             ✓ Kindle email configured: {kindleEmail}@kindle.com
@@ -84,15 +92,22 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
   }
 
   return (
-    <div data-testid="info-update-box" className="bg-white/80 backdrop-blur-xl border border-orange-200 rounded-[16px] p-6 mb-6">
+    <div
+      data-testid="info-update-box"
+      className="bg-white/80 backdrop-blur-xl border border-orange-200 rounded-[16px] p-6 mb-6"
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-orange-100 rounded-[8px] flex items-center justify-center">
             <Mail className="w-5 h-5 text-orange-600" />
           </div>
           <div>
-            <h3 className={`${text.body} font-semibold text-orange-800`}>Connect Your Kindle</h3>
-            <p className={`${text.caption} text-orange-700`}>We need a few details to get you started</p>
+            <h3 className={`${text.body} font-semibold text-orange-800`}>
+              Connect Your Kindle
+            </h3>
+            <p className={`${text.caption} text-orange-700`}>
+              We need a few details to get you started
+            </p>
           </div>
         </div>
         {onDismiss && (
@@ -108,7 +123,9 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Kindle Email Input */}
         <div>
-          <label className={`${text.caption} font-medium text-[#273F4F] mb-2 block`}>
+          <label
+            className={`${text.caption} font-medium text-[#273F4F] mb-2 block`}
+          >
             Your Kindle Email Address
           </label>
           <div className="flex items-center">
@@ -134,24 +151,40 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
           <div className="flex items-start gap-3 mb-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h4 className={`${text.caption} font-semibold text-blue-800 mb-1`}>
+              <h4
+                className={`${text.caption} font-semibold text-blue-800 mb-1`}
+              >
                 Important: Email Whitelisting Required
               </h4>
               <p className={`${text.caption} text-blue-700 mb-2`}>
-                To receive converted content, you must add our email to your Kindle's approved sender list:
+                To receive converted content, you must add our email to your
+                Kindle's approved sender list:
               </p>
               <div className="p-2 bg-white border border-blue-200 rounded-[4px] font-mono text-sm text-blue-800">
-                no-reply@kindlecast.com
+                send@kinddy.com
               </div>
               <p className={`${text.caption} text-blue-700 mt-2`}>
-                Go to Amazon → Manage Your Content and Devices → Preferences → Personal Document Settings → Add Email
+                Go to Amazon → Manage Your Content and Devices → Preferences →
+                Personal Document Settings → Add Email{" "}
+                <u>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href="https://www.amazon.com/hz/mycd/preferences/myx#/home/settings/"
+                  >
+                    [Link ↗️]
+                  </a>
+                </u>
               </p>
             </div>
           </div>
-          
+
           <div>
-            <label className={`${text.caption} font-medium text-blue-800 mb-2 block`}>
-              Type "YES" to confirm you've added our email to your approved sender list:
+            <label
+              className={`${text.caption} font-medium text-blue-800 mb-2 block`}
+            >
+              Type "YES" to confirm you've added our email to your approved
+              sender list:
             </label>
             <input
               type="text"
@@ -167,16 +200,18 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
         {/* Error Display */}
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-[8px]">
-            <p className={`${text.caption} text-red-800`}>
-              ❌ {error}
-            </p>
+            <p className={`${text.caption} text-red-800`}>❌ {error}</p>
           </div>
         )}
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isLoading || !kindleEmail.trim() || acknowledgment.toLowerCase() !== 'yes'}
+          disabled={
+            isLoading ||
+            !kindleEmail.trim() ||
+            acknowledgment.toLowerCase() !== "yes"
+          }
           className="w-full px-6 py-3 bg-orange-600 text-white text-base font-medium rounded-[8px] hover:bg-orange-700 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           {isLoading ? (
@@ -188,7 +223,6 @@ export function InfoUpdateBox({ onComplete, onDismiss }: InfoUpdateBoxProps) {
             <span>Connect Kindle</span>
           )}
         </button>
-
       </form>
     </div>
   );
